@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: oklch(1 0 0);
+  --color-foreground: oklch(0.18 0.012 285);
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.18 0.012 285);
+  --color-primary: oklch(0.78 0.12 285);
+  --color-primary-foreground: oklch(0.18 0.012 285);
+  --color-secondary: oklch(0.68 0.18 22);
+  --color-secondary-foreground: oklch(1 0 0);
+  --color-accent: oklch(0.74 0.16 75);
+  --color-accent-foreground: oklch(0.15 0.01 285);
+  --color-muted: oklch(0.94 0.004 285);
+  --color-muted-foreground: oklch(0.35 0.008 285);
+  --color-destructive: oklch(0.50 0.20 22);
+  --color-destructive-foreground: oklch(1 0 0);
+  --color-border: oklch(0.88 0.008 285);
+  --color-input: oklch(0.88 0.008 285);
+  --color-ring: oklch(0.55 0.17 285);
+  --radius: 1rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: oklch(0.12 0.006 285);
+    --color-foreground: oklch(0.92 0.004 285);
+    --color-card: oklch(0.16 0.008 285);
+    --color-card-foreground: oklch(0.92 0.004 285);
+    --color-primary: oklch(0.82 0.10 285);
+    --color-primary-foreground: oklch(0.12 0.006 285);
+    --color-secondary: oklch(0.74 0.14 22);
+    --color-secondary-foreground: oklch(0.12 0.006 285);
+    --color-accent: oklch(0.78 0.12 75);
+    --color-accent-foreground: oklch(0.12 0.006 285);
+    --color-muted: oklch(0.20 0.008 285);
+    --color-muted-foreground: oklch(0.65 0.008 285);
+    --color-destructive: oklch(0.55 0.18 22);
+    --color-destructive-foreground: oklch(1 0 0);
+    --color-border: oklch(0.25 0.01 285);
+    --color-input: oklch(0.25 0.01 285);
+    --color-ring: oklch(0.75 0.12 285);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes zoomOut {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.DialogOverlay {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.DialogOverlay[data-state="closed"] {
+  animation: fadeOut 0.15s ease-in;
+}
+
+.DialogContent {
+  animation: zoomIn 0.2s ease-out;
+}
+
+.DialogContent[data-state="closed"] {
+  animation: zoomOut 0.15s ease-in;
+}
+
+.ToastRoot {
+  animation: slideUp 0.3s ease-out;
+}
+
+.ToastRoot[data-state="closed"] {
+  animation: slideDown 0.2s ease-in;
+}
+
+.DropdownMenuContent {
+  animation: zoomIn 0.15s ease-out;
+}
+
+.DropdownMenuContent[data-state="closed"] {
+  animation: zoomOut 0.1s ease-in;
+}
