@@ -15,9 +15,6 @@ export interface HabitStats {
   completionRate: number
   averagePerDay: number
   lifetimeTotal: number
-  isRegressing: boolean
-  trend: "improving" | "declining" | "stable"
-  percentageChange: number
   currentStreak: number
   longestStreak: number
   dailyData: DailyCount[]
@@ -133,14 +130,7 @@ export function computeStats(habits: Habit[], completions: Completion[], windowD
   const windowStart = new Date(todayStart)
   windowStart.setDate(windowStart.getDate() - windowDays + 1)
 
-  const priorWindowStart = new Date(todayStart)
-  priorWindowStart.setDate(priorWindowStart.getDate() - windowDays * 2 + 1)
-
-  const priorWindowEnd = new Date(todayStart)
-  priorWindowEnd.setDate(priorWindowEnd.getDate() - windowDays)
-
   const daysInWindow = getDaysInRange(windowStart, todayStart)
-  const daysInPriorWindow = getDaysInRange(priorWindowStart, priorWindowEnd)
 
   let grandTotal = 0
 
@@ -157,19 +147,6 @@ export function computeStats(habits: Habit[], completions: Completion[], windowD
     const completionRate = windowDays > 0 ? (totalInWindow / windowDays) * 100 : 0
     const averagePerDay = windowDays > 0 ? totalInWindow / windowDays : 0
 
-    const priorTotal = daysInPriorWindow.reduce(
-      (sum, d) => sum + countCompletionsOnDate(completions, habit.id, d),
-      0
-    )
-    const priorRate = windowDays > 0 ? (priorTotal / windowDays) * 100 : 0
-    const isRegressing = priorRate > 0 && completionRate < priorRate
-
-    const percentageChange = priorRate > 0
-      ? Math.round(((completionRate - priorRate) / priorRate) * 100)
-      : completionRate > 0 ? 100 : 0
-
-    const trend = percentageChange > 5 ? "improving" : percentageChange < -5 ? "declining" : "stable"
-
     return {
       habitId: habit.id,
       habitName: habit.name,
@@ -180,9 +157,6 @@ export function computeStats(habits: Habit[], completions: Completion[], windowD
       completionRate: Math.round(completionRate * 10) / 10,
       averagePerDay: Math.round(averagePerDay * 100) / 100,
       lifetimeTotal,
-      isRegressing,
-      trend,
-      percentageChange,
       currentStreak: computeCurrentStreak(completions, habit.id, habit.type, habit.createdAt),
       longestStreak: computeLongestStreak(completions, habit.id, habit.type),
       dailyData,

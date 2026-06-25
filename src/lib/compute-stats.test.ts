@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { computeStats } from "./compute-stats"
-import type { Habit, Completion } from "../types"
+import type { Habit } from "../types"
 
 const habits: Habit[] = [
   { id: "h1", name: "Exercise", icon: "Dumbbell", type: "good", color: "oklch(0.7 0.12 225)", buttonLabel: "I did it!", createdAt: "2026-01-01T00:00:00.000Z" },
@@ -79,22 +79,6 @@ describe("computeStats", () => {
     expect(todayEntry.count).toBe(2)
   })
 
-  it("flags habit as regressing when rate dropped in prior window", () => {
-    const completions: Completion[] = []
-    for (let i = 0; i < 5; i++) completions.push(makeCompletion("h1", 8 + i))
-    for (let i = 0; i < 1; i++) completions.push(makeCompletion("h1", i))
-    const result = computeStats(habits, completions, 7)
-    expect(result.goodHabits[0].isRegressing).toBe(true)
-  })
-
-  it("does not flag habit as regressing when rate increased", () => {
-    const completions: Completion[] = []
-    for (let i = 0; i < 1; i++) completions.push(makeCompletion("h1", 8 + i))
-    for (let i = 0; i < 5; i++) completions.push(makeCompletion("h1", i))
-    const result = computeStats(habits, completions, 7)
-    expect(result.goodHabits[0].isRegressing).toBe(false)
-  })
-
   it("handles empty habits array", () => {
     const result = computeStats([], [], 7)
     expect(result.grandTotal).toBe(0)
@@ -107,6 +91,5 @@ describe("computeStats", () => {
     expect(result.grandTotal).toBe(0)
     expect(result.goodHabits[0].totalInWindow).toBe(0)
     expect(result.goodHabits[0].lifetimeTotal).toBe(0)
-    expect(result.goodHabits[0].isRegressing).toBe(false)
   })
 })

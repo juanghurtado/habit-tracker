@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown, Minus, Zap } from "lucide-react"
+import { Zap } from "lucide-react"
 import { getIcon } from "../lib/icons"
 import type { HabitStats } from "../lib/compute-stats"
 import { MiniBarChart } from "./mini-bar-chart"
@@ -9,14 +9,6 @@ interface HabitStatCardProps {
 
 export function HabitStatCard({ stats }: HabitStatCardProps) {
   const Icon = getIcon(stats.habitIcon)
-
-  const TrendIcon = stats.trend === "improving" ? TrendingUp : stats.trend === "declining" ? TrendingDown : Minus
-  const trendBadgeClass = stats.trend === "improving"
-    ? "bg-primary/10 text-primary"
-    : stats.trend === "declining"
-      ? "bg-destructive/10 text-destructive"
-      : "bg-muted text-muted-foreground"
-  const trendLabel = stats.trend === "improving" ? "Improving" : stats.trend === "declining" ? "Declining" : "Stable"
 
   return (
     <div
@@ -41,12 +33,6 @@ export function HabitStatCard({ stats }: HabitStatCardProps) {
           <div className="flex-1">
             <h3 className="font-bold">{stats.habitName}</h3>
           </div>
-          <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${trendBadgeClass}`}>
-            <TrendIcon className="size-3" />
-            {stats.percentageChange !== 0 && Math.abs(stats.percentageChange) !== 100
-              ? `${stats.percentageChange > 0 ? "+" : ""}${stats.percentageChange}%`
-              : trendLabel}
-          </span>
         </div>
 
         <div className="grid grid-cols-4 gap-2">

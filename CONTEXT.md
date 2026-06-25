@@ -21,16 +21,5 @@ The action text on a Habit's primary completion button. Assigned randomly from a
 _Avoid_: CTA, verb, action text
 
 **Stats**:
-The aggregate view of Habit data over rolling time windows, presented separately from the daily log. Shows totals, rates, trends, and regressions. Always computed relative to today, not the selected date.
+The aggregate view of Habit data over rolling time windows, presented separately from the daily log. Shows totals, rates, and streaks. Always computed relative to today, not the selected date.
 _Avoid_: Dashboard, analytics, reports
-
-**Completion Rate**:
-The percentage of days in a given window where a Habit had at least one Completion.
-_Avoid_: Hit rate, success rate, adherence
-
-**Rolling Window**:
-A date range anchored to today — e.g., the last 7 days or the last 30 days. Used instead of fixed calendar boundaries (calendar weeks/months) so the data is always current.
-_Avoid_: Period, interval, range
-
-**Regression**:
-A decrease in a Habit's completion rate in the current Rolling Window compared to the preceding window of the same length. Habits that are regressing are flagged in Stats.
