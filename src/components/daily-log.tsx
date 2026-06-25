@@ -22,7 +22,7 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
   const { habits, completions, addHabit, editHabit: edit, deleteHabit, addCompletion, undoLastCompletion } = useHabits()
 
   function handleComplete(habitId: string) {
-    addCompletion(habitId)
+    addCompletion(habitId, date)
     const habit = habits.find((h) => h.id === habitId)
     toast(habit ? `${habit.name} logged!` : "Logged!", {
       action: {

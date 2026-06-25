@@ -61,11 +61,14 @@ export function createHabit(
   }
 }
 
-export function createCompletion(habitId: string): Completion {
+export function createCompletion(habitId: string, date?: Date): Completion {
+  const timestamp = date
+    ? new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12).toISOString()
+    : new Date().toISOString()
   return {
     id: generateId(),
     habitId,
-    timestamp: new Date().toISOString(),
+    timestamp,
   }
 }
 

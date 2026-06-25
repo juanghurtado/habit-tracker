@@ -61,8 +61,8 @@ export function useHabits() {
     notifyListeners()
   }, [])
 
-  const addCompletion = useCallback((habitId: string) => {
-    const updated = [...loadCompletions(), createCompletion(habitId)]
+  const addCompletion = useCallback((habitId: string, date?: Date) => {
+    const updated = [...loadCompletions(), createCompletion(habitId, date)]
     saveCompletions(updated)
     notifyListeners()
   }, [])

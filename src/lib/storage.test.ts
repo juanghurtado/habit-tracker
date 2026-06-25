@@ -105,12 +105,20 @@ describe("createHabit", () => {
 })
 
 describe("createCompletion", () => {
-  it("creates a completion with a given habitId", () => {
+  it("creates a completion with a given habitId and default timestamp", () => {
     const completion = createCompletion("habit-1")
     expect(completion.habitId).toBe("habit-1")
     expect(completion.id).toBeDefined()
     expect(typeof completion.id).toBe("string")
     expect(completion.timestamp).toBeDefined()
     expect(() => new Date(completion.timestamp)).not.toThrow()
+  })
+
+  it("creates a completion for a specific date so it is findable by getCompletionsForHabitOnDate", () => {
+    const pastDate = new Date(2026, 5, 24)
+    const completion = createCompletion("habit-1", pastDate)
+    const result = getCompletionsForHabitOnDate([completion], "habit-1", pastDate)
+    expect(result).toHaveLength(1)
+    expect(result[0].id).toBe(completion.id)
   })
 })
