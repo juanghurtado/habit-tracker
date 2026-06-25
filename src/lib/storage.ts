@@ -6,7 +6,10 @@ const HABITS_KEY = "habit-tracker-habits"
 const COMPLETIONS_KEY = "habit-tracker-completions"
 
 function generateId(): string {
-  return crypto.randomUUID()
+  return crypto.randomUUID?.() ?? `xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx`.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0
+    return (c === "x" ? r : (r & 0x3) | 0x8).toString(16)
+  })
 }
 
 export function loadHabits(): Habit[] {
