@@ -69,9 +69,12 @@ export function useHabits() {
 
   const undoLastCompletion = useCallback((habitId: string) => {
     const comps = loadCompletions()
-    const lastIndex = comps.map((c) => c.habitId).lastIndexOf(habitId)
-    if (lastIndex === -1) return
-    const updated = comps.filter((_, i) => i !== lastIndex)
+    const habitComps = comps.filter((c) => c.habitId === habitId)
+    if (habitComps.length === 0) return
+    const mostRecent = habitComps.reduce((a, b) =>
+      a.timestamp > b.timestamp ? a : b
+    )
+    const updated = comps.filter((c) => c.id !== mostRecent.id)
     saveCompletions(updated)
     notifyListeners()
   }, [])
