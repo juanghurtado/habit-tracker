@@ -1,12 +1,12 @@
 import * as React from "react"
 import { Plus } from "lucide-react"
+import { Toaster, toast } from "sonner"
 import { useHabits } from "./hooks/use-habits"
 import { getCompletionsForHabitOnDate } from "./lib/storage"
 import { DateNavigation } from "./components/date-navigation"
 import { HabitCard } from "./components/habit-card"
 import { AddHabitSheet } from "./components/add-habit-sheet"
 import { EditHabitSheet } from "./components/edit-habit-sheet"
-import { Toaster } from "./components/toaster"
 import { Button } from "./components/ui/button"
 import type { Habit } from "./types"
 
@@ -14,29 +14,19 @@ export default function App() {
   const [date, setDate] = React.useState(new Date())
   const [addOpen, setAddOpen] = React.useState(false)
   const [editHabit, setEditHabit] = React.useState<Habit | null>(null)
-  const [toast, setToast] = React.useState<{
-    message: string
-    habitId: string
-  } | null>(null)
 
   const { habits, completions, addHabit, editHabit: edit, deleteHabit, addCompletion, undoLastCompletion } = useHabits()
 
   function handleComplete(habitId: string) {
     addCompletion(habitId)
     const habit = habits.find((h) => h.id === habitId)
-    setToast({
-      message: habit
-        ? `${habit.name} logged!`
-        : "Logged!",
-      habitId,
+    toast(habit ? `${habit.name} logged!` : "Logged!", {
+      action: {
+        label: "Undo",
+        onClick: () => undoLastCompletion(habitId),
+      },
+      duration: 4000,
     })
-  }
-
-  function handleUndo() {
-    if (toast) {
-      undoLastCompletion(toast.habitId)
-      setToast(null)
-    }
   }
 
   return (
@@ -63,10 +53,7 @@ export default function App() {
               habit={habit}
               completions={getCompletionsForHabitOnDate(completions, habit.id, date)}
               onComplete={handleComplete}
-              onUndoLast={(id) => {
-                undoLastCompletion(id)
-                setToast(null)
-              }}
+              onUndoLast={undoLastCompletion}
               onEdit={setEditHabit}
               onDelete={deleteHabit}
             />
@@ -97,10 +84,20 @@ export default function App() {
       />
 
       <Toaster
-        message={toast?.message ?? ""}
-        open={toast !== null}
-        onUndo={handleUndo}
-        onClose={() => setToast(null)}
+        position="bottom-center"
+        toastOptions={{
+          style: {
+            background: "var(--color-card)",
+            border: "1px solid var(--color-border)",
+            borderRadius: "var(--radius)",
+            boxShadow:
+              "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+            padding: "16px 20px",
+            color: "var(--color-foreground)",
+            fontSize: "0.875rem",
+          },
+        }}
+        style={{ bottom: "80px" }}
       />
     </div>
   )

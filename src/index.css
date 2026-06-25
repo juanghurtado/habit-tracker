@@ -63,15 +63,7 @@
   to { opacity: 0; transform: scale(0.95); }
 }
 
-@keyframes slideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
 
-@keyframes slideDown {
-  from { transform: translateY(0); }
-  to { transform: translateY(100%); }
-}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -105,14 +97,6 @@ body {
 
 .DialogContent[data-state="closed"] {
   animation: zoomOut 0.15s ease-in;
-}
-
-.ToastRoot {
-  animation: slideUp 0.3s ease-out;
-}
-
-.ToastRoot[data-state="closed"] {
-  animation: slideDown 0.2s ease-in;
 }
 
 .DropdownMenuContent {
