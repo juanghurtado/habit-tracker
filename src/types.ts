@@ -1,17 +1,17 @@
-export type HabitType = "good" | "bad"
+export type HabitType = "good" | "bad";
 
 export interface Habit {
-  id: string
-  name: string
-  icon: string
-  type: HabitType
-  color: string
-  buttonLabel: string
-  createdAt: string
+  buttonLabel: string;
+  color: string;
+  createdAt: string;
+  icon: string;
+  id: string;
+  name: string;
+  type: HabitType;
 }
 
 export interface Completion {
-  id: string
-  habitId: string
-  timestamp: string
+  habitId: string;
+  id: string;
+  timestamp: string;
 }

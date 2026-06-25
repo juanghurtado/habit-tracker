@@ -34,38 +34,62 @@
  *   `cli/engine/detect-antipatterns.mjs` (running from source).
  */
 
-import fs from 'node:fs';
-import path from 'node:path';
-import { pathToFileURL, fileURLToPath } from 'node:url';
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export const ENVELOPE_PREFIX = '[impeccable@1]';
+export const ENVELOPE_PREFIX = "[impeccable@1]";
 
 export const ALLOWED_EXTS = new Set([
-  '.tsx', '.jsx', '.html', '.htm', '.vue', '.svelte', '.astro',
-  '.css', '.scss', '.sass', '.less', '.ts', '.js',
+  ".tsx",
+  ".jsx",
+  ".html",
+  ".htm",
+  ".vue",
+  ".svelte",
+  ".astro",
+  ".css",
+  ".scss",
+  ".sass",
+  ".less",
+  ".ts",
+  ".js",
 ]);
 
 export const ACK_EXTS = new Set([
-  '.tsx', '.jsx', '.html', '.htm', '.vue', '.svelte', '.astro',
-  '.css', '.scss', '.sass', '.less',
+  ".tsx",
+  ".jsx",
+  ".html",
+  ".htm",
+  ".vue",
+  ".svelte",
+  ".astro",
+  ".css",
+  ".scss",
+  ".sass",
+  ".less",
 ]);
 
 // Hard-skip regex for sensitive files. Cannot be turned off via config.
 // Match tokenized secret/credential filenames, not UI names such as
 // CredentialForm.tsx, SecretPage.jsx, or secretary-dashboard.vue.
-export const SENSITIVE_PATH = new RegExp([
-  String.raw`(?:^|[/\\])\.env(?:\.|$)`,
-  String.raw`(?:^|[/\\])\.git(?:[/\\]|$)`,
-  String.raw`(?:^|[/\\])id_rsa(?:$|[._-])[^/\\]*$`,
-  String.raw`(?:^|[/\\])[^/\\]*\.pem$`,
-  String.raw`(?:^|[/\\])(?:[^/\\]*[._-])?(?:secret|secrets|credential|credentials)(?=[._-])[^/\\]*\.(?:json|ya?ml|toml|ini|conf|config|env|txt|key|cert|crt|pem|js|ts)$`,
-].join('|'), 'i');
+export const SENSITIVE_PATH = new RegExp(
+  [
+    String.raw`(?:^|[/\\])\.env(?:\.|$)`,
+    String.raw`(?:^|[/\\])\.git(?:[/\\]|$)`,
+    String.raw`(?:^|[/\\])id_rsa(?:$|[._-])[^/\\]*$`,
+    String.raw`(?:^|[/\\])[^/\\]*\.pem$`,
+    String.raw`(?:^|[/\\])(?:[^/\\]*[._-])?(?:secret|secrets|credential|credentials)(?=[._-])[^/\\]*\.(?:json|ya?ml|toml|ini|conf|config|env|txt|key|cert|crt|pem|js|ts)$`,
+  ].join("|"),
+  "i"
+);
 
 // Hard-skip regex for generated, lock, minified, and build-output paths.
-export const GENERATED_PATH = /(?:\.generated\.[a-z]+$|\.d\.ts$|\.min\.[a-z]+$|[/\\]node_modules[/\\]|[/\\](?:dist|build|out|\.next|\.cache|coverage)[/\\]|[/\\]?[^/\\]+\.lock(?:\.json)?$)/i;
+export const GENERATED_PATH =
+  /(?:\.generated\.[a-z]+$|\.d\.ts$|\.min\.[a-z]+$|[/\\]node_modules[/\\]|[/\\](?:dist|build|out|\.next|\.cache|coverage)[/\\]|[/\\]?[^/\\]+\.lock(?:\.json)?$)/i;
 
 export const TRUTHY = /^(1|true|yes|on)$/i;
 
@@ -81,57 +105,65 @@ export const DEFAULT_CONFIG = Object.freeze({
 });
 
 export const HOOK_LOCAL_IGNORE_PATTERNS = Object.freeze([
-  '.impeccable/hook.cache.json',
-  '.impeccable/hook.pending.json',
-  '.impeccable/config.local.json',
+  ".impeccable/hook.cache.json",
+  ".impeccable/hook.pending.json",
+  ".impeccable/config.local.json",
 ]);
 
-const HOOK_IGNORE_MARKER_OPEN = '# impeccable-hook-ignore-start';
-const HOOK_IGNORE_MARKER_CLOSE = '# impeccable-hook-ignore-end';
+const HOOK_IGNORE_MARKER_OPEN = "# impeccable-hook-ignore-start";
+const HOOK_IGNORE_MARKER_CLOSE = "# impeccable-hook-ignore-end";
 const CACHE_MAX_SESSIONS = 8;
 export const EDIT_COUNT_THRESHOLD = 6;
 
 export function truthy(value) {
-  return typeof value === 'string' && TRUTHY.test(value);
+  return typeof value === "string" && TRUTHY.test(value);
 }
 
 function depthIsSet(value) {
-  if (value === undefined || value === null) return false;
+  if (value === undefined || value === null) {
+    return false;
+  }
   const text = String(value).trim();
-  if (!text) return false;
-  if (TRUTHY.test(text)) return true;
+  if (!text) {
+    return false;
+  }
+  if (TRUTHY.test(text)) {
+    return true;
+  }
   return /^\d+$/.test(text) && Number(text) > 0;
 }
 
 function safeReadJson(filePath) {
   try {
-    return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    return JSON.parse(fs.readFileSync(filePath, "utf-8"));
   } catch {
     return null;
   }
 }
 
 export function getConfigPath(cwd) {
-  return path.join(cwd, '.impeccable', 'config.json');
+  return path.join(cwd, ".impeccable", "config.json");
 }
 
 export function getLocalConfigPath(cwd) {
-  return path.join(cwd, '.impeccable', 'config.local.json');
+  return path.join(cwd, ".impeccable", "config.local.json");
 }
 
 export function getCachePath(cwd) {
-  return path.join(cwd, '.impeccable', 'hook.cache.json');
+  return path.join(cwd, ".impeccable", "hook.cache.json");
 }
 
 export function getPendingPath(cwd) {
-  return path.join(cwd, '.impeccable', 'hook.pending.json');
+  return path.join(cwd, ".impeccable", "hook.pending.json");
 }
 
 export function resolveProjectCwd(event, fallback = process.cwd()) {
-  return event?.cwd
-    || (Array.isArray(event?.workspace_roots) && event.workspace_roots[0])
-    || envProjectDir(fallback)
-    || fallback;
+  return (
+    event?.cwd ||
+    (Array.isArray(event?.workspace_roots) && event.workspace_roots[0]) ||
+    envProjectDir(fallback) ||
+    fallback
+  );
 }
 
 export function readConfig(cwd) {
@@ -149,13 +181,23 @@ export function readConfig(cwd) {
 
 // The hook settings subtree of a unified config.json / config.local.json.
 function hookSection(raw) {
-  if (!raw || typeof raw !== 'object') return null;
-  return raw.hook && typeof raw.hook === 'object' && !Array.isArray(raw.hook) ? raw.hook : null;
+  if (!raw || typeof raw !== "object") {
+    return null;
+  }
+  return raw.hook && typeof raw.hook === "object" && !Array.isArray(raw.hook)
+    ? raw.hook
+    : null;
 }
 
 function detectorSection(raw) {
-  if (!raw || typeof raw !== 'object') return null;
-  return raw.detector && typeof raw.detector === 'object' && !Array.isArray(raw.detector) ? raw.detector : null;
+  if (!raw || typeof raw !== "object") {
+    return null;
+  }
+  return raw.detector &&
+    typeof raw.detector === "object" &&
+    !Array.isArray(raw.detector)
+    ? raw.detector
+    : null;
 }
 
 function numberOr(value, fallback) {
@@ -174,38 +216,55 @@ function cloneDefaultConfig() {
 }
 
 function applyDetectorConfigSource(config, raw) {
-  if (!raw || typeof raw !== 'object') return config;
-  if (raw.designSystem && typeof raw.designSystem === 'object' && !Array.isArray(raw.designSystem)) {
+  if (!raw || typeof raw !== "object") {
+    return config;
+  }
+  if (
+    raw.designSystem &&
+    typeof raw.designSystem === "object" &&
+    !Array.isArray(raw.designSystem)
+  ) {
     config.designSystem = {
       ...config.designSystem,
       enabled: raw.designSystem.enabled === false ? false : true,
     };
   }
   if (Array.isArray(raw.ignoreRules)) {
-    config.ignoreRules = uniqueStrings([...config.ignoreRules, ...raw.ignoreRules]);
+    config.ignoreRules = uniqueStrings([
+      ...config.ignoreRules,
+      ...raw.ignoreRules,
+    ]);
   }
   if (Array.isArray(raw.ignoreFiles)) {
-    config.ignoreFiles = uniqueStrings([...config.ignoreFiles, ...raw.ignoreFiles]);
+    config.ignoreFiles = uniqueStrings([
+      ...config.ignoreFiles,
+      ...raw.ignoreFiles,
+    ]);
   }
   if (Array.isArray(raw.ignoreValues)) {
-    config.ignoreValues = mergeIgnoreValues(config.ignoreValues, raw.ignoreValues);
+    config.ignoreValues = mergeIgnoreValues(
+      config.ignoreValues,
+      raw.ignoreValues
+    );
   }
   return config;
 }
 
 function applyConfigSource(config, raw) {
-  if (!raw || typeof raw !== 'object') return config;
-  if (Object.prototype.hasOwnProperty.call(raw, 'enabled')) {
+  if (!raw || typeof raw !== "object") {
+    return config;
+  }
+  if (Object.hasOwn(raw, "enabled")) {
     config.enabled = raw.enabled === false ? false : true;
   }
-  if (Object.prototype.hasOwnProperty.call(raw, 'quiet')) {
+  if (Object.hasOwn(raw, "quiet")) {
     config.quiet = raw.quiet === true;
   }
-  if (typeof raw.auditLog === 'string' && raw.auditLog.trim()) {
+  if (typeof raw.auditLog === "string" && raw.auditLog.trim()) {
     config.auditLog = raw.auditLog.trim();
   }
   applyDetectorConfigSource(config, raw);
-  if (raw.limits && typeof raw.limits === 'object') {
+  if (raw.limits && typeof raw.limits === "object") {
     config.limits = {
       maxFindings: numberOr(raw.limits.maxFindings, config.limits.maxFindings),
       maxChars: numberOr(raw.limits.maxChars, config.limits.maxChars),
@@ -219,52 +278,70 @@ function uniqueStrings(values) {
 }
 
 export function normalizeIgnoreValue(value) {
-  return String(value || '')
+  return String(value || "")
     .trim()
-    .replace(/^["']|["']$/g, '')
-    .replace(/\+/g, ' ')
-    .replace(/\s+/g, ' ')
+    .replace(/^["']|["']$/g, "")
+    .replace(/\+/g, " ")
+    .replace(/\s+/g, " ")
     .toLowerCase();
 }
 
 function normalizeIgnoreRule(rule) {
-  return String(rule || '').trim().toLowerCase();
+  return String(rule || "")
+    .trim()
+    .toLowerCase();
 }
 
 function colorIgnoreKey(value) {
   const color = parseIgnoreColor(value);
-  if (!color) return '';
+  if (!color) {
+    return "";
+  }
   return `${color.r},${color.g},${color.b},${Math.round(color.a * 255)}`;
 }
 
 function parseIgnoreColor(value) {
-  const text = String(value || '').trim().toLowerCase();
-  if (!text) return null;
+  const text = String(value || "")
+    .trim()
+    .toLowerCase();
+  if (!text) {
+    return null;
+  }
 
   const hex = text.match(/^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i);
-  if (hex) return parseHexIgnoreColor(hex[1]);
+  if (hex) {
+    return parseHexIgnoreColor(hex[1]);
+  }
 
   const rgb = text.match(/^rgba?\((.*)\)$/i);
   if (rgb) {
     const parts = splitColorArgs(rgb[1]);
-    if (parts.length < 3 || parts.length > 4) return null;
+    if (parts.length < 3 || parts.length > 4) {
+      return null;
+    }
     const r = parseRgbChannel(parts[0]);
     const g = parseRgbChannel(parts[1]);
     const b = parseRgbChannel(parts[2]);
     const a = parts[3] === undefined ? 1 : parseAlphaChannel(parts[3]);
-    if ([r, g, b, a].some((v) => v === null)) return null;
+    if ([r, g, b, a].some((v) => v === null)) {
+      return null;
+    }
     return { r, g, b, a };
   }
 
   const hsl = text.match(/^hsla?\((.*)\)$/i);
   if (hsl) {
     const parts = splitColorArgs(hsl[1]);
-    if (parts.length < 3 || parts.length > 4) return null;
+    if (parts.length < 3 || parts.length > 4) {
+      return null;
+    }
     const h = parseHueChannel(parts[0]);
     const s = parsePercentChannel(parts[1]);
     const l = parsePercentChannel(parts[2]);
     const a = parts[3] === undefined ? 1 : parseAlphaChannel(parts[3]);
-    if ([h, s, l, a].some((v) => v === null)) return null;
+    if ([h, s, l, a].some((v) => v === null)) {
+      return null;
+    }
     return hslToRgb(h, s, l, a);
   }
 
@@ -273,74 +350,109 @@ function parseIgnoreColor(value) {
 
 function parseHexIgnoreColor(hex) {
   if (hex.length === 3 || hex.length === 4) {
-    const r = parseInt(hex[0] + hex[0], 16);
-    const g = parseInt(hex[1] + hex[1], 16);
-    const b = parseInt(hex[2] + hex[2], 16);
-    const a = hex.length === 4 ? parseInt(hex[3] + hex[3], 16) / 255 : 1;
+    const r = Number.parseInt(hex[0] + hex[0], 16);
+    const g = Number.parseInt(hex[1] + hex[1], 16);
+    const b = Number.parseInt(hex[2] + hex[2], 16);
+    const a = hex.length === 4 ? Number.parseInt(hex[3] + hex[3], 16) / 255 : 1;
     return { r, g, b, a };
   }
-  const r = parseInt(hex.slice(0, 2), 16);
-  const g = parseInt(hex.slice(2, 4), 16);
-  const b = parseInt(hex.slice(4, 6), 16);
-  const a = hex.length === 8 ? parseInt(hex.slice(6, 8), 16) / 255 : 1;
+  const r = Number.parseInt(hex.slice(0, 2), 16);
+  const g = Number.parseInt(hex.slice(2, 4), 16);
+  const b = Number.parseInt(hex.slice(4, 6), 16);
+  const a = hex.length === 8 ? Number.parseInt(hex.slice(6, 8), 16) / 255 : 1;
   return { r, g, b, a };
 }
 
 function splitColorArgs(body) {
-  const text = String(body || '').trim();
-  if (!text) return [];
-  if (text.includes(',')) {
-    const parts = text.split(',').map((part) => part.trim()).filter(Boolean);
+  const text = String(body || "").trim();
+  if (!text) {
+    return [];
+  }
+  if (text.includes(",")) {
+    const parts = text
+      .split(",")
+      .map((part) => part.trim())
+      .filter(Boolean);
     const last = parts[parts.length - 1];
-    if (last && last.includes('/')) {
-      const split = last.split('/').map((part) => part.trim()).filter(Boolean);
+    if (last && last.includes("/")) {
+      const split = last
+        .split("/")
+        .map((part) => part.trim())
+        .filter(Boolean);
       return [...parts.slice(0, -1), ...split];
     }
     return parts;
   }
-  return text.replace(/\s*\/\s*/g, ' / ').split(/\s+/).filter((part) => part && part !== '/');
+  return text
+    .replace(/\s*\/\s*/g, " / ")
+    .split(/\s+/)
+    .filter((part) => part && part !== "/");
 }
 
 function parseRgbChannel(raw) {
-  const text = String(raw || '').trim();
+  const text = String(raw || "").trim();
   const match = text.match(/^(-?\d*\.?\d+)(%)?$/);
-  if (!match) return null;
+  if (!match) {
+    return null;
+  }
   const value = Number.parseFloat(match[1]);
-  if (!Number.isFinite(value)) return null;
+  if (!Number.isFinite(value)) {
+    return null;
+  }
   const scaled = match[2] ? value * 2.55 : value;
-  if (scaled < 0 || scaled > 255) return null;
+  if (scaled < 0 || scaled > 255) {
+    return null;
+  }
   return Math.round(scaled);
 }
 
 function parseAlphaChannel(raw) {
-  const text = String(raw || '').trim();
+  const text = String(raw || "").trim();
   const match = text.match(/^(-?\d*\.?\d+)(%)?$/);
-  if (!match) return null;
+  if (!match) {
+    return null;
+  }
   const value = Number.parseFloat(match[1]);
-  if (!Number.isFinite(value)) return null;
+  if (!Number.isFinite(value)) {
+    return null;
+  }
   const alpha = match[2] ? value / 100 : value;
   return alpha >= 0 && alpha <= 1 ? alpha : null;
 }
 
 function parseHueChannel(raw) {
-  const text = String(raw || '').trim();
+  const text = String(raw || "").trim();
   const match = text.match(/^(-?\d*\.?\d+)(deg|rad|turn|grad)?$/);
-  if (!match) return null;
+  if (!match) {
+    return null;
+  }
   const value = Number.parseFloat(match[1]);
-  if (!Number.isFinite(value)) return null;
-  const unit = match[2] || 'deg';
-  if (unit === 'turn') return value * 360;
-  if (unit === 'rad') return value * (180 / Math.PI);
-  if (unit === 'grad') return value * 0.9;
+  if (!Number.isFinite(value)) {
+    return null;
+  }
+  const unit = match[2] || "deg";
+  if (unit === "turn") {
+    return value * 360;
+  }
+  if (unit === "rad") {
+    return value * (180 / Math.PI);
+  }
+  if (unit === "grad") {
+    return value * 0.9;
+  }
   return value;
 }
 
 function parsePercentChannel(raw) {
-  const text = String(raw || '').trim();
+  const text = String(raw || "").trim();
   const match = text.match(/^(-?\d*\.?\d+)%$/);
-  if (!match) return null;
+  if (!match) {
+    return null;
+  }
   const value = Number.parseFloat(match[1]);
-  if (!Number.isFinite(value)) return null;
+  if (!Number.isFinite(value)) {
+    return null;
+  }
   return value >= 0 && value <= 100 ? value / 100 : null;
 }
 
@@ -350,17 +462,28 @@ function hslToRgb(hue, saturation, lightness, alpha) {
     const gray = clampByte(Math.round(lightness * 255));
     return { r: gray, g: gray, b: gray, a: alpha };
   }
-  const q = lightness < 0.5
-    ? lightness * (1 + saturation)
-    : lightness + saturation - lightness * saturation;
+  const q =
+    lightness < 0.5
+      ? lightness * (1 + saturation)
+      : lightness + saturation - lightness * saturation;
   const p = 2 * lightness - q;
   const toRgb = (t) => {
     let channel = t;
-    if (channel < 0) channel += 1;
-    if (channel > 1) channel -= 1;
-    if (channel < 1 / 6) return p + (q - p) * 6 * channel;
-    if (channel < 1 / 2) return q;
-    if (channel < 2 / 3) return p + (q - p) * (2 / 3 - channel) * 6;
+    if (channel < 0) {
+      channel += 1;
+    }
+    if (channel > 1) {
+      channel -= 1;
+    }
+    if (channel < 1 / 6) {
+      return p + (q - p) * 6 * channel;
+    }
+    if (channel < 1 / 2) {
+      return q;
+    }
+    if (channel < 2 / 3) {
+      return p + (q - p) * (2 / 3 - channel) * 6;
+    }
     return p;
   };
   return {
@@ -376,30 +499,48 @@ function clampByte(value) {
 }
 
 function ignoreValueMatches(rule, entryValue, findingValue) {
-  if (entryValue === findingValue) return true;
-  if (rule !== 'design-system-color') return false;
+  if (entryValue === findingValue) {
+    return true;
+  }
+  if (rule !== "design-system-color") {
+    return false;
+  }
   const entryColor = colorIgnoreKey(entryValue);
   return Boolean(entryColor && entryColor === colorIgnoreKey(findingValue));
 }
 
 export function normalizeIgnoreValueEntries(entries) {
-  if (!Array.isArray(entries)) return [];
+  if (!Array.isArray(entries)) {
+    return [];
+  }
   const out = [];
   for (const entry of entries) {
-    if (!entry || typeof entry !== 'object') continue;
+    if (!entry || typeof entry !== "object") {
+      continue;
+    }
     const rule = normalizeIgnoreRule(entry.rule);
     const value = normalizeIgnoreValue(entry.value);
-    if (!rule || !value) continue;
+    if (!(rule && value)) {
+      continue;
+    }
     const normalized = { rule, value };
     const files = uniqueStrings([
-      ...(typeof entry.file === 'string' && entry.file.trim() ? [entry.file.trim()] : []),
-      ...(Array.isArray(entry.files) ? entry.files.filter(v => typeof v === 'string' && v.trim()).map(v => v.trim()) : []),
+      ...(typeof entry.file === "string" && entry.file.trim()
+        ? [entry.file.trim()]
+        : []),
+      ...(Array.isArray(entry.files)
+        ? entry.files
+            .filter((v) => typeof v === "string" && v.trim())
+            .map((v) => v.trim())
+        : []),
     ]);
-    if (files.length > 0) normalized.files = files;
-    if (typeof entry.reason === 'string' && entry.reason.trim()) {
+    if (files.length > 0) {
+      normalized.files = files;
+    }
+    if (typeof entry.reason === "string" && entry.reason.trim()) {
       normalized.reason = entry.reason.trim();
     }
-    if (typeof entry.createdAt === 'string' && entry.createdAt.trim()) {
+    if (typeof entry.createdAt === "string" && entry.createdAt.trim()) {
       normalized.createdAt = entry.createdAt.trim();
     }
     out.push(normalized);
@@ -410,26 +551,33 @@ export function normalizeIgnoreValueEntries(entries) {
 function mergeIgnoreValues(existing, incoming) {
   const map = new Map();
   for (const entry of normalizeIgnoreValueEntries(existing)) {
-    map.set(`${entry.rule}\0${entry.value}\0${ignoreValueFilesKey(entry.files)}`, entry);
+    map.set(
+      `${entry.rule}\0${entry.value}\0${ignoreValueFilesKey(entry.files)}`,
+      entry
+    );
   }
   for (const entry of normalizeIgnoreValueEntries(incoming)) {
-    map.set(`${entry.rule}\0${entry.value}\0${ignoreValueFilesKey(entry.files)}`, entry);
+    map.set(
+      `${entry.rule}\0${entry.value}\0${ignoreValueFilesKey(entry.files)}`,
+      entry
+    );
   }
   return Array.from(map.values());
 }
 
 function ignoreValueFilesKey(files) {
-  return Array.isArray(files) && files.length > 0 ? files.join('\x1f') : '';
+  return Array.isArray(files) && files.length > 0 ? files.join("\x1f") : "";
 }
 
 export function readCache(cwd) {
   const raw = safeReadJson(getCachePath(cwd));
-  if (!raw || typeof raw !== 'object' || raw.version !== 1) {
+  if (!raw || typeof raw !== "object" || raw.version !== 1) {
     return { version: 1, sessions: {} };
   }
   return {
     version: 1,
-    sessions: raw.sessions && typeof raw.sessions === 'object' ? raw.sessions : {},
+    sessions:
+      raw.sessions && typeof raw.sessions === "object" ? raw.sessions : {},
   };
 }
 
@@ -443,7 +591,9 @@ export function persistCache(cwd, cache) {
       .sort((a, b) => b[1] - a[1])
       .slice(0, CACHE_MAX_SESSIONS);
     const next = {};
-    for (const [id] of ordered) next[id] = sessions[id];
+    for (const [id] of ordered) {
+      next[id] = sessions[id];
+    }
     cache = { ...cache, sessions: next };
   }
   const target = getCachePath(cwd);
@@ -461,40 +611,62 @@ export function ensureHookGitExcludes(cwd = process.cwd()) {
   try {
     const target = resolveHookGitExcludeTarget(cwd);
     if (!target) {
-      return { mode: 'none', changed: false, patterns: [...HOOK_LOCAL_IGNORE_PATTERNS] };
+      return {
+        mode: "none",
+        changed: false,
+        patterns: [...HOOK_LOCAL_IGNORE_PATTERNS],
+      };
     }
 
     const patterns = target.patternPrefix
-      ? HOOK_LOCAL_IGNORE_PATTERNS.map((pattern) => `${target.patternPrefix}/${pattern}`)
+      ? HOOK_LOCAL_IGNORE_PATTERNS.map(
+          (pattern) => `${target.patternPrefix}/${pattern}`
+        )
       : [...HOOK_LOCAL_IGNORE_PATTERNS];
-    const markerSuffix = target.patternPrefix || '.';
+    const markerSuffix = target.patternPrefix || ".";
     const markerOpen = `${HOOK_IGNORE_MARKER_OPEN} ${markerSuffix}`;
     const markerClose = `${HOOK_IGNORE_MARKER_CLOSE} ${markerSuffix}`;
-    const existing = fs.existsSync(target.path) ? fs.readFileSync(target.path, 'utf-8') : '';
-    const block = [markerOpen, ...patterns, markerClose].join('\n');
-    const markerRe = new RegExp(`${escapeRegExp(markerOpen)}[\\s\\S]*?${escapeRegExp(markerClose)}`);
+    const existing = fs.existsSync(target.path)
+      ? fs.readFileSync(target.path, "utf-8")
+      : "";
+    const block = [markerOpen, ...patterns, markerClose].join("\n");
+    const markerRe = new RegExp(
+      `${escapeRegExp(markerOpen)}[\\s\\S]*?${escapeRegExp(markerClose)}`
+    );
 
     let updated;
     if (markerRe.test(existing)) {
       updated = existing.replace(markerRe, block);
     } else {
-      const prefix = existing.length === 0 ? '' : existing.endsWith('\n') ? existing : `${existing}\n`;
-      updated = `${prefix}${prefix.endsWith('\n\n') || prefix === '' ? '' : '\n'}${block}\n`;
+      const prefix =
+        existing.length === 0
+          ? ""
+          : existing.endsWith("\n")
+            ? existing
+            : `${existing}\n`;
+      updated = `${prefix}${prefix.endsWith("\n\n") || prefix === "" ? "" : "\n"}${block}\n`;
     }
 
     if (updated !== existing) {
       fs.mkdirSync(path.dirname(target.path), { recursive: true });
-      fs.writeFileSync(target.path, updated, 'utf-8');
+      fs.writeFileSync(target.path, updated, "utf-8");
     }
 
     return {
-      mode: 'git-info-exclude',
-      file: path.relative(path.resolve(cwd), target.path).split(path.sep).join('/'),
+      mode: "git-info-exclude",
+      file: path
+        .relative(path.resolve(cwd), target.path)
+        .split(path.sep)
+        .join("/"),
       changed: updated !== existing,
       patterns,
     };
   } catch {
-    return { mode: 'error', changed: false, patterns: [...HOOK_LOCAL_IGNORE_PATTERNS] };
+    return {
+      mode: "error",
+      changed: false,
+      patterns: [...HOOK_LOCAL_IGNORE_PATTERNS],
+    };
   }
 }
 
@@ -502,35 +674,47 @@ function resolveHookGitExcludeTarget(cwd) {
   const start = path.resolve(cwd);
   let dir = start;
   while (true) {
-    const dotGit = path.join(dir, '.git');
+    const dotGit = path.join(dir, ".git");
     if (fs.existsSync(dotGit)) {
       const gitDir = resolveGitDir(dotGit, dir);
-      if (!gitDir) return null;
-      const relPrefix = path.relative(dir, start).split(path.sep).join('/');
+      if (!gitDir) {
+        return null;
+      }
+      const relPrefix = path.relative(dir, start).split(path.sep).join("/");
       return {
-        path: path.join(gitDir, 'info', 'exclude'),
-        patternPrefix: relPrefix && relPrefix !== '.' ? relPrefix : '',
+        path: path.join(gitDir, "info", "exclude"),
+        patternPrefix: relPrefix && relPrefix !== "." ? relPrefix : "",
       };
     }
     const parent = path.dirname(dir);
-    if (parent === dir) return null;
+    if (parent === dir) {
+      return null;
+    }
     dir = parent;
   }
 }
 
 function resolveGitDir(dotGit, worktreeDir) {
   const stat = fs.statSync(dotGit);
-  if (stat.isDirectory()) return dotGit;
-  if (!stat.isFile()) return null;
+  if (stat.isDirectory()) {
+    return dotGit;
+  }
+  if (!stat.isFile()) {
+    return null;
+  }
 
-  const body = fs.readFileSync(dotGit, 'utf-8').trim();
+  const body = fs.readFileSync(dotGit, "utf-8").trim();
   const match = body.match(/^gitdir:\s*(.+)$/i);
-  if (!match) return null;
-  return path.isAbsolute(match[1]) ? match[1] : path.resolve(worktreeDir, match[1]);
+  if (!match) {
+    return null;
+  }
+  return path.isAbsolute(match[1])
+    ? match[1]
+    : path.resolve(worktreeDir, match[1]);
 }
 
 function escapeRegExp(value) {
-  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function ensureSession(cache, sessionId) {
@@ -561,27 +745,36 @@ export function suppressionNotice(filePath) {
 
 // Glob → RegExp. Supports `**`, `*`, `?`, and `{a,b}` alternation.
 function globToRegex(glob) {
-  let re = '^';
+  let re = "^";
   let i = 0;
   while (i < glob.length) {
     const c = glob[i];
-    if (c === '*') {
-      if (glob[i + 1] === '*') {
-        re += '.*';
+    if (c === "*") {
+      if (glob[i + 1] === "*") {
+        re += ".*";
         i += 2;
-        if (glob[i] === '/') i += 1;
+        if (glob[i] === "/") {
+          i += 1;
+        }
       } else {
-        re += '[^/]*';
+        re += "[^/]*";
         i += 1;
       }
-    } else if (c === '?') {
-      re += '[^/]';
+    } else if (c === "?") {
+      re += "[^/]";
       i += 1;
-    } else if (c === '{') {
-      const end = glob.indexOf('}', i);
-      if (end === -1) { re += '\\{'; i += 1; continue; }
-      const parts = glob.slice(i + 1, end).split(',').map((p) => p.replace(/[.+^$()|[\]\\]/g, '\\$&'));
-      re += `(?:${parts.join('|')})`;
+    } else if (c === "{") {
+      const end = glob.indexOf("}", i);
+      if (end === -1) {
+        re += "\\{";
+        i += 1;
+        continue;
+      }
+      const parts = glob
+        .slice(i + 1, end)
+        .split(",")
+        .map((p) => p.replace(/[.+^$()|[\]\\]/g, "\\$&"));
+      re += `(?:${parts.join("|")})`;
       i = end + 1;
     } else if (/[.+^$()|[\]\\]/.test(c)) {
       re += `\\${c}`;
@@ -591,21 +784,27 @@ function globToRegex(glob) {
       i += 1;
     }
   }
-  re += '$';
+  re += "$";
   return new RegExp(re);
 }
 
 export function matchesAnyGlob(filePath, globs) {
-  if (!Array.isArray(globs) || globs.length === 0) return false;
-  const normalized = filePath.split(path.sep).join('/');
+  if (!Array.isArray(globs) || globs.length === 0) {
+    return false;
+  }
+  const normalized = filePath.split(path.sep).join("/");
   for (const glob of globs) {
     try {
       const re = globToRegex(String(glob));
-      if (re.test(normalized)) return true;
+      if (re.test(normalized)) {
+        return true;
+      }
       // Match against basename too for convenience: `*.generated.tsx` should
       // catch `src/foo.generated.tsx` without requiring `**/`.
-      const base = normalized.split('/').pop();
-      if (re.test(base)) return true;
+      const base = normalized.split("/").pop();
+      if (re.test(base)) {
+        return true;
+      }
     } catch {
       /* malformed glob, skip */
     }
@@ -614,75 +813,121 @@ export function matchesAnyGlob(filePath, globs) {
 }
 
 export function filterFindings(findings, _content, _ext, config) {
-  if (!Array.isArray(findings) || findings.length === 0) return [];
-  const ignoreRules = new Set((config.ignoreRules || []).map((rule) => normalizeIgnoreRule(rule)));
+  if (!Array.isArray(findings) || findings.length === 0) {
+    return [];
+  }
+  const ignoreRules = new Set(
+    (config.ignoreRules || []).map((rule) => normalizeIgnoreRule(rule))
+  );
   const ignoreValues = normalizeIgnoreValueEntries(config.ignoreValues || []);
   return findings.filter((f) => {
-    if (!f || typeof f !== 'object') return false;
-    if (ignoreRules.has(normalizeIgnoreRule(f.antipattern))) return false;
-    if (isIgnoredFindingValue(f, ignoreValues)) return false;
+    if (!f || typeof f !== "object") {
+      return false;
+    }
+    if (ignoreRules.has(normalizeIgnoreRule(f.antipattern))) {
+      return false;
+    }
+    if (isIgnoredFindingValue(f, ignoreValues)) {
+      return false;
+    }
     return true;
   });
 }
 
 function isIgnoredFindingValue(finding, ignoreValues) {
-  if (!Array.isArray(ignoreValues) || ignoreValues.length === 0) return false;
+  if (!Array.isArray(ignoreValues) || ignoreValues.length === 0) {
+    return false;
+  }
   const rule = normalizeIgnoreRule(finding.antipattern);
   const value = extractFindingIgnoreValue(finding);
-  if (!rule || !value) return false;
+  if (!(rule && value)) {
+    return false;
+  }
   return ignoreValues.some((entry) => {
-    const wildcardValue = entry.value === '*';
-    if (entry.rule !== rule || (!wildcardValue && !ignoreValueMatches(rule, entry.value, value))) return false;
-    if (!Array.isArray(entry.files) || entry.files.length === 0) return !wildcardValue;
+    const wildcardValue = entry.value === "*";
+    if (
+      entry.rule !== rule ||
+      !(wildcardValue || ignoreValueMatches(rule, entry.value, value))
+    ) {
+      return false;
+    }
+    if (!Array.isArray(entry.files) || entry.files.length === 0) {
+      return !wildcardValue;
+    }
     return findingMatchesScopedIgnoreFile(finding, entry.files);
   });
 }
 
 function findingMatchesScopedIgnoreFile(finding, globs) {
-  const filePath = String(finding?.file || '').trim();
-  if (!filePath) return false;
-  if (matchesAnyGlob(filePath, globs)) return true;
+  const filePath = String(finding?.file || "").trim();
+  if (!filePath) {
+    return false;
+  }
+  if (matchesAnyGlob(filePath, globs)) {
+    return true;
+  }
 
-  const normalized = filePath.split(path.sep).join('/');
-  const parts = normalized.split('/').filter(Boolean);
+  const normalized = filePath.split(path.sep).join("/");
+  const parts = normalized.split("/").filter(Boolean);
   for (let i = 0; i < parts.length; i++) {
-    const suffix = parts.slice(i).join('/');
-    if (matchesAnyGlob(suffix, globs)) return true;
+    const suffix = parts.slice(i).join("/");
+    if (matchesAnyGlob(suffix, globs)) {
+      return true;
+    }
   }
   return false;
 }
 
 export function extractFindingIgnoreValue(finding) {
-  if (!finding || typeof finding !== 'object') return '';
+  if (!finding || typeof finding !== "object") {
+    return "";
+  }
   const rule = normalizeIgnoreRule(finding.antipattern);
   const directValueRules = new Set([
-    'overused-font',
-    'bounce-easing',
-    'design-system-font',
-    'design-system-color',
-    'design-system-radius',
+    "overused-font",
+    "bounce-easing",
+    "design-system-font",
+    "design-system-color",
+    "design-system-radius",
   ]);
-  if (!directValueRules.has(rule)) return '';
+  if (!directValueRules.has(rule)) {
+    return "";
+  }
   return normalizeIgnoreValue(extractFindingIgnoreValueRaw(finding, rule));
 }
 
-function extractFindingIgnoreValueRaw(finding, rule = normalizeIgnoreRule(finding?.antipattern)) {
-  const direct = cleanIgnoreValueDisplay(finding.ignoreValue || finding.value || '');
-  if (direct) return direct;
+function extractFindingIgnoreValueRaw(
+  finding,
+  rule = normalizeIgnoreRule(finding?.antipattern)
+) {
+  const direct = cleanIgnoreValueDisplay(
+    finding.ignoreValue || finding.value || ""
+  );
+  if (direct) {
+    return direct;
+  }
 
-  const candidates = [finding.detail, finding.snippet].filter((v) => typeof v === 'string' && v);
+  const candidates = [finding.detail, finding.snippet].filter(
+    (v) => typeof v === "string" && v
+  );
   for (const text of candidates) {
-    if (rule === 'bounce-easing') {
+    if (rule === "bounce-easing") {
       const motion = extractMotionIgnoreValue(text);
-      if (motion) return motion;
+      if (motion) {
+        return motion;
+      }
       continue;
     }
 
     const primary = text.match(/Primary font:\s*([^()\n;]+)/i);
-    if (primary) return cleanIgnoreValueDisplay(primary[1]);
+    if (primary) {
+      return cleanIgnoreValueDisplay(primary[1]);
+    }
 
     const family = text.match(/font-family\s*:\s*["']?([^'",;\n]+)/i);
-    if (family) return cleanIgnoreValueDisplay(family[1]);
+    if (family) {
+      return cleanIgnoreValueDisplay(family[1]);
+    }
 
     const google = text.match(/[?&]family=([^&:;\n]+)/i);
     if (google) {
@@ -694,43 +939,53 @@ function extractFindingIgnoreValueRaw(finding, rule = normalizeIgnoreRule(findin
     }
   }
 
-  return '';
+  return "";
 }
 
 function extractMotionIgnoreValue(text) {
   const tailwind = text.match(/\banimate-bounce\b/i);
-  if (tailwind) return cleanIgnoreValueDisplay(tailwind[0]);
+  if (tailwind) {
+    return cleanIgnoreValueDisplay(tailwind[0]);
+  }
 
   const bezier = text.match(/cubic-bezier\([^)]+\)/i);
-  if (bezier) return cleanIgnoreValueDisplay(bezier[0]);
+  if (bezier) {
+    return cleanIgnoreValueDisplay(bezier[0]);
+  }
 
   const animation = text.match(/animation(?:-name)?\s*:\s*([^;\n]+)/i);
   if (animation) {
     const token = animation[1]
       .split(/[,\s]+/)
       .find((part) => /bounce|elastic|wobble|jiggle|spring/i.test(part));
-    if (token) return cleanIgnoreValueDisplay(token);
+    if (token) {
+      return cleanIgnoreValueDisplay(token);
+    }
   }
 
-  return '';
+  return "";
 }
 
 function cleanIgnoreValueDisplay(value) {
-  return String(value || '')
+  return String(value || "")
     .trim()
-    .replace(/^["']|["']$/g, '')
-    .replace(/\+/g, ' ')
-    .replace(/\s+/g, ' ');
+    .replace(/^["']|["']$/g, "")
+    .replace(/\+/g, " ")
+    .replace(/\s+/g, " ");
 }
 
 export function dedupeAgainstCache(findings, cache, sessionId, filePath) {
-  if (!Array.isArray(findings) || findings.length === 0) return [];
+  if (!Array.isArray(findings) || findings.length === 0) {
+    return [];
+  }
   const fileEntry = ensureFile(cache, sessionId, filePath);
   const known = new Set(fileEntry.findings || []);
   const fresh = [];
   for (const f of findings) {
     const key = findingCacheKey(f);
-    if (known.has(key)) continue;
+    if (known.has(key)) {
+      continue;
+    }
     known.add(key);
     fresh.push(f);
   }
@@ -740,7 +995,9 @@ export function dedupeAgainstCache(findings, cache, sessionId, filePath) {
 export function rememberFindings(cache, sessionId, filePath, findings) {
   const fileEntry = ensureFile(cache, sessionId, filePath);
   const known = new Set(fileEntry.findings || []);
-  for (const f of findings) known.add(findingCacheKey(f));
+  for (const f of findings) {
+    known.add(findingCacheKey(f));
+  }
   fileEntry.findings = Array.from(known);
   ensureSession(cache, sessionId).updatedAt = Date.now();
 }
@@ -748,18 +1005,36 @@ export function rememberFindings(cache, sessionId, filePath, findings) {
 function findingCacheKey(finding) {
   const line = finding?.line || 0;
   const value = extractFindingIgnoreValue(finding);
-  if (line > 0 && value) return `${finding.antipattern}:${line}:${value}`;
-  if (line > 0) return `${finding.antipattern}:${line}`;
-  if (value) return `${finding.antipattern}:0:${value}`;
-  const snippet = String(finding?.snippet || '').trim().slice(0, 80);
-  return snippet ? `${finding.antipattern}:0:${snippet}` : `${finding.antipattern}:0`;
+  if (line > 0 && value) {
+    return `${finding.antipattern}:${line}:${value}`;
+  }
+  if (line > 0) {
+    return `${finding.antipattern}:${line}`;
+  }
+  if (value) {
+    return `${finding.antipattern}:0:${value}`;
+  }
+  const snippet = String(finding?.snippet || "")
+    .trim()
+    .slice(0, 80);
+  return snippet
+    ? `${finding.antipattern}:0:${snippet}`
+    : `${finding.antipattern}:0`;
 }
 
 export function renderTemplate(findings, filePath, config, opts = {}) {
-  if (!Array.isArray(findings) || findings.length === 0) return '';
+  if (!Array.isArray(findings) || findings.length === 0) {
+    return "";
+  }
   const limits = config?.limits || DEFAULT_CONFIG.limits;
-  const cap = Math.max(1, limits.maxFindings || DEFAULT_CONFIG.limits.maxFindings);
-  const maxChars = Math.max(500, limits.maxChars || DEFAULT_CONFIG.limits.maxChars);
+  const cap = Math.max(
+    1,
+    limits.maxFindings || DEFAULT_CONFIG.limits.maxFindings
+  );
+  const maxChars = Math.max(
+    500,
+    limits.maxChars || DEFAULT_CONFIG.limits.maxChars
+  );
 
   const cwd = opts.cwd || process.cwd();
   const display = relativize(filePath, cwd);
@@ -769,16 +1044,17 @@ export function renderTemplate(findings, filePath, config, opts = {}) {
 
   const header = `${ENVELOPE_PREFIX} Design hook findings requiring review in ${display} (${total} issue(s)):`;
   const lines = shown.map((f) => formatFindingLine(f));
-  const more = remaining > 0
-    ? `... and ${remaining} more (see /impeccable audit).`
-    : null;
+  const more =
+    remaining > 0 ? `... and ${remaining} more (see /impeccable audit).` : null;
   const footer = directiveFooter(display);
 
   const blocks = [header, ...lines];
-  if (more) blocks.push(more);
-  blocks.push('');
+  if (more) {
+    blocks.push(more);
+  }
+  blocks.push("");
   blocks.push(footer);
-  let text = blocks.join('\n');
+  let text = blocks.join("\n");
 
   if (text.length > maxChars) {
     text = clampToBudget(header, lines, more, footer, maxChars);
@@ -787,18 +1063,31 @@ export function renderTemplate(findings, filePath, config, opts = {}) {
 }
 
 function renderGroupedTemplate(groups, config, opts = {}) {
-  const realGroups = groups.filter((group) => Array.isArray(group.findings) && group.findings.length > 0);
-  if (realGroups.length === 0) return '';
+  const realGroups = groups.filter(
+    (group) => Array.isArray(group.findings) && group.findings.length > 0
+  );
+  if (realGroups.length === 0) {
+    return "";
+  }
   if (realGroups.length === 1) {
     const [group] = realGroups;
     return renderTemplate(group.findings, group.filePath, config, opts);
   }
 
   const limits = config?.limits || DEFAULT_CONFIG.limits;
-  const cap = Math.max(1, limits.maxFindings || DEFAULT_CONFIG.limits.maxFindings);
-  const maxChars = Math.max(500, limits.maxChars || DEFAULT_CONFIG.limits.maxChars);
+  const cap = Math.max(
+    1,
+    limits.maxFindings || DEFAULT_CONFIG.limits.maxFindings
+  );
+  const maxChars = Math.max(
+    500,
+    limits.maxChars || DEFAULT_CONFIG.limits.maxChars
+  );
   const cwd = opts.cwd || process.cwd();
-  const total = realGroups.reduce((sum, group) => sum + group.findings.length, 0);
+  const total = realGroups.reduce(
+    (sum, group) => sum + group.findings.length,
+    0
+  );
   const header = `${ENVELOPE_PREFIX} Design hook findings requiring review across ${realGroups.length} files (${total} issue(s)):`;
   const lines = [];
   let shownCount = 0;
@@ -818,8 +1107,8 @@ function renderGroupedTemplate(groups, config, opts = {}) {
     }
   }
 
-  const footer = directiveFooter('the affected files', { grouped: true });
-  let text = [header, ...lines, '', footer].join('\n');
+  const footer = directiveFooter("the affected files", { grouped: true });
+  let text = [header, ...lines, "", footer].join("\n");
   if (text.length > maxChars) {
     text = clampGroupedToBudget(header, lines, footer, maxChars);
   }
@@ -827,15 +1116,16 @@ function renderGroupedTemplate(groups, config, opts = {}) {
 }
 
 function clampGroupedToBudget(header, lines, footer, maxChars) {
-  const assemble = (linesArr, omitted) => [
-    header,
-    ...linesArr,
-    ...(omitted ? ['... and more (see /impeccable audit).'] : []),
-    '',
-    footer,
-  ].join('\n');
+  const assemble = (linesArr, omitted) =>
+    [
+      header,
+      ...linesArr,
+      ...(omitted ? ["... and more (see /impeccable audit)."] : []),
+      "",
+      footer,
+    ].join("\n");
 
-  let working = lines.slice();
+  const working = lines.slice();
   let omitted = false;
   let assembled = assemble(working, omitted);
   while (assembled.length > maxChars && working.length > 1) {
@@ -852,18 +1142,20 @@ function clampGroupedToBudget(header, lines, footer, maxChars) {
 function clampToBudget(header, lines, more, footer, maxChars) {
   const assemble = (linesArr, moreText) => {
     const blocks = [header, ...linesArr];
-    if (moreText) blocks.push(moreText);
-    blocks.push('');
+    if (moreText) {
+      blocks.push(moreText);
+    }
+    blocks.push("");
     blocks.push(footer);
-    return blocks.join('\n');
+    return blocks.join("\n");
   };
 
-  let working = lines.slice();
+  const working = lines.slice();
   let moreText = more;
   let assembled = assemble(working, moreText);
   while (assembled.length > maxChars && working.length > 1) {
     working.pop();
-    moreText = '... and more (see /impeccable audit).';
+    moreText = "... and more (see /impeccable audit).";
     assembled = assemble(working, moreText);
   }
   if (assembled.length > maxChars) {
@@ -873,25 +1165,33 @@ function clampToBudget(header, lines, more, footer, maxChars) {
 }
 
 function formatFindingLine(f) {
-  const prefix = f.line && f.line > 0 ? `- L${f.line}` : '-';
-  const desc = (f.description || '').trim();
-  const name = (f.name || '').trim();
+  const prefix = f.line && f.line > 0 ? `- L${f.line}` : "-";
+  const desc = (f.description || "").trim();
+  const name = (f.name || "").trim();
   // Description from the registry already ends in punctuation; join with a
   // single space. `name` may have a trailing period already, keep it clean.
-  const nameSegment = name ? `${name.replace(/\.+\s*$/, '')}.` : '';
+  const nameSegment = name ? `${name.replace(/\.+\s*$/, "")}.` : "";
   const ignoreCommand = formatFindingIgnoreCommand(f);
   const ignoreSegment = ignoreCommand
     ? ` If the user explicitly confirms this value is intentional: \`${ignoreCommand}\`.`
-    : '';
-  return `${prefix} [${f.antipattern}] ${nameSegment} ${desc}${ignoreSegment}`.replace(/\s+/g, ' ').trim();
+    : "";
+  return `${prefix} [${f.antipattern}] ${nameSegment} ${desc}${ignoreSegment}`
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function formatFindingIgnoreCommand(finding) {
-  if (!finding || typeof finding !== 'object') return '';
+  if (!finding || typeof finding !== "object") {
+    return "";
+  }
   const rule = normalizeIgnoreRule(finding.antipattern);
-  if (!rule) return '';
+  if (!rule) {
+    return "";
+  }
   const normalizedValue = extractFindingIgnoreValue(finding);
-  if (!normalizedValue) return '';
+  if (!normalizedValue) {
+    return "";
+  }
   const value = extractFindingIgnoreValueRaw(finding);
   const valueArg = quoteCommandArg(value);
   const reason = quoteCommandArg(`User confirmed ${value} is intentional`);
@@ -899,16 +1199,20 @@ function formatFindingIgnoreCommand(finding) {
 }
 
 function quoteCommandArg(value) {
-  const text = String(value || '').trim();
-  if (/^[A-Za-z0-9._:-]+$/.test(text)) return text;
-  return `"${text.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+  const text = String(value || "").trim();
+  if (/^[A-Za-z0-9._:-]+$/.test(text)) {
+    return text;
+  }
+  return `"${text.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 }
 
 function relativize(filePath, cwd) {
   try {
     const rel = path.relative(cwd, filePath);
-    if (!rel || rel.startsWith('..')) return filePath;
-    return rel.split(path.sep).join('/');
+    if (!rel || rel.startsWith("..")) {
+      return filePath;
+    }
+    return rel.split(path.sep).join("/");
   } catch {
     return filePath;
   }
@@ -921,12 +1225,18 @@ function relativize(filePath, cwd) {
 const APPLY_PATCH_FILE_RE = /^\*\*\* (?:Update|Add) File: (.+)$/gm;
 
 export function parseApplyPatchPaths(command, projectCwd) {
-  if (!command || typeof command !== 'string') return [];
+  if (!command || typeof command !== "string") {
+    return [];
+  }
   const out = [];
   for (const m of command.matchAll(APPLY_PATCH_FILE_RE)) {
-    let p = (m[1] || '').trim();
-    if (!p) continue;
-    if (!path.isAbsolute(p)) p = path.resolve(projectCwd, p);
+    let p = (m[1] || "").trim();
+    if (!p) {
+      continue;
+    }
+    if (!path.isAbsolute(p)) {
+      p = path.resolve(projectCwd, p);
+    }
     out.push(p);
   }
   return out;
@@ -936,21 +1246,31 @@ export function resolveTargetFiles(event, projectCwd) {
   const ti = event?.tool_input;
   const out = [];
   const add = (filePath) => {
-    if (typeof filePath !== 'string' || !filePath) return;
-    if (!out.includes(filePath)) out.push(filePath);
+    if (typeof filePath !== "string" || !filePath) {
+      return;
+    }
+    if (!out.includes(filePath)) {
+      out.push(filePath);
+    }
   };
 
-  if (event?.tool_name === 'apply_patch' && ti && typeof ti.command === 'string') {
-    for (const filePath of parseApplyPatchPaths(ti.command, projectCwd)) add(filePath);
+  if (
+    event?.tool_name === "apply_patch" &&
+    ti &&
+    typeof ti.command === "string"
+  ) {
+    for (const filePath of parseApplyPatchPaths(ti.command, projectCwd)) {
+      add(filePath);
+    }
   }
-  if (ti && typeof ti.file_path === 'string' && ti.file_path) {
+  if (ti && typeof ti.file_path === "string" && ti.file_path) {
     add(ti.file_path);
   }
   // Cursor Write / StrReplace use `path`, not `file_path`.
-  if (ti && typeof ti.path === 'string' && ti.path) {
+  if (ti && typeof ti.path === "string" && ti.path) {
     add(ti.path);
   }
-  if (typeof event?.file_path === 'string' && event.file_path) {
+  if (typeof event?.file_path === "string" && event.file_path) {
     add(event.file_path);
   }
   return out;
@@ -958,18 +1278,30 @@ export function resolveTargetFiles(event, projectCwd) {
 
 export function resolveHarness(env = {}, event = null) {
   const explicit = env?.IMPECCABLE_HOOK_HARNESS;
-  if (explicit === 'cursor') return 'cursor';
-  if (explicit === 'github') return 'github';
-  if (explicit === 'claude' || explicit === 'codex') return 'claude';
+  if (explicit === "cursor") {
+    return "cursor";
+  }
+  if (explicit === "github") {
+    return "github";
+  }
+  if (explicit === "claude" || explicit === "codex") {
+    return "claude";
+  }
   // GitHub Copilot's postToolUse event uses camelCase `toolName`/`toolArgs` and
   // has no `tool_name`/`tool_input`. That shape is the discriminator.
-  if (event && typeof event === 'object'
-    && (typeof event.toolName === 'string' || event.toolArgs !== undefined)
-    && event.tool_name === undefined && event.tool_input === undefined) {
-    return 'github';
+  if (
+    event &&
+    typeof event === "object" &&
+    (typeof event.toolName === "string" || event.toolArgs !== undefined) &&
+    event.tool_name === undefined &&
+    event.tool_input === undefined
+  ) {
+    return "github";
   }
-  if (typeof event?.conversation_id === 'string' && event.conversation_id) return 'cursor';
-  return 'claude';
+  if (typeof event?.conversation_id === "string" && event.conversation_id) {
+    return "cursor";
+  }
+  return "claude";
 }
 
 // GitHub Copilot's postToolUse payload is
@@ -982,11 +1314,15 @@ export function resolveHarness(env = {}, event = null) {
 // normalizeGitHubEvent). The detector reads the file from disk after the tool
 // ran, so only the path (not the proposed content) is needed here.
 export function parseGitHubToolArgs(toolArgs) {
-  if (toolArgs && typeof toolArgs === 'object' && !Array.isArray(toolArgs)) return toolArgs;
-  if (typeof toolArgs === 'string' && toolArgs.trim()) {
+  if (toolArgs && typeof toolArgs === "object" && !Array.isArray(toolArgs)) {
+    return toolArgs;
+  }
+  if (typeof toolArgs === "string" && toolArgs.trim()) {
     try {
       const parsed = JSON.parse(toolArgs);
-      return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+        ? parsed
+        : {};
     } catch {
       return {};
     }
@@ -1002,10 +1338,13 @@ export function parseGitHubToolArgs(toolArgs) {
 //   *** End Patch
 // The `view`/`edit`/`create` tools (seen in `copilot -p` runs) instead send a
 // JSON string with the path under `path`. Both must map onto the internal shape.
-const APPLY_PATCH_MARKER = /\*\*\* (?:Begin Patch|Add File:|Update File:|Delete File:)/;
+const APPLY_PATCH_MARKER =
+  /\*\*\* (?:Begin Patch|Add File:|Update File:|Delete File:)/;
 
 function looksLikeApplyPatch(rawArgs) {
-  if (typeof rawArgs !== 'string' || !APPLY_PATCH_MARKER.test(rawArgs)) return false;
+  if (typeof rawArgs !== "string" || !APPLY_PATCH_MARKER.test(rawArgs)) {
+    return false;
+  }
   // Guard against an edit/create payload whose edited *content* happens to
   // contain patch markers: that payload is a JSON object string, whereas a real
   // apply_patch payload is a raw patch string that does not parse as JSON. Only
@@ -1013,45 +1352,57 @@ function looksLikeApplyPatch(rawArgs) {
   // `path` extracted.
   try {
     const parsed = JSON.parse(rawArgs);
-    if (parsed && typeof parsed === 'object') return false;
-  } catch { /* not JSON → genuine raw patch */ }
+    if (parsed && typeof parsed === "object") {
+      return false;
+    }
+  } catch {
+    /* not JSON → genuine raw patch */
+  }
   return true;
 }
 
 function applyPatchText(rawArgs) {
-  if (typeof rawArgs === 'string') {
-    if (APPLY_PATCH_MARKER.test(rawArgs)) return rawArgs;
+  if (typeof rawArgs === "string") {
+    if (APPLY_PATCH_MARKER.test(rawArgs)) {
+      return rawArgs;
+    }
     // Defensive: a future Copilot build might JSON-wrap the patch.
     const parsed = parseGitHubToolArgs(rawArgs);
-    return parsed.patch || parsed.input || parsed.command || '';
+    return parsed.patch || parsed.input || parsed.command || "";
   }
-  if (rawArgs && typeof rawArgs === 'object' && !Array.isArray(rawArgs)) {
-    return rawArgs.patch || rawArgs.input || rawArgs.command || '';
+  if (rawArgs && typeof rawArgs === "object" && !Array.isArray(rawArgs)) {
+    return rawArgs.patch || rawArgs.input || rawArgs.command || "";
   }
-  return '';
+  return "";
 }
 
 function normalizeGitHubEvent(event, projectCwd) {
   const cwd = event.cwd || envProjectDir(projectCwd) || projectCwd;
-  const sessionId = event.sessionId || event.session_id || 'unknown';
+  const sessionId = event.sessionId || event.session_id || "unknown";
   const toolName = event.toolName || event.tool_name || null;
-  const toolInput = event.tool_input && typeof event.tool_input === 'object' ? { ...event.tool_input } : {};
+  const toolInput =
+    event.tool_input && typeof event.tool_input === "object"
+      ? { ...event.tool_input }
+      : {};
   const rawArgs = event.toolArgs;
 
   let normalizedToolName = toolName;
-  if (toolName === 'apply_patch' || looksLikeApplyPatch(rawArgs)) {
+  if (toolName === "apply_patch" || looksLikeApplyPatch(rawArgs)) {
     // resolveTargetFiles() reads the touched paths from tool_input.command when
     // tool_name is 'apply_patch', so normalize the name even if a future build
     // sends the patch under a different tool label.
     const patch = applyPatchText(rawArgs);
     if (patch) {
       toolInput.command = patch;
-      normalizedToolName = 'apply_patch';
+      normalizedToolName = "apply_patch";
     }
   } else {
     const args = parseGitHubToolArgs(rawArgs);
-    const filePath = args.path || args.file_path || args.filePath || args.target_file;
-    if (typeof filePath === 'string' && filePath) toolInput.file_path = filePath;
+    const filePath =
+      args.path || args.file_path || args.filePath || args.target_file;
+    if (typeof filePath === "string" && filePath) {
+      toolInput.file_path = filePath;
+    }
   }
 
   return {
@@ -1063,18 +1414,28 @@ function normalizeGitHubEvent(event, projectCwd) {
   };
 }
 
-export function normalizeHookEvent(event, projectCwd, harness = 'claude') {
-  if (!event || typeof event !== 'object') return event;
-  if (harness === 'github') return normalizeGitHubEvent(event, projectCwd);
-  if (harness !== 'cursor') return event;
+export function normalizeHookEvent(event, projectCwd, harness = "claude") {
+  if (!event || typeof event !== "object") {
+    return event;
+  }
+  if (harness === "github") {
+    return normalizeGitHubEvent(event, projectCwd);
+  }
+  if (harness !== "cursor") {
+    return event;
+  }
 
-  const cwd = event.cwd
-    || (Array.isArray(event.workspace_roots) && event.workspace_roots[0])
-    || envProjectDir(projectCwd)
-    || projectCwd;
-  const sessionId = event.session_id || event.conversation_id || 'unknown';
+  const cwd =
+    event.cwd ||
+    (Array.isArray(event.workspace_roots) && event.workspace_roots[0]) ||
+    envProjectDir(projectCwd) ||
+    projectCwd;
+  const sessionId = event.session_id || event.conversation_id || "unknown";
 
-  const ti = event.tool_input && typeof event.tool_input === 'object' ? event.tool_input : {};
+  const ti =
+    event.tool_input && typeof event.tool_input === "object"
+      ? event.tool_input
+      : {};
   const filePath = ti.file_path || ti.path || event.file_path;
   if (filePath) {
     return {
@@ -1089,7 +1450,10 @@ export function normalizeHookEvent(event, projectCwd, harness = 'claude') {
 }
 
 function envProjectDir(fallback) {
-  if (typeof process.env.CURSOR_PROJECT_DIR === 'string' && process.env.CURSOR_PROJECT_DIR) {
+  if (
+    typeof process.env.CURSOR_PROJECT_DIR === "string" &&
+    process.env.CURSOR_PROJECT_DIR
+  ) {
     return process.env.CURSOR_PROJECT_DIR;
   }
   return fallback;
@@ -1098,42 +1462,66 @@ function envProjectDir(fallback) {
 // UI components often keep slop in a sibling/co-located stylesheet while the
 // JSX edit is what triggered PostToolUse. Scan those styles too so an App.jsx
 // patch doesn't report "clean" while styles.css still has Inter/bounce/etc.
-const UI_CODE_EXTS = new Set(['.jsx', '.tsx', '.vue', '.svelte', '.astro']);
-const STYLE_EXTS = new Set(['.css', '.scss', '.sass', '.less']);
+const UI_CODE_EXTS = new Set([".jsx", ".tsx", ".vue", ".svelte", ".astro"]);
+const STYLE_EXTS = new Set([".css", ".scss", ".sass", ".less"]);
 const CO_SCAN_STYLE_NAMES = [
-  'styles.css', 'styles.scss', 'styles.sass', 'styles.less',
-  'index.css', 'index.scss', 'index.sass', 'index.less',
-  'global.css', 'global.scss', 'global.sass', 'global.less',
-  'globals.css', 'globals.scss', 'globals.sass', 'globals.less',
+  "styles.css",
+  "styles.scss",
+  "styles.sass",
+  "styles.less",
+  "index.css",
+  "index.scss",
+  "index.sass",
+  "index.less",
+  "global.css",
+  "global.scss",
+  "global.sass",
+  "global.less",
+  "globals.css",
+  "globals.scss",
+  "globals.sass",
+  "globals.less",
 ];
 const MAX_SCAN_TARGETS = 6;
 
-const STATIC_STYLE_IMPORT_RE = /import\s+(?:[\w*{}\s,$]+\s+from\s+)?['"]([^'"]+\.(?:css|scss|sass|less))['"]/gi;
+const STATIC_STYLE_IMPORT_RE =
+  /import\s+(?:[\w*{}\s,$]+\s+from\s+)?['"]([^'"]+\.(?:css|scss|sass|less))['"]/gi;
 
 function hasPathTraversal(filePath) {
-  return typeof filePath === 'string' && filePath.includes('..');
+  return typeof filePath === "string" && filePath.includes("..");
 }
 
 function isInsideProject(filePath, projectCwd) {
-  if (!filePath || !projectCwd || hasPathTraversal(filePath)) return false;
+  if (!(filePath && projectCwd) || hasPathTraversal(filePath)) {
+    return false;
+  }
   try {
     const rel = path.relative(projectCwd, filePath);
-    return rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel));
+    return rel === "" || !(rel.startsWith("..") || path.isAbsolute(rel));
   } catch {
     return false;
   }
 }
 
 export function parseStaticStyleImports(content, fromFile, projectCwd) {
-  if (!content || typeof content !== 'string') return [];
+  if (!content || typeof content !== "string") {
+    return [];
+  }
   const dir = path.dirname(fromFile);
   const out = [];
   for (const m of content.matchAll(STATIC_STYLE_IMPORT_RE)) {
-    let p = (m[1] || '').trim();
-    if (!p) continue;
-    if (p.startsWith('.')) p = path.resolve(dir, p);
-    else if (!path.isAbsolute(p)) p = path.resolve(projectCwd, p);
-    if (!isInsideProject(p, projectCwd)) continue;
+    let p = (m[1] || "").trim();
+    if (!p) {
+      continue;
+    }
+    if (p.startsWith(".")) {
+      p = path.resolve(dir, p);
+    } else if (!path.isAbsolute(p)) {
+      p = path.resolve(projectCwd, p);
+    }
+    if (!isInsideProject(p, projectCwd)) {
+      continue;
+    }
     out.push(p);
   }
   return out;
@@ -1159,62 +1547,98 @@ export function coLocatedStylesheets(filePath) {
 }
 
 export function normalizeScanTargets(primaryTargets, projectCwd) {
-  if (!Array.isArray(primaryTargets) || primaryTargets.length === 0) return [];
+  if (!Array.isArray(primaryTargets) || primaryTargets.length === 0) {
+    return [];
+  }
   const ordered = [];
   const seen = new Set();
   const baseCwd = projectCwd || process.cwd();
   const normalizeTarget = (p) => {
     // Preserve literal `..` segments so downstream sensitive-path checks
     // still fire. path.resolve would collapse `/foo/../etc/passwd`.
-    if (hasPathTraversal(p)) return p;
+    if (hasPathTraversal(p)) {
+      return p;
+    }
     return path.isAbsolute(p) ? p : path.resolve(baseCwd, p);
   };
   const add = (p) => {
-    if (ordered.length >= MAX_SCAN_TARGETS) return;
+    if (ordered.length >= MAX_SCAN_TARGETS) {
+      return;
+    }
     const abs = normalizeTarget(p);
-    if (seen.has(abs)) return;
+    if (seen.has(abs)) {
+      return;
+    }
     seen.add(abs);
     ordered.push(abs);
     return abs;
   };
 
-  for (const p of primaryTargets) add(p);
+  for (const p of primaryTargets) {
+    add(p);
+  }
   return ordered;
 }
 
 export function expandScanTargets(primaryTargets, projectCwd) {
   const ordered = normalizeScanTargets(primaryTargets, projectCwd);
-  if (ordered.length === 0) return [];
+  if (ordered.length === 0) {
+    return [];
+  }
   const seen = new Set(ordered);
   const baseCwd = projectCwd || process.cwd();
   const add = (p) => {
-    if (ordered.length >= MAX_SCAN_TARGETS) return;
-    const abs = hasPathTraversal(p) ? p : (path.isAbsolute(p) ? p : path.resolve(baseCwd, p));
-    if (seen.has(abs)) return;
+    if (ordered.length >= MAX_SCAN_TARGETS) {
+      return;
+    }
+    const abs = hasPathTraversal(p)
+      ? p
+      : path.isAbsolute(p)
+        ? p
+        : path.resolve(baseCwd, p);
+    if (seen.has(abs)) {
+      return;
+    }
     seen.add(abs);
     ordered.push(abs);
     return abs;
   };
 
   const normalizedPrimaries = [];
-  for (const p of ordered) normalizedPrimaries.push(p);
+  for (const p of ordered) {
+    normalizedPrimaries.push(p);
+  }
 
   for (const p of normalizedPrimaries) {
-    if (ordered.length >= MAX_SCAN_TARGETS) break;
-    if (!isInsideProject(p, baseCwd)) continue;
+    if (ordered.length >= MAX_SCAN_TARGETS) {
+      break;
+    }
+    if (!isInsideProject(p, baseCwd)) {
+      continue;
+    }
     const ext = path.extname(p).toLowerCase();
-    if (STYLE_EXTS.has(ext) || !UI_CODE_EXTS.has(ext)) continue;
+    if (STYLE_EXTS.has(ext) || !UI_CODE_EXTS.has(ext)) {
+      continue;
+    }
 
-    let content = '';
-    try { content = fs.readFileSync(p, 'utf-8'); } catch { /* unreadable primary */ }
+    let content = "";
+    try {
+      content = fs.readFileSync(p, "utf-8");
+    } catch {
+      /* unreadable primary */
+    }
 
     for (const imp of parseStaticStyleImports(content, p, projectCwd)) {
       add(imp);
-      if (ordered.length >= MAX_SCAN_TARGETS) break;
+      if (ordered.length >= MAX_SCAN_TARGETS) {
+        break;
+      }
     }
     for (const col of coLocatedStylesheets(p)) {
       add(col);
-      if (ordered.length >= MAX_SCAN_TARGETS) break;
+      if (ordered.length >= MAX_SCAN_TARGETS) {
+        break;
+      }
     }
   }
 
@@ -1225,24 +1649,35 @@ export function writeAuditLog(env, entry, cwd = process.cwd()) {
   // The event's project root (entry.cwd) when present, else the passed cwd. Both
   // config reads and relative log paths resolve against this, since the hook
   // process cwd can differ from the project being edited.
-  const baseCwd = entry && typeof entry.cwd === 'string' && entry.cwd ? entry.cwd : cwd;
+  const baseCwd =
+    entry && typeof entry.cwd === "string" && entry.cwd ? entry.cwd : cwd;
   // Env wins; otherwise fall back to the unified config's hook.auditLog path.
   let target = env?.IMPECCABLE_HOOK_LOG;
-  if (!target || typeof target !== 'string') {
-    try { target = readConfig(baseCwd).auditLog; } catch { target = null; }
+  if (!target || typeof target !== "string") {
+    try {
+      target = readConfig(baseCwd).auditLog;
+    } catch {
+      target = null;
+    }
   }
-  if (!target || typeof target !== 'string') return false;
+  if (!target || typeof target !== "string") {
+    return false;
+  }
   try {
     let expanded;
-    if (target.startsWith('~/')) {
-      expanded = path.join(process.env.HOME || process.env.USERPROFILE || '.', target.slice(2));
+    if (target.startsWith("~/")) {
+      expanded = path.join(
+        process.env.HOME || process.env.USERPROFILE || ".",
+        target.slice(2)
+      );
     } else if (path.isAbsolute(target)) {
       expanded = target;
     } else {
       expanded = path.resolve(baseCwd, target);
     }
     fs.mkdirSync(path.dirname(expanded), { recursive: true });
-    const line = JSON.stringify({ ts: new Date().toISOString(), ...entry }) + '\n';
+    const line =
+      JSON.stringify({ ts: new Date().toISOString(), ...entry }) + "\n";
     fs.appendFileSync(expanded, line);
     return true;
   } catch {
@@ -1251,16 +1686,28 @@ export function writeAuditLog(env, entry, cwd = process.cwd()) {
 }
 
 const DETECTOR_CANDIDATES = [
-  path.join(__dirname, 'detector', 'detect-antipatterns.mjs'),
-  path.join(__dirname, '..', '..', 'cli', 'engine', 'detect-antipatterns.mjs'),
-  path.join(__dirname, '..', '..', '..', 'cli', 'engine', 'detect-antipatterns.mjs'),
+  path.join(__dirname, "detector", "detect-antipatterns.mjs"),
+  path.join(__dirname, "..", "..", "cli", "engine", "detect-antipatterns.mjs"),
+  path.join(
+    __dirname,
+    "..",
+    "..",
+    "..",
+    "cli",
+    "engine",
+    "detect-antipatterns.mjs"
+  ),
 ];
 
 let detectorCache = null;
 export async function loadDetector(candidates = DETECTOR_CANDIDATES) {
-  if (detectorCache) return detectorCache;
+  if (detectorCache) {
+    return detectorCache;
+  }
   const found = candidates.find((c) => fs.existsSync(c));
-  if (!found) return null;
+  if (!found) {
+    return null;
+  }
   const mod = await import(pathToFileURL(found));
   detectorCache = {
     detectText: mod.detectText,
@@ -1301,7 +1748,8 @@ export function setDetectorForTesting(impl) {
 // session" so the model knows it's a re-mind, not a new finding.
 // ────────────────────────────────────────────────────────────────────────
 
-const STEER_LINE = 'That does not mean the design is good: keep following the project design system and the impeccable skill guidance.';
+const STEER_LINE =
+  "That does not mean the design is good: keep following the project design system and the impeccable skill guidance.";
 
 export function renderCleanAck(filePath, opts = {}) {
   const cwd = opts.cwd || process.cwd();
@@ -1314,18 +1762,22 @@ export function renderPendingAck(filePath, knownFindings, opts = {}) {
   const display = relativize(filePath, cwd);
   const count = knownFindings.length;
   // `knownFindings` here are the cache strings like "side-tab:3".
-  const sample = knownFindings.slice(0, 3).join(', ');
-  const more = count > 3 ? `, +${count - 3} more` : '';
+  const sample = knownFindings.slice(0, 3).join(", ");
+  const more = count > 3 ? `, +${count - 3} more` : "";
   return `${ENVELOPE_PREFIX} Design hook scanned ${display}. Still has ${count} finding(s) flagged earlier this session (${sample}${more}). Handle them before finalizing — the previous reminder still applies.`;
 }
 
 export function shouldEmitAckForFile(filePath) {
-  return ACK_EXTS.has(path.extname(String(filePath || '')).toLowerCase());
+  return ACK_EXTS.has(path.extname(String(filePath || "")).toLowerCase());
 }
 
 export function designSystemOptions(config, detector, projectCwd) {
-  if (config?.designSystem?.enabled === false) return {};
-  if (!detector || typeof detector.loadDesignSystemForCwd !== 'function') return {};
+  if (config?.designSystem?.enabled === false) {
+    return {};
+  }
+  if (!detector || typeof detector.loadDesignSystemForCwd !== "function") {
+    return {};
+  }
   try {
     const designSystem = detector.loadDesignSystemForCwd(projectCwd);
     return designSystem ? { designSystem } : {};
@@ -1335,7 +1787,9 @@ export function designSystemOptions(config, detector, projectCwd) {
 }
 
 export function appendDesignSystemNote(text, scanOptions) {
-  if (!text || !scanOptions?.designSystem?.mdNewerThanJson) return text;
+  if (!(text && scanOptions?.designSystem?.mdNewerThanJson)) {
+    return text;
+  }
   return `${text}\n\n${ENVELOPE_PREFIX} DESIGN.md is newer than .impeccable/design.json. Run /impeccable document to refresh the design-system sidecar.`;
 }
 
@@ -1355,15 +1809,15 @@ export function appendDesignSystemNote(text, scanOptions) {
 function directiveFooter(display, opts = {}) {
   const ignoreFileCommand = `/impeccable hooks ignore-file ${quoteCommandArg(display)}`;
   const fileIgnoreGuidance = opts.grouped
-    ? 'run `/impeccable hooks ignore-file <path>` for the specific file'
+    ? "run `/impeccable hooks ignore-file <path>` for the specific file"
     : `run \`${ignoreFileCommand}\``;
   return [
-    'Handle these before finalizing: fix findings that are real design problems, or explicitly classify contextually intentional findings as false positives. Acknowledge what you changed or why you are leaving a finding unchanged.',
-    '',
-    'Use context judgment before editing. A finding is not automatically a defect; literal or domain-appropriate motion, intentional demos or fixtures, documentation of bad design, and user-confirmed choices can be valid as-is.',
-    '',
+    "Handle these before finalizing: fix findings that are real design problems, or explicitly classify contextually intentional findings as false positives. Acknowledge what you changed or why you are leaving a finding unchanged.",
+    "",
+    "Use context judgment before editing. A finding is not automatically a defect; literal or domain-appropriate motion, intentional demos or fixtures, documentation of bad design, and user-confirmed choices can be valid as-is.",
+    "",
     `Do not change intentional design just to satisfy the hook, and do not silence a real finding with an inline ignore comment to skip fixing it. Suppress a finding only after the user explicitly confirms it is intentional. Prefer a config ignore (one reviewable place, the commands below); reach for an inline \`impeccable-disable <rule>\` comment only when the waiver must travel with a file that leaves the repo, such as an exported or standalone document. Prefer the narrowest persisted exception: run the exact \`/impeccable hooks ignore-value ... --shared\` command shown next to a value-specific finding. For \`overused-font\`, use \`ignore-value\` for a specific font and use \`/impeccable hooks ignore-rule overused-font --all-values\` only when the user asks to ignore overused fonts generally. For file-specific findings without an ignore-value command, ${fileIgnoreGuidance}; use \`/impeccable hooks ignore-rule <id>\` only when the user asks to suppress the whole non-value-specific rule. Run /impeccable audit for the full pass.`,
-  ].join('\n');
+  ].join("\n");
 }
 
 /**
@@ -1372,30 +1826,49 @@ function directiveFooter(display, opts = {}) {
  *
  * Never throws. All errors are converted to `exitCode: 0` + audit entry.
  */
-export async function runHook({ stdinJson, env = {}, cwd = process.cwd(), now = Date.now, detector } = {}) {
-  const audit = { ts: new Date(now()).toISOString(), event: 'PostToolUse' };
-  const result = (extra) => ({ exitCode: 0, stdout: '', audit: { ...audit, ...extra } });
+export async function runHook({
+  stdinJson,
+  env = {},
+  cwd = process.cwd(),
+  now = Date.now,
+  detector,
+} = {}) {
+  const audit = { ts: new Date(now()).toISOString(), event: "PostToolUse" };
+  const result = (extra) => ({
+    exitCode: 0,
+    stdout: "",
+    audit: { ...audit, ...extra },
+  });
 
   try {
     // Re-entrancy guard.
-    if (depthIsSet(env.IMPECCABLE_HOOK_DEPTH) || depthIsSet(env.CLAUDE_HOOK_DEPTH)) {
+    if (
+      depthIsSet(env.IMPECCABLE_HOOK_DEPTH) ||
+      depthIsSet(env.CLAUDE_HOOK_DEPTH)
+    ) {
       return result({ reentrant: true, durationMs: 0 });
     }
 
     if (truthy(env.IMPECCABLE_HOOK_DISABLED)) {
-      return result({ skipped: 'env-disabled', durationMs: 0 });
+      return result({ skipped: "env-disabled", durationMs: 0 });
     }
 
     const started = Date.now();
 
     let event;
     try {
-      event = typeof stdinJson === 'string' ? JSON.parse(stdinJson) : stdinJson;
+      event = typeof stdinJson === "string" ? JSON.parse(stdinJson) : stdinJson;
     } catch {
-      return result({ skipped: 'stdin-malformed', durationMs: Date.now() - started });
+      return result({
+        skipped: "stdin-malformed",
+        durationMs: Date.now() - started,
+      });
     }
-    if (!event || typeof event !== 'object') {
-      return result({ skipped: 'stdin-empty', durationMs: Date.now() - started });
+    if (!event || typeof event !== "object") {
+      return result({
+        skipped: "stdin-empty",
+        durationMs: Date.now() - started,
+      });
     }
 
     const harness = resolveHarness(env, event);
@@ -1404,27 +1877,41 @@ export async function runHook({ stdinJson, env = {}, cwd = process.cwd(), now = 
 
     const projectCwd = event.cwd || cwd;
     audit.cwd = projectCwd;
-    const primaryFiles = normalizeScanTargets(resolveTargetFiles(event, projectCwd), projectCwd);
+    const primaryFiles = normalizeScanTargets(
+      resolveTargetFiles(event, projectCwd),
+      projectCwd
+    );
     const primaryFileSet = new Set(primaryFiles);
     const targetFiles = expandScanTargets(primaryFiles, projectCwd);
     audit.session = event.session_id || null;
-    if (event.tool_name) audit.tool = event.tool_name;
+    if (event.tool_name) {
+      audit.tool = event.tool_name;
+    }
 
     if (targetFiles.length === 0) {
-      return result({ skipped: 'no-file-path', durationMs: Date.now() - started });
+      return result({
+        skipped: "no-file-path",
+        durationMs: Date.now() - started,
+      });
     }
 
     const config = readConfig(projectCwd);
     if (config.enabled === false) {
-      return result({ skipped: 'config-disabled', durationMs: Date.now() - started });
+      return result({
+        skipped: "config-disabled",
+        durationMs: Date.now() - started,
+      });
     }
 
     const cache = readCache(projectCwd);
-    const sessionId = event.session_id || 'unknown';
-    const det = detector || await loadDetector();
-    if (!det || typeof det.detectText !== 'function') {
+    const sessionId = event.session_id || "unknown";
+    const det = detector || (await loadDetector());
+    if (!det || typeof det.detectText !== "function") {
       persistCache(projectCwd, cache);
-      return result({ skipped: 'detector-missing', durationMs: Date.now() - started });
+      return result({
+        skipped: "detector-missing",
+        durationMs: Date.now() - started,
+      });
     }
     const scanOptions = designSystemOptions(config, det, projectCwd);
 
@@ -1433,35 +1920,38 @@ export async function runHook({ stdinJson, env = {}, cwd = process.cwd(), now = 
     const freshGroups = [];
     let suppressionWinner = null;
     let detectorThrewAny = false;
-    let lastSkip = 'no-scannable-file';
+    let lastSkip = "no-scannable-file";
     let suppressedHit = false;
 
     for (const filePath of targetFiles) {
       audit.file = filePath;
 
       if (hasPathTraversal(filePath) || SENSITIVE_PATH.test(filePath)) {
-        lastSkip = 'sensitive';
+        lastSkip = "sensitive";
         continue;
       }
       if (GENERATED_PATH.test(filePath)) {
-        lastSkip = 'generated';
+        lastSkip = "generated";
         continue;
       }
 
       const ext = path.extname(filePath).toLowerCase();
       audit.ext = ext;
       if (!ALLOWED_EXTS.has(ext)) {
-        lastSkip = 'extension';
+        lastSkip = "extension";
         continue;
       }
 
       const relForMatch = relativize(filePath, projectCwd);
-      if (matchesAnyGlob(relForMatch, config.ignoreFiles) || matchesAnyGlob(filePath, config.ignoreFiles)) {
-        lastSkip = 'config-ignore-file';
+      if (
+        matchesAnyGlob(relForMatch, config.ignoreFiles) ||
+        matchesAnyGlob(filePath, config.ignoreFiles)
+      ) {
+        lastSkip = "config-ignore-file";
         continue;
       }
       if (!fs.existsSync(filePath)) {
-        lastSkip = 'file-missing';
+        lastSkip = "file-missing";
         continue;
       }
 
@@ -1474,19 +1964,32 @@ export async function runHook({ stdinJson, env = {}, cwd = process.cwd(), now = 
           if (wasJustCrossed && !suppressionWinner) {
             suppressionWinner = { filePath };
           }
-          lastSkip = 'suppressed';
+          lastSkip = "suppressed";
           suppressedHit = true;
           continue;
         }
       }
 
-      const content = fs.readFileSync(filePath, 'utf-8');
+      const content = fs.readFileSync(filePath, "utf-8");
       let findings;
       let detectorThrew = false;
-      if ((ext === '.html' || ext === '.htm') && typeof det.detectHtml === 'function') {
-        try { findings = await det.detectHtml(filePath, scanOptions); } catch { findings = []; detectorThrew = true; }
+      if (
+        (ext === ".html" || ext === ".htm") &&
+        typeof det.detectHtml === "function"
+      ) {
+        try {
+          findings = await det.detectHtml(filePath, scanOptions);
+        } catch {
+          findings = [];
+          detectorThrew = true;
+        }
       } else {
-        try { findings = await det.detectText(content, filePath, scanOptions); } catch { findings = []; detectorThrew = true; }
+        try {
+          findings = await det.detectText(content, filePath, scanOptions);
+        } catch {
+          findings = [];
+          detectorThrew = true;
+        }
       }
 
       const filtered = filterFindings(findings || [], content, ext, config);
@@ -1506,7 +2009,9 @@ export async function runHook({ stdinJson, env = {}, cwd = process.cwd(), now = 
       }
 
       if (filtered.length > 0 && !pendingWinner) {
-        const known = (ensureFile(cache, sessionId, filePath).findings || []).slice();
+        const known = (
+          ensureFile(cache, sessionId, filePath).findings || []
+        ).slice();
         pendingWinner = { filePath, known };
       } else if (filtered.length === 0 && !cleanWinner) {
         cleanWinner = { filePath };
@@ -1517,13 +2022,16 @@ export async function runHook({ stdinJson, env = {}, cwd = process.cwd(), now = 
 
     if (freshGroups.length > 0) {
       const firstGroup = freshGroups[0];
-      const text = appendDesignSystemNote(renderGroupedTemplate(freshGroups, config, { cwd: projectCwd }), scanOptions);
+      const text = appendDesignSystemNote(
+        renderGroupedTemplate(freshGroups, config, { cwd: projectCwd }),
+        scanOptions
+      );
       const allFindings = freshGroups.flatMap((group) => group.findings);
       return {
         exitCode: 0,
-        stdout: payload(text, 'PostToolUse', harness),
+        stdout: payload(text, "PostToolUse", harness),
         emission: {
-          kind: 'fresh',
+          kind: "fresh",
           file: firstGroup.filePath,
           findings: firstGroup.findings,
           groups: freshGroups,
@@ -1541,24 +2049,41 @@ export async function runHook({ stdinJson, env = {}, cwd = process.cwd(), now = 
     }
 
     if (detectorThrewAny && !pendingWinner && !cleanWinner) {
-      return result({ emitted: false, error: 'detector-threw', durationMs: Date.now() - started });
+      return result({
+        emitted: false,
+        error: "detector-threw",
+        durationMs: Date.now() - started,
+      });
     }
 
     if (truthy(env.IMPECCABLE_HOOK_QUIET) || config.quiet === true) {
-      return result({ emitted: false, quiet: true, durationMs: Date.now() - started });
+      return result({
+        emitted: false,
+        quiet: true,
+        durationMs: Date.now() - started,
+      });
     }
 
     if (pendingWinner && shouldEmitAckForFile(pendingWinner.filePath)) {
-      const text = appendDesignSystemNote(renderPendingAck(pendingWinner.filePath, pendingWinner.known, { cwd: projectCwd }), scanOptions);
+      const text = appendDesignSystemNote(
+        renderPendingAck(pendingWinner.filePath, pendingWinner.known, {
+          cwd: projectCwd,
+        }),
+        scanOptions
+      );
       return {
         exitCode: 0,
-        stdout: payload(text, 'PostToolUse', harness),
-        emission: { kind: 'pending', file: pendingWinner.filePath, known: pendingWinner.known },
+        stdout: payload(text, "PostToolUse", harness),
+        emission: {
+          kind: "pending",
+          file: pendingWinner.filePath,
+          known: pendingWinner.known,
+        },
         audit: {
           ...audit,
           file: pendingWinner.filePath,
           emitted: true,
-          kind: 'pending',
+          kind: "pending",
           pending: pendingWinner.known.length,
           chars: text.length,
           durationMs: Date.now() - started,
@@ -1567,11 +2092,13 @@ export async function runHook({ stdinJson, env = {}, cwd = process.cwd(), now = 
     }
 
     if (suppressionWinner) {
-      const text = suppressionNotice(relativize(suppressionWinner.filePath, projectCwd));
+      const text = suppressionNotice(
+        relativize(suppressionWinner.filePath, projectCwd)
+      );
       return {
         exitCode: 0,
-        stdout: payload(text, 'PostToolUse', harness),
-        emission: { kind: 'suppression', file: suppressionWinner.filePath },
+        stdout: payload(text, "PostToolUse", harness),
+        emission: { kind: "suppression", file: suppressionWinner.filePath },
         audit: {
           ...audit,
           file: suppressionWinner.filePath,
@@ -1583,16 +2110,19 @@ export async function runHook({ stdinJson, env = {}, cwd = process.cwd(), now = 
     }
 
     if (cleanWinner && shouldEmitAckForFile(cleanWinner.filePath)) {
-      const text = appendDesignSystemNote(renderCleanAck(cleanWinner.filePath, { cwd: projectCwd }), scanOptions);
+      const text = appendDesignSystemNote(
+        renderCleanAck(cleanWinner.filePath, { cwd: projectCwd }),
+        scanOptions
+      );
       return {
         exitCode: 0,
-        stdout: payload(text, 'PostToolUse', harness),
-        emission: { kind: 'clean', file: cleanWinner.filePath },
+        stdout: payload(text, "PostToolUse", harness),
+        emission: { kind: "clean", file: cleanWinner.filePath },
         audit: {
           ...audit,
           file: cleanWinner.filePath,
           emitted: true,
-          kind: 'clean',
+          kind: "clean",
           chars: text.length,
           durationMs: Date.now() - started,
         },
@@ -1600,30 +2130,41 @@ export async function runHook({ stdinJson, env = {}, cwd = process.cwd(), now = 
     }
 
     if (pendingWinner || cleanWinner) {
-      return result({ emitted: false, skipped: 'non-ui-ack', durationMs: Date.now() - started });
+      return result({
+        emitted: false,
+        skipped: "non-ui-ack",
+        durationMs: Date.now() - started,
+      });
     }
 
     if (suppressedHit) {
-      return result({ suppressed: true, emitted: false, durationMs: Date.now() - started });
+      return result({
+        suppressed: true,
+        emitted: false,
+        durationMs: Date.now() - started,
+      });
     }
 
     return result({ skipped: lastSkip, durationMs: Date.now() - started });
   } catch (err) {
     return {
       exitCode: 0,
-      stdout: '',
-      audit: { ...audit, error: String(err && err.message ? err.message : err) },
+      stdout: "",
+      audit: {
+        ...audit,
+        error: String(err && err.message ? err.message : err),
+      },
     };
   }
 }
 
-export function payload(text, eventName = 'PostToolUse', harness = 'claude') {
-  if (harness === 'cursor') {
+export function payload(text, eventName = "PostToolUse", harness = "claude") {
+  if (harness === "cursor") {
     return JSON.stringify({ additional_context: text });
   }
   // GitHub Copilot's postToolUse hook injects context via a top-level
   // `additionalContext` string (alongside an optional `modifiedResult`).
-  if (harness === 'github') {
+  if (harness === "github") {
     return JSON.stringify({ additionalContext: text });
   }
   return JSON.stringify({

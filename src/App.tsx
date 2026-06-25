@@ -1,14 +1,14 @@
-import * as React from "react"
-import { Toaster } from "sonner"
-import { DailyLog } from "./components/daily-log"
-import { StatsPage } from "./components/stats-page"
-import { TabBar } from "./components/tab-bar"
-import { BackgroundPattern } from "./components/background-pattern"
-import type { Tab } from "./components/tab-bar"
+import * as React from "react";
+import { Toaster } from "sonner";
+import { BackgroundPattern } from "./components/background-pattern.tsx";
+import { DailyLog } from "./components/daily-log.tsx";
+import { StatsPage } from "./components/stats-page.tsx";
+import type { Tab } from "./components/tab-bar.tsx";
+import { TabBar } from "./components/tab-bar.tsx";
 
 export default function App() {
-  const [date, setDate] = React.useState(new Date())
-  const [tab, setTab] = React.useState<Tab>("log")
+  const [date, setDate] = React.useState(new Date());
+  const [tab, setTab] = React.useState<Tab>("log");
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col">
@@ -23,6 +23,7 @@ export default function App() {
 
       <Toaster
         position="bottom-center"
+        style={{ bottom: "80px" }}
         toastOptions={{
           style: {
             background: "var(--color-card)",
@@ -35,8 +36,7 @@ export default function App() {
             fontSize: "0.875rem",
           },
         }}
-        style={{ bottom: "80px" }}
       />
     </div>
-  )
+  );
 }

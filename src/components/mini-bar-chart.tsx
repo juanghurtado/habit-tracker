@@ -1,42 +1,44 @@
-import { useMemo } from "react"
-import type { DailyCount } from "../lib/compute-stats"
-import { cn } from "../lib/utils"
+import { useMemo } from "react";
+import type { DailyCount } from "../lib/compute-stats.ts";
+import { cn } from "../lib/utils.ts";
 
 interface MiniBarChartProps {
-  data: DailyCount[]
-  color: string
-  maxCount?: number
+  color: string;
+  data: DailyCount[];
+  maxCount?: number;
 }
 
 export function MiniBarChart({ data, color, maxCount }: MiniBarChartProps) {
-  const max = maxCount ?? Math.max(...data.map((d) => d.count), 1)
+  const max = maxCount ?? Math.max(...data.map((d) => d.count), 1);
 
   const weekBoundaries = useMemo(() => {
-    const boundaries: number[] = []
+    const boundaries: number[] = [];
     for (let i = 1; i < data.length; i++) {
-      const prev = new Date(data[i - 1].date + "T00:00:00")
-      const curr = new Date(data[i].date + "T00:00:00")
+      const prev = new Date(data[i - 1].date + "T00:00:00");
+      const curr = new Date(data[i].date + "T00:00:00");
       if (prev.getDay() === 6 && curr.getDay() === 0) {
-        boundaries.push(i)
+        boundaries.push(i);
       }
     }
-    return boundaries
-  }, [data])
+    return boundaries;
+  }, [data]);
 
   return (
     <div
       className="flex items-end gap-[2px]"
-      style={{ borderBottom: `1px solid color-mix(in oklch, ${color} 25%, transparent)` }}
+      style={{
+        borderBottom: `1px solid color-mix(in oklch, ${color} 25%, transparent)`,
+      }}
     >
       {data.map((day, index) => {
-        const height = Math.max((day.count / max) * 100, day.count > 0 ? 8 : 0)
+        const height = Math.max((day.count / max) * 100, day.count > 0 ? 8 : 0);
         return (
           <div
-            key={day.date}
             className={cn(
               "relative flex flex-1 items-end transition-all duration-300",
               weekBoundaries.includes(index) && "ml-[3px]"
             )}
+            key={day.date}
             style={{ height: 36 }}
           >
             <div
@@ -49,8 +51,8 @@ export function MiniBarChart({ data, color, maxCount }: MiniBarChartProps) {
               }}
             />
           </div>
-        )
+        );
       })}
     </div>
-  )
+  );
 }

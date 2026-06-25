@@ -1,9 +1,15 @@
-import { useState, useMemo } from "react"
-import { CheckCheck, Flame, Calendar, CalendarRange, BarChart3 } from "lucide-react"
-import { useHabits } from "../hooks/use-habits"
-import { computeStats } from "../lib/compute-stats"
-import { HabitStatCard } from "./habit-stat-card"
-import { cn } from "../lib/utils"
+import {
+  BarChart3,
+  Calendar,
+  CalendarRange,
+  CheckCheck,
+  Flame,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import { useHabits } from "../hooks/use-habits.ts";
+import { computeStats } from "../lib/compute-stats.ts";
+import { cn } from "../lib/utils.ts";
+import { HabitStatCard } from "./habit-stat-card.tsx";
 
 function SummaryStat({
   icon: Icon,
@@ -11,10 +17,10 @@ function SummaryStat({
   label,
   color,
 }: {
-  icon: React.ComponentType<{ className?: string }>
-  value: string | number
-  label: string
-  color?: string
+  icon: React.ComponentType<{ className?: string }>;
+  value: string | number;
+  label: string;
+  color?: string;
 }) {
   return (
     <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-3">
@@ -30,59 +36,60 @@ function SummaryStat({
         <Icon className="size-5" />
       </div>
       <div className="min-w-0">
-        <div className="text-xl font-bold leading-none">{value}</div>
-        <div className="mt-0.5 text-xs text-muted-foreground">{label}</div>
+        <div className="font-bold text-xl leading-none">{value}</div>
+        <div className="mt-0.5 text-muted-foreground text-xs">{label}</div>
       </div>
     </div>
-  )
+  );
 }
 
 export function StatsPage() {
-  const { habits, completions } = useHabits()
-  const [windowDays, setWindowDays] = useState(7)
+  const { habits, completions } = useHabits();
+  const [windowDays, setWindowDays] = useState(7);
 
-  const stats = useMemo(
+const stats = useMemo(
     () => computeStats(habits, completions, windowDays),
-    [habits, completions, windowDays]
-  )
+    [habits, completions, windowDays],
+  );
 
   const summaryStats = useMemo(() => {
-    const totalCompletions = stats.goodHabits.reduce((s, h) => s + h.totalInWindow, 0) +
-      stats.badHabits.reduce((s, h) => s + h.totalInWindow, 0)
+    const totalCompletions =
+      stats.goodHabits.reduce((s, h) => s + h.totalInWindow, 0) +
+      stats.badHabits.reduce((s, h) => s + h.totalInWindow, 0);
     const bestStreak = Math.max(
       ...stats.goodHabits.map((h) => h.currentStreak),
       ...stats.badHabits.map((h) => h.currentStreak),
       0
-    )
+    );
 
-    return { totalCompletions, bestStreak }
-  }, [stats])
+    return { totalCompletions, bestStreak };
+  }, [stats]);
 
   return (
     <div className="flex flex-col gap-5 px-4 pt-5 pb-28">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Stats</h1>
+        <h1 className="font-bold text-xl">Stats</h1>
         <div className="inline-flex items-center gap-1 rounded-full border border-border bg-card p-0.5 shadow-sm">
           <button
-            onClick={() => setWindowDays(7)}
             className={cn(
-              "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-150 cursor-pointer select-none active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+              "flex cursor-pointer select-none items-center gap-1.5 rounded-full px-3 py-1.5 font-medium text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-95",
               windowDays === 7
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hoverable:hover:text-foreground"
             )}
+            onClick={() => setWindowDays(7)}
           >
             <Calendar className="size-3.5" />
             7d
           </button>
           <button
-            onClick={() => setWindowDays(30)}
             className={cn(
-              "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-150 cursor-pointer select-none active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+              "flex cursor-pointer select-none items-center gap-1.5 rounded-full px-3 py-1.5 font-medium text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-95",
               windowDays === 30
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hoverable:hover:text-foreground"
             )}
+            onClick={() => setWindowDays(30)}
           >
             <CalendarRange className="size-3.5" />
             30d
@@ -95,31 +102,38 @@ export function StatsPage() {
           <div className="mb-5 flex size-20 items-center justify-center rounded-[1.25rem] bg-muted">
             <BarChart3 className="size-10 text-muted-foreground" />
           </div>
-          <h2 className="text-lg font-bold">No data yet</h2>
-          <p className="mt-1.5 max-w-[20ch] text-sm text-muted-foreground">
-            Start tracking habits from the Log tab, then come here to see your progress.
+          <h2 className="font-bold text-lg">No data yet</h2>
+          <p className="mt-1.5 max-w-[20ch] text-muted-foreground text-sm">
+            Start tracking habits from the Log tab, then come here to see your
+            progress.
           </p>
         </div>
       ) : (
         <>
           <div className="grid grid-cols-2 gap-2.5">
             <SummaryStat
-              icon={CheckCheck}
-              value={summaryStats.totalCompletions}
-              label="this period"
               color="var(--color-primary)"
+              icon={CheckCheck}
+              label="this period"
+              value={summaryStats.totalCompletions}
             />
             <SummaryStat
-              icon={Flame}
-              value={summaryStats.bestStreak > 0 ? `${summaryStats.bestStreak}d` : "—"}
-              label="best streak"
               color="var(--color-accent)"
+              icon={Flame}
+              label="best streak"
+              value={
+                summaryStats.bestStreak > 0
+                  ? `${summaryStats.bestStreak}d`
+                  : "—"
+              }
             />
           </div>
 
           {stats.goodHabits.length > 0 && (
             <section className="space-y-3">
-              <h2 className="text-sm font-bold text-muted-foreground">Good habits</h2>
+              <h2 className="font-bold text-muted-foreground text-sm">
+                Good habits
+              </h2>
               {stats.goodHabits.map((h) => (
                 <HabitStatCard key={h.habitId} stats={h} />
               ))}
@@ -128,7 +142,9 @@ export function StatsPage() {
 
           {stats.badHabits.length > 0 && (
             <section className="space-y-3">
-              <h2 className="text-sm font-bold text-muted-foreground">Bad habits</h2>
+              <h2 className="font-bold text-muted-foreground text-sm">
+                Bad habits
+              </h2>
               {stats.badHabits.map((h) => (
                 <HabitStatCard key={h.habitId} stats={h} />
               ))}
@@ -137,5 +153,5 @@ export function StatsPage() {
         </>
       )}
     </div>
-  )
+  );
 }

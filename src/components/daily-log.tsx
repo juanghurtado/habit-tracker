@@ -1,48 +1,66 @@
-import { Plus, Smile, Frown, MoreVertical, Undo2, Pencil, Trash2 } from "lucide-react"
-import { toast } from "sonner"
-import confetti from "canvas-confetti"
-import { useHabits } from "../hooks/use-habits"
-import { getIcon } from "../lib/icons"
-import { getCompletionsForHabitOnDate } from "../lib/storage"
-import { getRandomToastMessage } from "../lib/toast-messages"
+import confetti from "canvas-confetti";
+import {
+  Frown,
+  MoreVertical,
+  Pencil,
+  Plus,
+  Smile,
+  Trash2,
+  Undo2,
+} from "lucide-react";
+import * as React from "react";
+import { toast } from "sonner";
+import { useHabits } from "../hooks/use-habits.ts";
+import { getIcon } from "../lib/icons.ts";
+import { getCompletionsForHabitOnDate } from "../lib/storage.ts";
+import { getRandomToastMessage } from "../lib/toast-messages.ts";
+import type { Habit } from "../types.ts";
+import { AddHabitSheet } from "./add-habit-sheet.tsx";
+import { DateNavigation } from "./date-navigation.tsx";
+import { EditHabitSheet } from "./edit-habit-sheet.tsx";
+import { Button } from "./ui/button.tsx";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu"
-import { DateNavigation } from "./date-navigation"
-import { AddHabitSheet } from "./add-habit-sheet"
-import { EditHabitSheet } from "./edit-habit-sheet"
-import { Button } from "./ui/button"
-import type { Habit } from "../types"
-import * as React from "react"
+} from "./ui/dropdown-menu.tsx";
 
 interface DailyLogProps {
-  date: Date
-  onDateChange: (date: Date) => void
+  date: Date;
+  onDateChange: (date: Date) => void;
 }
 
 export function DailyLog({ date, onDateChange }: DailyLogProps) {
-  const [addOpen, setAddOpen] = React.useState(false)
-  const [editHabit, setEditHabit] = React.useState<Habit | null>(null)
+  const [addOpen, setAddOpen] = React.useState(false);
+  const [editHabit, setEditHabit] = React.useState<Habit | null>(null);
 
-  const { habits, completions, addHabit, editHabit: edit, deleteHabit, addCompletion, undoLastCompletion } = useHabits()
+  const {
+    habits,
+    completions,
+    addHabit,
+    editHabit: edit,
+    deleteHabit,
+    addCompletion,
+    undoLastCompletion,
+  } = useHabits();
 
   function handleComplete(habitId: string) {
-    addCompletion(habitId, date)
-    const habit = habits.find((h) => h.id === habitId)
-    if (!habit) return
+    addCompletion(habitId, date);
+    const habit = habits.find((h) => h.id === habitId);
+    if (!habit) {
+      return;
+    }
 
-    const message = getRandomToastMessage(habit.type, habit.name)
-    const Icon = habit.type === "good" ? Smile : Frown
+    const message = getRandomToastMessage(habit.type, habit.name);
+    const Icon = habit.type === "good" ? Smile : Frown;
 
     if (habit.type === "good") {
       confetti({
         particleCount: 60,
         spread: 80,
         origin: { y: 0.6 },
-      })
+      });
     }
 
     toast(message, {
@@ -56,12 +74,12 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
         onClick: () => undoLastCompletion(habitId),
       },
       duration: 4000,
-    })
+    });
   }
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="sticky top-0 z-10 px-4 pb-4 pt-6">
+      <header className="sticky top-0 z-10 px-4 pt-6 pb-4">
         <DateNavigation date={date} onDateChange={onDateChange} />
       </header>
 
@@ -71,30 +89,40 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
             <div className="mb-6 flex size-24 items-center justify-center rounded-3xl bg-gradient-to-br from-primary/20 to-secondary/15">
               <Plus className="size-10 text-primary" />
             </div>
-            <h2 className="text-2xl font-bold">Your habits start here</h2>
-            <p className="mt-2 max-w-xs text-sm leading-relaxed text-muted-foreground">
+            <h2 className="font-bold text-2xl">Your habits start here</h2>
+            <p className="mt-2 max-w-xs text-muted-foreground text-sm leading-relaxed">
               Tap the shiny + button below to add your first habit.
             </p>
           </div>
         ) : (
           <div className="mt-3 grid grid-cols-2 gap-3">
             {habits.map((habit) => {
-              const habitCompletions = getCompletionsForHabitOnDate(completions, habit.id, date)
-              const count = habitCompletions.length
-              const Icon = getIcon(habit.icon)
-return (
-                <div key={habit.id} className="relative h-full">
+              const habitCompletions = getCompletionsForHabitOnDate(
+                completions,
+                habit.id,
+                date
+              );
+              const count = habitCompletions.length;
+              const Icon = getIcon(habit.icon);
+              return (
+                <div className="relative h-full" key={habit.id}>
                   <button
+                    className="flex h-full w-full flex-col items-center justify-center rounded-2xl p-5 text-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] active:brightness-90"
                     onClick={() => handleComplete(habit.id)}
-                    className="flex h-full w-full flex-col items-center justify-center rounded-2xl p-5 text-center transition-all duration-150 active:scale-[0.97] active:brightness-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    style={{ backgroundColor: `color-mix(in oklch, ${habit.color} 22%, white)` }}
+                    style={{
+                      backgroundColor: `color-mix(in oklch, ${habit.color} 22%, white)`,
+                    }}
                   >
                     {count > 0 && (
                       <div
-                        className="absolute left-2.5 top-2.5 flex size-6 items-center justify-center rounded-full text-xs font-bold text-white shadow-sm"
+                        className="absolute top-2.5 left-2.5 flex size-6 items-center justify-center rounded-full font-bold text-white text-xs shadow-sm"
                         style={{ backgroundColor: habit.color }}
                       >
-                        {habit.type === "good" ? <Smile className="size-4" /> : <Frown className="size-4" />}
+                        {habit.type === "good" ? (
+                          <Smile className="size-4" />
+                        ) : (
+                          <Frown className="size-4" />
+                        )}
                       </div>
                     )}
                     <div
@@ -103,26 +131,37 @@ return (
                     >
                       <Icon className="size-6" />
                     </div>
-                    <h3 className="text-sm font-bold leading-tight">{habit.name}</h3>
-                    <p className="mt-0.5 text-xs font-medium text-muted-foreground">
-                      {count === 0 ? <span className="italic">Not yet today</span> : <>{count} {count === 1 ? "time" : "times"}</>}
+                    <h3 className="font-bold text-sm leading-tight">
+                      {habit.name}
+                    </h3>
+                    <p className="mt-0.5 font-medium text-muted-foreground text-xs">
+                      {count === 0 ? (
+                        <span className="italic">Not yet today</span>
+                      ) : (
+                        <>
+                          {count} {count === 1 ? "time" : "times"}
+                        </>
+                      )}
                     </p>
                   </button>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <div
+                        className="absolute top-1.5 right-1.5 z-10 flex size-8 cursor-pointer items-center justify-center rounded-xl transition-all duration-150 hoverable:hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-90 active:bg-black/10 data-[state=open]:bg-black/10"
                         onClick={(e) => e.stopPropagation()}
-                        className="absolute right-1.5 top-1.5 z-10 flex size-8 cursor-pointer items-center justify-center rounded-xl transition-all duration-150 hoverable:hover:bg-black/5 active:scale-90 active:bg-black/10 data-[state=open]:bg-black/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       >
-                        <MoreVertical className="size-5" style={{ color: habit.color }} />
+                        <MoreVertical
+                          className="size-5"
+                          style={{ color: habit.color }}
+                        />
                       </div>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       {count > 0 && (
                         <DropdownMenuItem
                           onClick={(e) => {
-                            e.stopPropagation()
-                            undoLastCompletion(habit.id)
+                            e.stopPropagation();
+                            undoLastCompletion(habit.id);
                           }}
                         >
                           <Undo2 className="size-4" />
@@ -131,19 +170,19 @@ return (
                       )}
                       <DropdownMenuItem
                         onClick={(e) => {
-                          e.stopPropagation()
-                          setEditHabit(habit)
+                          e.stopPropagation();
+                          setEditHabit(habit);
                         }}
                       >
                         <Pencil className="size-4" />
                         Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          deleteHabit(habit.id)
-                        }}
                         className="text-destructive focus:text-destructive"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteHabit(habit.id);
+                        }}
                       >
                         <Trash2 className="size-4" />
                         Delete
@@ -151,33 +190,41 @@ return (
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-              )
+              );
             })}
           </div>
         )}
       </main>
 
-      <div className="fixed bottom-6 right-6 z-20">
+      <div className="fixed right-6 bottom-6 z-20">
         <Button
-          variant="default"
-          size="xl"
           className="h-16 w-16 rounded-full p-0 shadow-xl"
           onClick={() => setAddOpen(true)}
+          size="xl"
+          variant="default"
         >
           <Plus className="size-8" />
         </Button>
       </div>
 
-      <AddHabitSheet open={addOpen} onOpenChange={setAddOpen} onSave={addHabit} />
+      <AddHabitSheet
+        onOpenChange={setAddOpen}
+        onSave={addHabit}
+        open={addOpen}
+      />
 
       <EditHabitSheet
         habit={editHabit}
-        open={editHabit !== null}
-        onOpenChange={(open) => { if (!open) setEditHabit(null) }}
-        onSave={(id, name, icon, type, color, buttonLabel) => {
-          edit(id, name, icon, type, color, buttonLabel)
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditHabit(null);
+          }
         }}
+        onSave={(id, name, icon, type, color, buttonLabel) => {
+          edit(id, name, icon, type, color, buttonLabel);
+        }}
+        open={editHabit !== null}
       />
     </div>
-  )
+  );
 }
