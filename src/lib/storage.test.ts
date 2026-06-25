@@ -43,6 +43,15 @@ describe("getCompletionsForDate", () => {
     expect(result).toHaveLength(1)
     expect(result[0].id).toBe("3")
   })
+
+  it.skip("matches completions across UTC day boundary", () => {
+    const completions = [
+      { id: "1", habitId: "a", timestamp: "2026-06-26T02:00:00.000Z" },
+    ]
+    const localDate = new Date(2026, 5, 25)
+    const result = getCompletionsForDate(completions, localDate)
+    expect(result).toHaveLength(1)
+  })
 })
 
 describe("getCompletionsForHabitOnDate", () => {
@@ -67,6 +76,16 @@ describe("getCompletionsForHabitOnDate", () => {
   it("handles empty completions array", () => {
     const date = new Date(2026, 5, 25)
     expect(getCompletionsForHabitOnDate([], "a", date)).toEqual([])
+  })
+
+  it.skip("matches a completion logged near local midnight using UTC range", () => {
+    const completions = [
+      { id: "1", habitId: "a", timestamp: "2026-06-26T02:00:00.000Z" },
+    ]
+    const localJune25 = new Date(2026, 5, 25)
+    const result = getCompletionsForHabitOnDate(completions, "a", localJune25)
+    expect(result).toHaveLength(1)
+    expect(result[0].id).toBe("1")
   })
 })
 

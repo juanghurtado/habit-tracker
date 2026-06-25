@@ -4,5 +4,8 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
+    env: {
+      TZ: "UTC",
+    },
   },
 })

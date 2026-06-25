@@ -73,12 +73,24 @@ export function formatDateKey(date: Date): string {
   return `${y}-${m}-${d}`
 }
 
+export function formatUTCDateKey(date: Date): string {
+  const y = date.getUTCFullYear()
+  const m = String(date.getUTCMonth() + 1).padStart(2, "0")
+  const d = String(date.getUTCDate()).padStart(2, "0")
+  return `${y}-${m}-${d}`
+}
+
 export function getCompletionsForDate(
   completions: Completion[],
   date: Date
 ): Completion[] {
-  const key = formatDateKey(date)
-  return completions.filter((c) => c.timestamp.startsWith(key))
+  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  const end = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
+  const startStr = start.toISOString()
+  const endStr = end.toISOString()
+  return completions.filter(
+    (c) => c.timestamp >= startStr && c.timestamp < endStr
+  )
 }
 
 export function getCompletionsForHabitOnDate(
@@ -86,8 +98,11 @@ export function getCompletionsForHabitOnDate(
   habitId: string,
   date: Date
 ): Completion[] {
-  const key = formatDateKey(date)
+  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  const end = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
+  const startStr = start.toISOString()
+  const endStr = end.toISOString()
   return completions.filter(
-    (c) => c.habitId === habitId && c.timestamp.startsWith(key)
+    (c) => c.habitId === habitId && c.timestamp >= startStr && c.timestamp < endStr
   )
 }
