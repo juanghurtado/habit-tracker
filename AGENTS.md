@@ -24,6 +24,10 @@ This project uses **Ultracite**, a zero-config preset that enforces strict code 
 
 Biome (the underlying engine) provides robust linting and formatting. Most issues are automatically fixable.
 
+## Agent Harness Hook
+
+**Always run the linter after editing files.** After every `edit`, `write`, or `apply_patch` tool use, run `npm exec -- ultracite check` and fix any issues before continuing. If `ultracite check` reports fixable issues, run `npm exec -- ultracite fix` first, then re-run `check` to confirm everything passes.
+
 ---
 
 ## Core Principles
@@ -133,5 +137,3 @@ Biome's linter will catch most issues automatically. Focus your attention on:
 6. **Documentation** - Add comments for complex logic, but prefer self-documenting code
 
 ---
-
-Most formatting and common issues are automatically fixed by Biome. Run `npm exec -- ultracite fix` before committing to ensure compliance.
