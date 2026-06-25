@@ -20,6 +20,10 @@ _Avoid_: Accent, theme, tag
 The action text on a Habit's primary completion button. Assigned randomly from a curated list matching the Habit's type at creation time. Good habits get affirmative verbs ("Done!", "Nailed it!"); bad habits get softer acknowledgements ("Oops...", "Skipped"). Can be changed during editing.
 _Avoid_: CTA, verb, action text
 
+**Toast Message**:
+A randomly selected message shown in a Sonner toast when the user completes a Habit. The message pool is separate per Habit type — good habits get celebratory phrases ("Crushed \"{name}\" today!"); bad habits get resilient acknowledgements ("\"{name}\" — slipped today."). The toast also shows a type-appropriate icon (Smile for good, Frown for bad) and a left border in the Habit's color. Good-habit toasts trigger a confetti burst; bad-habit toasts play a gentle wobble animation.
+_Avoid_: Notification, alert, popup
+
 **Stats**:
 The aggregate view of Habit data over rolling time windows, presented separately from the daily log. Shows totals, rates, and streaks. Always computed relative to today, not the selected date.
 _Avoid_: Dashboard, analytics, reports

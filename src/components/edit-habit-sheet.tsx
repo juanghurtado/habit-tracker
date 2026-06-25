@@ -8,6 +8,8 @@ import {
 import { Button } from "./ui/button"
 import { IconPicker } from "./icon-picker"
 import { ColorPicker } from "./color-picker"
+import { getRandomColor } from "../lib/colors"
+import { getRandomLabel } from "../lib/button-labels"
 import type { Habit } from "../types"
 
 interface EditHabitSheetProps {
@@ -61,7 +63,11 @@ function FormContent({ habit, onSave, onOpenChange }: {
         </label>
         <div className="flex gap-2">
           <button
-            onClick={() => { setType("good") }}
+            onClick={() => {
+              setType("good")
+              setColor(getRandomColor("good"))
+              setButtonLabel(getRandomLabel("good"))
+            }}
             className={`flex-1 rounded-xl px-4 py-3 text-center text-sm font-medium transition-all active:scale-95 ${
               type === "good"
                 ? "bg-primary text-primary-foreground shadow-sm"
@@ -71,7 +77,11 @@ function FormContent({ habit, onSave, onOpenChange }: {
             Good Habit
           </button>
           <button
-            onClick={() => { setType("bad") }}
+            onClick={() => {
+              setType("bad")
+              setColor(getRandomColor("bad"))
+              setButtonLabel(getRandomLabel("bad"))
+            }}
             className={`flex-1 rounded-xl px-4 py-3 text-center text-sm font-medium transition-all active:scale-95 ${
               type === "bad"
                 ? "bg-destructive text-destructive-foreground shadow-sm"

@@ -1,8 +1,16 @@
-import { Plus, Smile, Frown } from "lucide-react"
+import { Plus, Smile, Frown, MoreVertical, Undo2, Pencil, Trash2 } from "lucide-react"
 import { toast } from "sonner"
+import confetti from "canvas-confetti"
 import { useHabits } from "../hooks/use-habits"
 import { getIcon } from "../lib/icons"
 import { getCompletionsForHabitOnDate } from "../lib/storage"
+import { getRandomToastMessage } from "../lib/toast-messages"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu"
 import { DateNavigation } from "./date-navigation"
 import { AddHabitSheet } from "./add-habit-sheet"
 import { EditHabitSheet } from "./edit-habit-sheet"
@@ -24,7 +32,25 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
   function handleComplete(habitId: string) {
     addCompletion(habitId, date)
     const habit = habits.find((h) => h.id === habitId)
-    toast(habit ? `${habit.name} logged!` : "Logged!", {
+    if (!habit) return
+
+    const message = getRandomToastMessage(habit.type, habit.name)
+    const Icon = habit.type === "good" ? Smile : Frown
+
+    if (habit.type === "good") {
+      confetti({
+        particleCount: 60,
+        spread: 80,
+        origin: { y: 0.6 },
+      })
+    }
+
+    toast(message, {
+      icon: <Icon className="size-4" style={{ color: habit.color }} />,
+      style: {
+        background: `color-mix(in oklch, ${habit.color} 22%, white)`,
+      },
+      className: habit.type === "bad" ? "ToastWobble" : undefined,
       action: {
         label: "Undo",
         onClick: () => undoLastCompletion(habitId),
@@ -56,32 +82,75 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
               const habitCompletions = getCompletionsForHabitOnDate(completions, habit.id, date)
               const count = habitCompletions.length
               const Icon = getIcon(habit.icon)
-              return (
-                <button
-                  key={habit.id}
-                  onClick={() => handleComplete(habit.id)}
-                  className="group relative flex flex-col items-center justify-center rounded-2xl p-5 text-center transition-all active:scale-[0.96]"
-                  style={{ backgroundColor: `color-mix(in oklch, ${habit.color} 22%, white)` }}
-                >
-                  {count > 0 && (
+return (
+                <div key={habit.id} className="relative h-full">
+                  <button
+                    onClick={() => handleComplete(habit.id)}
+                    className="flex h-full w-full flex-col items-center justify-center rounded-2xl p-5 text-center transition-all active:scale-[0.96]"
+                    style={{ backgroundColor: `color-mix(in oklch, ${habit.color} 22%, white)` }}
+                  >
+                    {count > 0 && (
+                      <div
+                        className="absolute left-2.5 top-2.5 flex size-6 items-center justify-center rounded-full text-xs font-bold text-white shadow-sm"
+                        style={{ backgroundColor: habit.color }}
+                      >
+                        {habit.type === "good" ? <Smile className="size-4" /> : <Frown className="size-4" />}
+                      </div>
+                    )}
                     <div
-                      className="absolute right-2.5 top-2.5 flex size-6 items-center justify-center rounded-full text-xs font-bold text-white shadow-sm"
+                      className="mb-2 flex size-12 items-center justify-center rounded-2xl text-white transition-transform hover:scale-110"
                       style={{ backgroundColor: habit.color }}
                     >
-                      {habit.type === "good" ? <Smile className="size-4" /> : <Frown className="size-4" />}
+                      <Icon className="size-6" />
                     </div>
-                  )}
-                  <div
-                    className="mb-2 flex size-12 items-center justify-center rounded-2xl text-white transition-transform group-hover:scale-110"
-                    style={{ backgroundColor: habit.color }}
-                  >
-                    <Icon className="size-6" />
-                  </div>
-                  <h3 className="text-sm font-bold leading-tight">{habit.name}</h3>
-                  <p className="mt-0.5 text-xs font-medium text-muted-foreground">
-                    {count === 0 ? <span className="italic">Not yet today</span> : <>{count} {count === 1 ? "time" : "times"}</>}
-                  </p>
-                </button>
+                    <h3 className="text-sm font-bold leading-tight">{habit.name}</h3>
+                    <p className="mt-0.5 text-xs font-medium text-muted-foreground">
+                      {count === 0 ? <span className="italic">Not yet today</span> : <>{count} {count === 1 ? "time" : "times"}</>}
+                    </p>
+                  </button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="absolute right-1.5 top-1.5 z-10 flex size-8 cursor-pointer items-center justify-center rounded-xl transition-colors hover:bg-black/5"
+                      >
+                        <MoreVertical className="size-5" style={{ color: habit.color }} />
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {count > 0 && (
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            undoLastCompletion(habit.id)
+                          }}
+                        >
+                          <Undo2 className="size-4" />
+                          Undo last
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setEditHabit(habit)
+                        }}
+                      >
+                        <Pencil className="size-4" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          deleteHabit(habit.id)
+                        }}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="size-4" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               )
             })}
           </div>
