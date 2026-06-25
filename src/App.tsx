@@ -78,8 +78,8 @@ export default function App() {
         habit={editHabit}
         open={editHabit !== null}
         onOpenChange={(open) => { if (!open) setEditHabit(null) }}
-        onSave={(id, name, icon, type) => {
-          edit(id, name, icon, type)
+        onSave={(id, name, icon, type, color, buttonLabel) => {
+          edit(id, name, icon, type, color, buttonLabel)
         }}
       />
 

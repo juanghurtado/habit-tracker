@@ -5,6 +5,8 @@ export interface Habit {
   name: string
   icon: string
   type: HabitType
+  color: string
+  buttonLabel: string
   createdAt: string
 }
 

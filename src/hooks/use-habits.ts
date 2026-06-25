@@ -39,15 +39,15 @@ export function useHabits() {
   const habits = useSyncExternalStore(subscribe, getSnapshotHabits)
   const completions = useSyncExternalStore(subscribe, getSnapshotCompletions)
 
-  const addHabit = useCallback((name: string, icon: string, type: "good" | "bad") => {
-    const updated = [...loadHabits(), createHabit(name, icon, type)]
+  const addHabit = useCallback((name: string, icon: string, type: "good" | "bad", color: string, buttonLabel: string) => {
+    const updated = [...loadHabits(), createHabit(name, icon, type, color, buttonLabel)]
     saveHabits(updated)
     notifyListeners()
   }, [])
 
-  const editHabit = useCallback((id: string, name: string, icon: string, type: "good" | "bad") => {
+  const editHabit = useCallback((id: string, name: string, icon: string, type: "good" | "bad", color: string, buttonLabel: string) => {
     const updated = loadHabits().map((h) =>
-      h.id === id ? { ...h, name, icon, type } : h
+      h.id === id ? { ...h, name, icon, type, color, buttonLabel } : h
     )
     saveHabits(updated)
     notifyListeners()

@@ -1,4 +1,6 @@
 import type { Habit, Completion } from "../types"
+import { getRandomColor } from "./colors"
+import { getRandomLabel } from "./button-labels"
 
 const HABITS_KEY = "habit-tracker-habits"
 const COMPLETIONS_KEY = "habit-tracker-completions"
@@ -10,7 +12,12 @@ function generateId(): string {
 export function loadHabits(): Habit[] {
   try {
     const raw = localStorage.getItem(HABITS_KEY)
-    return raw ? JSON.parse(raw) : []
+    const habits: Habit[] = raw ? JSON.parse(raw) : []
+    return habits.map((h) => ({
+      ...h,
+      color: h.color ?? getRandomColor(h.type),
+      buttonLabel: h.buttonLabel ?? getRandomLabel(h.type),
+    }))
   } catch {
     return []
   }
@@ -36,13 +43,17 @@ export function saveCompletions(completions: Completion[]): void {
 export function createHabit(
   name: string,
   icon: string,
-  type: "good" | "bad"
+  type: "good" | "bad",
+  color: string,
+  buttonLabel: string
 ): Habit {
   return {
     id: generateId(),
     name,
     icon,
     type,
+    color,
+    buttonLabel,
     createdAt: new Date().toISOString(),
   }
 }

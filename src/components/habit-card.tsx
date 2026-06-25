@@ -1,6 +1,5 @@
 import type { Habit, Completion } from "../types"
 import { getIcon } from "../lib/icons"
-import { Button } from "./ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,67 +27,72 @@ export function HabitCard({
 }: HabitCardProps) {
   const Icon = getIcon(habit.icon)
   const count = completions.length
-  const isGood = habit.type === "good"
 
   return (
-    <div className="relative rounded-2xl border border-border bg-card p-5 shadow-sm transition-all hover:shadow-md active:scale-[0.98]">
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <div
-            className={`flex size-12 items-center justify-center rounded-2xl ${
-              isGood
-                ? "bg-gradient-to-br from-primary/20 to-secondary/15 text-primary"
-                : "bg-destructive/15 text-destructive"
-            }`}
-          >
-            <Icon className="size-6" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold">{habit.name}</h3>
-            <p className="text-sm font-medium text-muted-foreground">
-              {count === 0 ? (
-                <span className="italic">Not yet today</span>
-              ) : (
-                <>{count} {count === 1 ? "time" : "times"} today</>
-              )}
-            </p>
-          </div>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex size-8 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted active:scale-90">
-              <MoreVertical className="size-5" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {count > 0 && (
-              <DropdownMenuItem onClick={() => onUndoLast(habit.id)}>
-                <Undo2 className="size-4" />
-                Undo last
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuItem onClick={() => onEdit(habit)}>
-              <Pencil className="size-4" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => onDelete(habit.id)}
-              className="text-destructive focus:text-destructive"
+    <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:shadow-md">
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{ backgroundColor: `color-mix(in oklch, ${habit.color} 10%, transparent)` }}
+      />
+      <div className="relative z-0 p-4">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <div
+              className="flex size-11 items-center justify-center rounded-2xl"
+              style={{
+                backgroundColor: `color-mix(in oklch, ${habit.color} 20%, transparent)`,
+                color: habit.color,
+              }}
             >
-              <Trash2 className="size-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <Icon className="size-5" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold">{habit.name}</h3>
+              <p className="text-sm font-medium text-muted-foreground">
+                {count === 0 ? (
+                  <span className="italic">Not yet today</span>
+                ) : (
+                  <>{count} {count === 1 ? "time" : "times"} today</>
+                )}
+              </p>
+            </div>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex size-8 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted active:scale-90">
+                <MoreVertical className="size-5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {count > 0 && (
+                <DropdownMenuItem onClick={() => onUndoLast(habit.id)}>
+                  <Undo2 className="size-4" />
+                  Undo last
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem onClick={() => onEdit(habit)}>
+                <Pencil className="size-4" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => onDelete(habit.id)}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="size-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <button
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold tracking-tight text-white shadow-sm transition-all hover:brightness-110 active:scale-[0.97]"
+          style={{ backgroundColor: habit.color }}
+          onClick={() => onComplete(habit.id)}
+        >
+          <Icon className="size-4" />
+          {habit.buttonLabel}
+        </button>
       </div>
-      <Button
-        variant={isGood ? "complete" : "destructive"}
-        size="xl"
-        className="mt-4 w-full font-bold tracking-tight active:scale-[0.97]"
-        onClick={() => onComplete(habit.id)}
-      >
-        {isGood ? "I did it!" : "Oops..."}
-      </Button>
     </div>
   )
 }

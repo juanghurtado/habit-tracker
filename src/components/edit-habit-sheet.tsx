@@ -7,31 +7,38 @@ import {
 } from "./ui/dialog"
 import { Button } from "./ui/button"
 import { IconPicker } from "./icon-picker"
+import { ColorPicker } from "./color-picker"
+import { getRandomColor } from "../lib/colors"
+import { getRandomLabel } from "../lib/button-labels"
 import type { Habit } from "../types"
 
 interface EditHabitSheetProps {
   habit: Habit | null
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSave: (id: string, name: string, icon: string, type: "good" | "bad") => void
+  onSave: (id: string, name: string, icon: string, type: "good" | "bad", color: string, buttonLabel: string) => void
 }
 
 export function EditHabitSheet({ habit, open, onOpenChange, onSave }: EditHabitSheetProps) {
   const [name, setName] = React.useState("")
   const [icon, setIcon] = React.useState("Trophy")
   const [type, setType] = React.useState<"good" | "bad">("good")
+  const [color, setColor] = React.useState("")
+  const [buttonLabel, setButtonLabel] = React.useState("")
 
   React.useEffect(() => {
     if (habit) {
       setName(habit.name)
       setIcon(habit.icon)
       setType(habit.type)
+      setColor(habit.color)
+      setButtonLabel(habit.buttonLabel)
     }
   }, [habit])
 
   function handleSave() {
     if (!habit || !name.trim()) return
-    onSave(habit.id, name.trim(), icon, type)
+    onSave(habit.id, name.trim(), icon, type, color, buttonLabel)
     onOpenChange(false)
   }
 
@@ -67,7 +74,11 @@ export function EditHabitSheet({ habit, open, onOpenChange, onSave }: EditHabitS
             </label>
             <div className="flex gap-2">
               <button
-                onClick={() => setType("good")}
+                onClick={() => {
+                  setType("good")
+                  setColor(getRandomColor("good"))
+                  setButtonLabel(getRandomLabel("good"))
+                }}
                 className={`flex-1 rounded-xl px-4 py-3 text-center text-sm font-medium transition-all active:scale-95 ${
                   type === "good"
                     ? "bg-primary text-primary-foreground shadow-sm"
@@ -77,7 +88,11 @@ export function EditHabitSheet({ habit, open, onOpenChange, onSave }: EditHabitS
                 Good Habit
               </button>
               <button
-                onClick={() => setType("bad")}
+                onClick={() => {
+                  setType("bad")
+                  setColor(getRandomColor("bad"))
+                  setButtonLabel(getRandomLabel("bad"))
+                }}
                 className={`flex-1 rounded-xl px-4 py-3 text-center text-sm font-medium transition-all active:scale-95 ${
                   type === "bad"
                     ? "bg-destructive text-destructive-foreground shadow-sm"
@@ -87,6 +102,21 @@ export function EditHabitSheet({ habit, open, onOpenChange, onSave }: EditHabitS
                 Bad Habit
               </button>
             </div>
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-medium text-muted-foreground">
+              Color
+            </label>
+            <ColorPicker type={type} selected={color} onSelect={setColor} />
+          </div>
+          <div className="flex items-center gap-3 rounded-xl bg-muted px-4 py-3">
+            <span className="text-sm text-muted-foreground">Button:</span>
+            <span
+              className="rounded-full px-4 py-1.5 text-sm font-bold text-white"
+              style={{ backgroundColor: color }}
+            >
+              {buttonLabel}
+            </span>
           </div>
           <Button
             className="w-full"
