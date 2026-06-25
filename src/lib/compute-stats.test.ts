@@ -11,6 +11,9 @@ const habits: Habit[] = [
     color: "oklch(0.7 0.12 225)",
     buttonLabel: "I did it!",
     createdAt: "2026-01-01T00:00:00.000Z",
+    syncedAt: null,
+    updatedAt: "2026-01-01T00:00:00.000Z",
+    deletedAt: null,
   },
   {
     id: "h2",
@@ -20,6 +23,9 @@ const habits: Habit[] = [
     color: "oklch(0.7 0.2 22)",
     buttonLabel: "Oops!",
     createdAt: "2026-01-01T00:00:00.000Z",
+    syncedAt: null,
+    updatedAt: "2026-01-01T00:00:00.000Z",
+    deletedAt: null,
   },
 ];
 
@@ -33,6 +39,7 @@ function makeCompletion(habitId: string, daysAgo: number): Completion {
     id: `c-${habitId}-${daysAgo}`,
     habitId,
     timestamp: `${y}-${m}-${day}T12:00:00.000Z`,
+    syncedAt: null,
   };
 }
 

@@ -21,11 +21,22 @@ export function loadHabits(): Habit[] {
   try {
     const raw = localStorage.getItem(HABITS_KEY);
     const habits: Habit[] = raw ? JSON.parse(raw) : [];
-    if (habits.some((h) => !(h.color && h.buttonLabel))) {
+    const needsColorMigration = habits.some((h) => !(h.color && h.buttonLabel));
+    const needsSyncMigration = habits.some(
+      (h) =>
+        h.syncedAt === undefined ||
+        h.updatedAt === undefined ||
+        h.deletedAt === undefined
+    );
+    if (needsColorMigration || needsSyncMigration) {
+      const now = new Date().toISOString();
       const migrated = habits.map((h) => ({
         ...h,
         color: h.color ?? getRandomColor(h.type),
         buttonLabel: h.buttonLabel ?? getRandomLabel(h.type),
+        syncedAt: h.syncedAt ?? null,
+        updatedAt: h.updatedAt ?? now,
+        deletedAt: h.deletedAt ?? null,
       }));
       try {
         saveHabits(migrated);
@@ -47,7 +58,20 @@ export function saveHabits(habits: Habit[]): void {
 export function loadCompletions(): Completion[] {
   try {
     const raw = localStorage.getItem(COMPLETIONS_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const completions: Completion[] = raw ? JSON.parse(raw) : [];
+    if (completions.some((c) => c.syncedAt === undefined)) {
+      const migrated = completions.map((c) => ({
+        ...c,
+        syncedAt: c.syncedAt ?? null,
+      }));
+      try {
+        saveCompletions(migrated);
+      } catch {
+        console.warn("Failed to persist migrated completion data");
+      }
+      return migrated;
+    }
+    return completions;
   } catch {
     return [];
   }
@@ -64,6 +88,7 @@ export function createHabit(
   color: string,
   buttonLabel: string
 ): Habit {
+  const now = new Date().toISOString();
   return {
     id: generateId(),
     name,
@@ -71,7 +96,10 @@ export function createHabit(
     type,
     color,
     buttonLabel,
-    createdAt: new Date().toISOString(),
+    createdAt: now,
+    syncedAt: null,
+    updatedAt: now,
+    deletedAt: null,
   };
 }
 
@@ -88,6 +116,7 @@ export function createCompletion(habitId: string, date?: Date): Completion {
     id: generateId(),
     habitId,
     timestamp,
+    syncedAt: null,
   };
 }
 
