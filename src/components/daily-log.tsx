@@ -159,7 +159,7 @@ return (
 
       <div className="fixed bottom-6 right-6 z-20">
         <Button
-          variant="accent"
+          variant="default"
           size="xl"
           className="h-16 w-16 rounded-full p-0 shadow-xl"
           onClick={() => setAddOpen(true)}
