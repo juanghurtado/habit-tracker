@@ -44,13 +44,3 @@ export function getRandomColor(type: "good" | "bad"): string {
   return list[Math.floor(Math.random() * list.length)].value
 }
 
-export function getButtonColor(color: string): string {
-  const match = color.match(/oklch\(([\d.]+)\s+([\d.]+)\s+([\d.]+)\)/)
-  if (!match) return color
-  const l = Math.min(parseFloat(match[1]) * 0.62, 0.48)
-  return `oklch(${l.toFixed(2)} ${match[2]} ${match[3]})`
-}
-
-export function findPaletteColor(value: string): PaletteColor | undefined {
-  return [...goodColors, ...badColors].find((c) => c.value === value)
-}

@@ -88,13 +88,6 @@ export function formatDateKey(date: Date): string {
   return `${y}-${m}-${d}`
 }
 
-export function formatUTCDateKey(date: Date): string {
-  const y = date.getUTCFullYear()
-  const m = String(date.getUTCMonth() + 1).padStart(2, "0")
-  const d = String(date.getUTCDate()).padStart(2, "0")
-  return `${y}-${m}-${d}`
-}
-
 export function getCompletionsForDate(
   completions: Completion[],
   date: Date
