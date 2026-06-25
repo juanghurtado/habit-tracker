@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest"
-import { formatDateKey, getCompletionsForDate, getCompletionsForHabitOnDate, createHabit, createCompletion } from "./storage"
+import { describe, it, expect, beforeEach } from "vitest"
+import { loadHabits, saveHabits, formatDateKey, getCompletionsForDate, getCompletionsForHabitOnDate, createHabit, createCompletion } from "./storage"
 
 describe("formatDateKey", () => {
   it("formats a date as YYYY-MM-DD", () => {
@@ -120,5 +120,64 @@ describe("createCompletion", () => {
     const result = getCompletionsForHabitOnDate([completion], "habit-1", pastDate)
     expect(result).toHaveLength(1)
     expect(result[0].id).toBe(completion.id)
+  })
+})
+
+describe("loadHabits", () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  it("returns complete habits unchanged and does not re-save", () => {
+    const habit = createHabit("Drink water", "Droplets", "good", "oklch(0.7 0.12 225)", "Done!")
+    saveHabits([habit])
+
+    const result = loadHabits()
+
+    expect(result).toHaveLength(1)
+    expect(result[0].color).toBe("oklch(0.7 0.12 225)")
+    expect(result[0].buttonLabel).toBe("Done!")
+
+    const raw = localStorage.getItem("habit-tracker-habits")
+    const parsed = raw ? JSON.parse(raw) : []
+    expect(parsed[0].color).toBe("oklch(0.7 0.12 225)")
+  })
+
+  it("migrates habits missing color and buttonLabel and persists them", () => {
+    const legacy = { id: "legacy-1", name: "Old habit", icon: "Star", type: "good" as const, createdAt: "2026-01-01T00:00:00.000Z" }
+    localStorage.setItem("habit-tracker-habits", JSON.stringify([legacy]))
+
+    const result = loadHabits()
+
+    expect(result).toHaveLength(1)
+    expect(result[0].color).toBeDefined()
+    expect(result[0].buttonLabel).toBeDefined()
+    expect(typeof result[0].color).toBe("string")
+    expect(typeof result[0].buttonLabel).toBe("string")
+
+    const raw = localStorage.getItem("habit-tracker-habits")
+    const parsed = raw ? JSON.parse(raw) : []
+    expect(parsed[0].color).toBe(result[0].color)
+    expect(parsed[0].buttonLabel).toBe(result[0].buttonLabel)
+  })
+
+  it("returns stable colors after two loads (first load persists)", () => {
+    const legacy = { id: "legacy-2", name: "Unstable color?", icon: "Zap", type: "bad" as const, createdAt: "2026-02-01T00:00:00.000Z" }
+    localStorage.setItem("habit-tracker-habits", JSON.stringify([legacy]))
+
+    const first = loadHabits()
+    const second = loadHabits()
+
+    expect(first[0].color).toBe(second[0].color)
+    expect(first[0].buttonLabel).toBe(second[0].buttonLabel)
+  })
+
+  it("returns empty array when no habits exist", () => {
+    expect(loadHabits()).toEqual([])
+  })
+
+  it("returns empty array on corrupt localStorage", () => {
+    localStorage.setItem("habit-tracker-habits", "not-json")
+    expect(loadHabits()).toEqual([])
   })
 })

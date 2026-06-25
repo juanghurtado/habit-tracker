@@ -16,11 +16,20 @@ export function loadHabits(): Habit[] {
   try {
     const raw = localStorage.getItem(HABITS_KEY)
     const habits: Habit[] = raw ? JSON.parse(raw) : []
-    return habits.map((h) => ({
-      ...h,
-      color: h.color ?? getRandomColor(h.type),
-      buttonLabel: h.buttonLabel ?? getRandomLabel(h.type),
-    }))
+    if (habits.some((h) => !h.color || !h.buttonLabel)) {
+      const migrated = habits.map((h) => ({
+        ...h,
+        color: h.color ?? getRandomColor(h.type),
+        buttonLabel: h.buttonLabel ?? getRandomLabel(h.type),
+      }))
+      try {
+        saveHabits(migrated)
+      } catch {
+        console.warn("Failed to persist migrated habit data")
+      }
+      return migrated
+    }
+    return habits
   } catch {
     return []
   }

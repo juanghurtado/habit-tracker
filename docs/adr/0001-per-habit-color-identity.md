@@ -23,5 +23,5 @@ The original design used one gradient (purple→orange) for all "good" habits an
 
 ## Consequences
 
-- Existing habits get auto-migrated with random colors and labels on first load (backward-compatible).
+- Existing habits get auto-migrated with random colors and labels on first load; the values are persisted to localStorage so colors are stable across page loads (backward-compatible).
 - `color-mix()` is a modern CSS function with ~94% browser support as of 2026; the fallback (no tint) is still readable—the card just looks slightly less colored.
