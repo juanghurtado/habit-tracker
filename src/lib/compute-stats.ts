@@ -16,6 +16,10 @@ export interface HabitStats {
   averagePerDay: number
   lifetimeTotal: number
   isRegressing: boolean
+  trend: "improving" | "declining" | "stable"
+  percentageChange: number
+  currentStreak: number
+  longestStreak: number
   dailyData: DailyCount[]
 }
 
@@ -49,6 +53,77 @@ function getDaysInRange(start: Date, end: Date): Date[] {
 function countCompletionsOnDate(completions: Completion[], habitId: string, date: Date): number {
   const key = formatDateKey(date)
   return completions.filter((c) => c.habitId === habitId && c.timestamp.startsWith(key)).length
+}
+
+function getCompletionDateSet(completions: Completion[], habitId: string): Set<string> {
+  return new Set(
+    completions
+      .filter((c) => c.habitId === habitId)
+      .map((c) => c.timestamp.slice(0, 10))
+  )
+}
+
+function computeCurrentStreak(completions: Completion[], habitId: string, habitType: "good" | "bad", createdAt: string): number {
+  const completionDates = getCompletionDateSet(completions, habitId)
+
+  const earliestDate = createdAt
+    ? new Date(Math.max(new Date(createdAt).getTime(), Date.now() - 365 * 86400000))
+    : new Date(Date.now() - 365 * 86400000)
+
+  let streak = 0
+  const current = new Date()
+  current.setHours(0, 0, 0, 0)
+
+  const earliest = startOfDay(earliestDate)
+
+  while (current >= earliest) {
+    const key = formatDateKey(current)
+    const hasCompletion = completionDates.has(key)
+
+    if (habitType === "good" && hasCompletion) streak++
+    else if (habitType === "bad" && !hasCompletion) streak++
+    else break
+
+    current.setDate(current.getDate() - 1)
+  }
+
+  return streak
+}
+
+function computeLongestStreak(completions: Completion[], habitId: string, habitType: "good" | "bad"): number {
+  const completionDates = getCompletionDateSet(completions, habitId)
+
+  const allDates = [...completionDates].sort()
+  if (allDates.length === 0) return 0
+
+  const firstDate = new Date(allDates[0])
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const maxSpan = Math.min(366, Math.ceil((today.getTime() - firstDate.getTime()) / 86400000) + 1)
+  if (maxSpan <= 0) return 0
+
+  const current = new Date(firstDate)
+  let longest = 0
+  let currentRun = 0
+  let daysChecked = 0
+
+  while (current <= today && daysChecked < maxSpan) {
+    const key = formatDateKey(current)
+    const hasCompletion = completionDates.has(key)
+
+    if (habitType === "good" && hasCompletion) currentRun++
+    else if (habitType === "bad" && !hasCompletion) currentRun++
+    else {
+      longest = Math.max(longest, currentRun)
+      currentRun = 0
+    }
+
+    current.setDate(current.getDate() + 1)
+    daysChecked++
+  }
+
+  longest = Math.max(longest, currentRun)
+  return longest
 }
 
 export function computeStats(habits: Habit[], completions: Completion[], windowDays: number): StatsResult {
@@ -89,6 +164,12 @@ export function computeStats(habits: Habit[], completions: Completion[], windowD
     const priorRate = windowDays > 0 ? (priorTotal / windowDays) * 100 : 0
     const isRegressing = priorRate > 0 && completionRate < priorRate
 
+    const percentageChange = priorRate > 0
+      ? Math.round(((completionRate - priorRate) / priorRate) * 100)
+      : completionRate > 0 ? 100 : 0
+
+    const trend = percentageChange > 5 ? "improving" : percentageChange < -5 ? "declining" : "stable"
+
     return {
       habitId: habit.id,
       habitName: habit.name,
@@ -100,6 +181,10 @@ export function computeStats(habits: Habit[], completions: Completion[], windowD
       averagePerDay: Math.round(averagePerDay * 100) / 100,
       lifetimeTotal,
       isRegressing,
+      trend,
+      percentageChange,
+      currentStreak: computeCurrentStreak(completions, habit.id, habit.type, habit.createdAt),
+      longestStreak: computeLongestStreak(completions, habit.id, habit.type),
       dailyData,
     }
   })
