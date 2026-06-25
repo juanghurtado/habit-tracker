@@ -30,6 +30,7 @@ export function TabBar({ activeTab, onTabChange }: TabBarProps) {
               )}
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
+              type="button"
             >
               <Icon className="size-4" />
               {tab.label}

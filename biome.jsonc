@@ -4,5 +4,49 @@
     "ultracite/biome/core",
     "ultracite/biome/type-aware",
     "ultracite/biome/react"
+  ],
+  "files": {
+    "includes": [
+      "!**/node_modules",
+      "!**/.git",
+      "!**/dist",
+      "!**/.next",
+      "!**/.agents",
+      "!scripts"
+    ]
+  },
+  "javascript": {
+    "globals": ["React", "Chrome"]
+  },
+  "linter": {
+    "rules": {
+      "style": {
+        "useFilenamingConvention": {
+          "level": "off"
+        }
+      },
+      "suspicious": {
+        "noArrayIndexKey": {
+          "level": "off"
+        }
+      },
+      "performance": {
+        "noNamespaceImport": {
+          "level": "off"
+        }
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["src/main.tsx"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnresolvedImports": "off"
+          }
+        }
+      }
+    }
   ]
 }

@@ -1,8 +1,8 @@
-import * as React from "react";
+import { Component, type ReactNode } from "react";
 
 interface ErrorBoundaryProps {
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
+  children: ReactNode;
+  fallback?: ReactNode;
 }
 
 interface ErrorBoundaryState {
@@ -10,7 +10,7 @@ interface ErrorBoundaryState {
   hasError: boolean;
 }
 
-export class ErrorBoundary extends React.Component<
+export class ErrorBoundary extends Component<
   ErrorBoundaryProps,
   ErrorBoundaryState
 > {
@@ -23,7 +23,7 @@ export class ErrorBoundary extends React.Component<
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  componentDidCatch(error: Error, errorInfo: { componentStack: string }) {
     console.error("[ErrorBoundary]", error, errorInfo.componentStack);
   }
 
@@ -52,12 +52,14 @@ export class ErrorBoundary extends React.Component<
             <button
               className="inline-flex h-10 items-center justify-center rounded-full bg-primary px-5 font-medium text-primary-foreground text-sm shadow-sm transition-all hover:brightness-110 active:scale-95"
               onClick={() => window.location.reload()}
+              type="button"
             >
               Reload
             </button>
             <button
               className="inline-flex h-10 items-center justify-center rounded-full border border-border bg-card px-5 font-medium text-foreground text-sm shadow-sm transition-all hover:bg-muted active:scale-95"
               onClick={this.handleReset}
+              type="button"
             >
               Try again
             </button>
@@ -68,6 +70,7 @@ export class ErrorBoundary extends React.Component<
               localStorage.clear();
               window.location.reload();
             }}
+            type="button"
           >
             Reset all data
           </button>

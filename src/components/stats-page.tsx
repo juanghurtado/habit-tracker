@@ -47,9 +47,9 @@ export function StatsPage() {
   const { habits, completions } = useHabits();
   const [windowDays, setWindowDays] = useState(7);
 
-const stats = useMemo(
+  const stats = useMemo(
     () => computeStats(habits, completions, windowDays),
-    [habits, completions, windowDays],
+    [habits, completions, windowDays]
   );
 
   const summaryStats = useMemo(() => {
@@ -78,6 +78,7 @@ const stats = useMemo(
                 : "text-muted-foreground hoverable:hover:text-foreground"
             )}
             onClick={() => setWindowDays(7)}
+            type="button"
           >
             <Calendar className="size-3.5" />
             7d
@@ -90,6 +91,7 @@ const stats = useMemo(
                 : "text-muted-foreground hoverable:hover:text-foreground"
             )}
             onClick={() => setWindowDays(30)}
+            type="button"
           >
             <CalendarRange className="size-3.5" />
             30d

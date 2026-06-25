@@ -8,7 +8,7 @@ import {
   Trash2,
   Undo2,
 } from "lucide-react";
-import * as React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { useHabits } from "../hooks/use-habits.ts";
 import { getIcon } from "../lib/icons.ts";
@@ -32,8 +32,8 @@ interface DailyLogProps {
 }
 
 export function DailyLog({ date, onDateChange }: DailyLogProps) {
-  const [addOpen, setAddOpen] = React.useState(false);
-  const [editHabit, setEditHabit] = React.useState<Habit | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
+  const [editHabit, setEditHabit] = useState<Habit | null>(null);
 
   const {
     habits,
@@ -112,6 +112,7 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
                     style={{
                       backgroundColor: `color-mix(in oklch, ${habit.color} 22%, white)`,
                     }}
+                    type="button"
                   >
                     {count > 0 && (
                       <div
@@ -146,15 +147,20 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
                   </button>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <div
+                      <button
+                        aria-label="More options"
                         className="absolute top-1.5 right-1.5 z-10 flex size-8 cursor-pointer items-center justify-center rounded-xl transition-all duration-150 hoverable:hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-90 active:bg-black/10 data-[state=open]:bg-black/10"
                         onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(e) =>
+                          e.key === "Enter" && e.stopPropagation()
+                        }
+                        type="button"
                       >
                         <MoreVertical
                           className="size-5"
                           style={{ color: habit.color }}
                         />
-                      </div>
+                      </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       {count > 0 && (

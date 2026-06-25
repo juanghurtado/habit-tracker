@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState } from "react";
 import { getRandomLabel } from "../lib/button-labels.ts";
 import { getRandomColor } from "../lib/colors.ts";
 import { ColorPicker } from "./color-picker.tsx";
@@ -28,11 +28,11 @@ export function AddHabitSheet({
   onOpenChange,
   onSave,
 }: AddHabitSheetProps) {
-  const [name, setName] = React.useState("");
-  const [icon, setIcon] = React.useState("Trophy");
-  const [type, setType] = React.useState<"good" | "bad">("good");
-  const [color, setColor] = React.useState(getRandomColor("good"));
-  const [buttonLabel, setButtonLabel] = React.useState(getRandomLabel("good"));
+  const [name, setName] = useState("");
+  const [icon, setIcon] = useState("Trophy");
+  const [type, setType] = useState<"good" | "bad">("good");
+  const [color, setColor] = useState(getRandomColor("good"));
+  const [buttonLabel, setButtonLabel] = useState(getRandomLabel("good"));
 
   function handleSave() {
     if (!name.trim()) {
@@ -61,12 +61,16 @@ export function AddHabitSheet({
         </DialogHeader>
         <div className="space-y-5">
           <div>
-            <label className="mb-2 block font-medium text-muted-foreground text-sm">
+            <label
+              className="mb-2 block font-medium text-muted-foreground text-sm"
+              htmlFor="habit-name"
+            >
               Name
             </label>
             <input
               autoFocus
               className="w-full rounded-xl border border-border bg-bg px-4 py-3 text-base outline-none focus:ring-2 focus:ring-ring"
+              id="habit-name"
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSave()}
               placeholder="e.g. Drink water"
@@ -74,16 +78,24 @@ export function AddHabitSheet({
             />
           </div>
           <div>
-            <label className="mb-2 block font-medium text-muted-foreground text-sm">
+            <label
+              className="mb-2 block font-medium text-muted-foreground text-sm"
+              htmlFor="habit-icon"
+            >
               Icon
             </label>
-            <IconPicker onSelect={setIcon} selected={icon} />
+            <div id="habit-icon">
+              <IconPicker onSelect={setIcon} selected={icon} />
+            </div>
           </div>
           <div>
-            <label className="mb-2 block font-medium text-muted-foreground text-sm">
+            <label
+              className="mb-2 block font-medium text-muted-foreground text-sm"
+              htmlFor="habit-type"
+            >
               Type
             </label>
-            <div className="flex gap-2">
+            <div className="flex gap-2" id="habit-type">
               <button
                 className={`flex-1 rounded-xl px-4 py-3 text-center font-medium text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95 ${
                   type === "good"
@@ -91,6 +103,7 @@ export function AddHabitSheet({
                     : "bg-muted text-muted-foreground"
                 }`}
                 onClick={() => handleTypeChange("good")}
+                type="button"
               >
                 Good Habit
               </button>
@@ -101,16 +114,22 @@ export function AddHabitSheet({
                     : "bg-muted text-muted-foreground"
                 }`}
                 onClick={() => handleTypeChange("bad")}
+                type="button"
               >
                 Bad Habit
               </button>
             </div>
           </div>
           <div>
-            <label className="mb-2 block font-medium text-muted-foreground text-sm">
+            <label
+              className="mb-2 block font-medium text-muted-foreground text-sm"
+              htmlFor="habit-color"
+            >
               Color
             </label>
-            <ColorPicker onSelect={setColor} selected={color} type={type} />
+            <div id="habit-color">
+              <ColorPicker onSelect={setColor} selected={color} type={type} />
+            </div>
           </div>
           <div className="flex items-center gap-3 rounded-xl bg-muted px-4 py-3">
             <span className="text-muted-foreground text-sm">Button:</span>

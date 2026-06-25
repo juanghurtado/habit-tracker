@@ -14,8 +14,8 @@ export function MiniBarChart({ data, color, maxCount }: MiniBarChartProps) {
   const weekBoundaries = useMemo(() => {
     const boundaries: number[] = [];
     for (let i = 1; i < data.length; i++) {
-      const prev = new Date(data[i - 1].date + "T00:00:00");
-      const curr = new Date(data[i].date + "T00:00:00");
+      const prev = new Date(`${data[i - 1].date}T00:00:00`);
+      const curr = new Date(`${data[i].date}T00:00:00`);
       if (prev.getDay() === 6 && curr.getDay() === 0) {
         boundaries.push(i);
       }

@@ -85,7 +85,7 @@ const patterns = [
             ? Math.random() < 0.75
             : Math.random() < 0.85,
   // Read — steady ~70%
-  (d) => Math.random() < 0.7,
+  (_d) => Math.random() < 0.7,
   // Meditate — declining (85% → 20%)
   (d) =>
     d > 45

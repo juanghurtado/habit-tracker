@@ -1,4 +1,6 @@
-import { addDays, format, subDays } from "date-fns";
+import { addDays } from "date-fns/addDays";
+import { format } from "date-fns/format";
+import { subDays } from "date-fns/subDays";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "./ui/button.tsx";
 
@@ -24,6 +26,7 @@ export function DateNavigation({ date, onDateChange }: DateNavigationProps) {
       <button
         className="cursor-pointer select-none rounded-xl px-3 py-1 text-center transition-all duration-150 hoverable:hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-95"
         onClick={() => onDateChange(today)}
+        type="button"
       >
         <p className="font-medium text-muted-foreground text-sm">
           {format(date, "EEEE")}

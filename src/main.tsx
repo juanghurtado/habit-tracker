@@ -4,10 +4,13 @@ import "./index.css";
 import App from "./App.tsx";
 import { ErrorBoundary } from "./components/error-boundary.tsx";
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>
-  </StrictMode>
-);
+const rootEl = document.getElementById("root");
+if (rootEl) {
+  createRoot(rootEl).render(
+    <StrictMode>
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </StrictMode>
+  );
+}

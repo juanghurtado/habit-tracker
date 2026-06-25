@@ -22,17 +22,20 @@ export function ColorPicker({ type, selected, onSelect }: ColorPickerProps) {
           onClick={() => onSelect(c.value)}
           style={{ backgroundColor: c.value }}
           title={c.name}
+          type="button"
         >
           {selected === c.value && (
             <svg
               className="size-4 text-white drop-shadow-sm"
               fill="none"
+              role="img"
               stroke="currentColor"
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={3}
               viewBox="0 0 24 24"
             >
+              <title>{c.name}</title>
               <polyline points="20 6 9 17 4 12" />
             </svg>
           )}

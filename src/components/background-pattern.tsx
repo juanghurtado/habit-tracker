@@ -47,7 +47,7 @@ export function BackgroundPattern() {
           return (
             <div
               className="flex items-center justify-center"
-              key={i}
+              key={`cell-${i}`}
               style={{ opacity: 0.06 }}
             >
               <Icon

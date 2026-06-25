@@ -17,6 +17,7 @@ export function IconPicker({ selected, onSelect }: IconPickerProps) {
           }`}
           key={name}
           onClick={() => onSelect(name)}
+          type="button"
         >
           <Icon className="size-6" />
         </button>

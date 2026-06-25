@@ -9,7 +9,9 @@ function generateId(): string {
   return (
     crypto.randomUUID?.() ??
     "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+      // biome-ignore lint/suspicious/noBitwiseOperators: needed for legacy UUID generation
       const r = (Math.random() * 16) | 0;
+      // biome-ignore lint/suspicious/noBitwiseOperators: needed for legacy UUID generation
       return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
     })
   );

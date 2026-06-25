@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState } from "react";
 import { Toaster } from "sonner";
 import { BackgroundPattern } from "./components/background-pattern.tsx";
 import { DailyLog } from "./components/daily-log.tsx";
@@ -7,8 +7,8 @@ import type { Tab } from "./components/tab-bar.tsx";
 import { TabBar } from "./components/tab-bar.tsx";
 
 export default function App() {
-  const [date, setDate] = React.useState(new Date());
-  const [tab, setTab] = React.useState<Tab>("log");
+  const [date, setDate] = useState(new Date());
+  const [tab, setTab] = useState<Tab>("log");
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col">
