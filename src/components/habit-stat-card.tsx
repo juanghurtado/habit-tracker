@@ -11,7 +11,10 @@ export function HabitStatCard({ stats }: HabitStatCardProps) {
   const Icon = getIcon(stats.habitIcon)
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm">
+    <div
+      className="relative overflow-hidden rounded-2xl border bg-card p-4"
+      style={{ borderColor: `color-mix(in oklch, ${stats.habitColor} 30%, transparent)` }}
+    >
       <div
         className="pointer-events-none absolute inset-0"
         style={{ backgroundColor: `color-mix(in oklch, ${stats.habitColor} 8%, transparent)` }}
@@ -41,15 +44,15 @@ export function HabitStatCard({ stats }: HabitStatCardProps) {
         </div>
 
         <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-xl bg-muted/50 p-2.5 text-center">
+          <div className="rounded-xl p-2.5 text-center" style={{ backgroundColor: `color-mix(in oklch, ${stats.habitColor} 12%, transparent)` }}>
             <div className="text-lg font-bold">{stats.totalInWindow}</div>
             <div className="text-xs text-muted-foreground">Done</div>
           </div>
-          <div className="rounded-xl bg-muted/50 p-2.5 text-center">
+          <div className="rounded-xl p-2.5 text-center" style={{ backgroundColor: `color-mix(in oklch, ${stats.habitColor} 12%, transparent)` }}>
             <div className="text-lg font-bold">{stats.completionRate}%</div>
             <div className="text-xs text-muted-foreground">Rate</div>
           </div>
-          <div className="rounded-xl bg-muted/50 p-2.5 text-center">
+          <div className="rounded-xl p-2.5 text-center" style={{ backgroundColor: `color-mix(in oklch, ${stats.habitColor} 12%, transparent)` }}>
             <div className="text-lg font-bold">{stats.averagePerDay}</div>
             <div className="text-xs text-muted-foreground">Avg/day</div>
           </div>

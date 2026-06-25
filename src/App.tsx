@@ -3,6 +3,7 @@ import { Toaster } from "sonner"
 import { DailyLog } from "./components/daily-log"
 import { StatsPage } from "./components/stats-page"
 import { TabBar } from "./components/tab-bar"
+import { BackgroundPattern } from "./components/background-pattern"
 import type { Tab } from "./components/tab-bar"
 
 export default function App() {
@@ -10,7 +11,8 @@ export default function App() {
   const [tab, setTab] = React.useState<Tab>("log")
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-bg">
+    <div className="mx-auto flex min-h-dvh max-w-md flex-col">
+      <BackgroundPattern />
       {tab === "log" ? (
         <DailyLog date={date} onDateChange={setDate} />
       ) : (

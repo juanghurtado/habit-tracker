@@ -35,7 +35,7 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-10 bg-bg/80 px-4 pb-2 pt-6 backdrop-blur-lg">
+      <header className="sticky top-0 z-10 px-4 pb-2 pt-6">
         <DateNavigation date={date} onDateChange={onDateChange} />
       </header>
 

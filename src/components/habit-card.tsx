@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu"
-import { MoreVertical, Undo2, Pencil, Trash2 } from "lucide-react"
+import { MoreVertical, Undo2, Pencil, Trash2, ThumbsDown, ThumbsUp } from "lucide-react"
 
 interface HabitCardProps {
   habit: Habit
@@ -29,7 +29,10 @@ export function HabitCard({
   const count = completions.length
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:shadow-md">
+    <div
+      className="relative overflow-hidden rounded-2xl border bg-card transition-all"
+      style={{ borderColor: `color-mix(in oklch, ${habit.color} 30%, transparent)` }}
+    >
       <div
         className="pointer-events-none absolute inset-0"
         style={{ backgroundColor: `color-mix(in oklch, ${habit.color} 10%, transparent)` }}
@@ -59,7 +62,12 @@ export function HabitCard({
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex size-8 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted active:scale-90">
+              <button
+                className="flex size-8 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted transition-all active:scale-90"
+                style={{
+                  color: `color-mix(in oklch, ${habit.color} 50%, var(--color-muted-foreground) 50%)`,
+                }}
+              >
                 <MoreVertical className="size-5" />
               </button>
             </DropdownMenuTrigger>
@@ -89,7 +97,7 @@ export function HabitCard({
           style={{ backgroundColor: habit.color }}
           onClick={() => onComplete(habit.id)}
         >
-          <Icon className="size-4" />
+          {habit.type === "bad" ? <ThumbsDown className="size-4" /> : <ThumbsUp className="size-4" />}
           {habit.buttonLabel}
         </button>
       </div>
