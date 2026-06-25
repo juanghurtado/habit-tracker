@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { computeStats } from "./compute-stats"
-import type { Habit } from "../types"
+import type { Habit, Completion } from "../types"
 
 const habits: Habit[] = [
   { id: "h1", name: "Exercise", icon: "Dumbbell", type: "good", color: "oklch(0.7 0.12 225)", buttonLabel: "I did it!", createdAt: "2026-01-01T00:00:00.000Z" },
