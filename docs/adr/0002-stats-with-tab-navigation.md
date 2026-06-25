@@ -1,0 +1,3 @@
+# Stats with tab navigation
+
+The app gains a second screen — Stats — accessed via a bottom tab bar. This is the first navigation feature in what was a single-screen app. Rather than adding a router library, we manage tab state with a simple `useState` in `App.tsx`. Stats are computed in-memory from the existing localStorage data on every render (the dataset is small — single user, local only). Rolling windows are always anchored to today, not the selected date, because aggregate stats over an arbitrary past date are confusing and rarely what the user wants.
