@@ -93,7 +93,7 @@ export function HabitCard({
           </DropdownMenu>
         </div>
         <button
-          className="mt-3 flex w-full items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold tracking-tight text-white shadow-sm transition-all hover:brightness-110 active:scale-[0.97]"
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:brightness-110 active:scale-[0.97]"
           style={{ backgroundColor: habit.color }}
           onClick={() => onComplete(habit.id)}
         >

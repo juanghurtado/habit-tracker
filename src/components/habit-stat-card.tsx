@@ -35,25 +35,21 @@ export function HabitStatCard({ stats }: HabitStatCardProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           <div className="rounded-xl p-2.5 text-center" style={{ backgroundColor: `color-mix(in oklch, ${stats.habitColor} 12%, transparent)` }}>
             <div className="text-lg font-bold leading-none">{stats.totalInWindow}</div>
-            <div className="mt-0.5 text-[11px] text-muted-foreground">Done</div>
-          </div>
-          <div className="rounded-xl p-2.5 text-center" style={{ backgroundColor: `color-mix(in oklch, ${stats.habitColor} 12%, transparent)` }}>
-            <div className="text-lg font-bold leading-none">{stats.completionRate}%</div>
-            <div className="mt-0.5 text-[11px] text-muted-foreground">Rate</div>
+            <div className="mt-0.5 text-xs text-muted-foreground">Done</div>
           </div>
           <div className="rounded-xl p-2.5 text-center" style={{ backgroundColor: `color-mix(in oklch, ${stats.habitColor} 12%, transparent)` }}>
             <div className="text-lg font-bold leading-none">{stats.averagePerDay}</div>
-            <div className="mt-0.5 text-[11px] text-muted-foreground">Avg/day</div>
+            <div className="mt-0.5 text-xs text-muted-foreground">Avg/day</div>
           </div>
           <div className="rounded-xl p-2.5 text-center" style={{ backgroundColor: `color-mix(in oklch, ${stats.habitColor} 12%, transparent)` }}>
             <div className="inline-flex items-center justify-center gap-0.5 text-lg font-bold leading-none">
               <Zap className="size-3.5" style={{ color: stats.habitColor }} />
               {stats.currentStreak}
             </div>
-            <div className="mt-0.5 text-[11px] text-muted-foreground">Streak</div>
+            <div className="mt-0.5 text-xs text-muted-foreground">Streak</div>
           </div>
         </div>
 

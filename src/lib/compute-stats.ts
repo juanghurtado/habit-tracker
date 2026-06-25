@@ -12,7 +12,6 @@ export interface HabitStats {
   habitColor: string
   habitType: "good" | "bad"
   totalInWindow: number
-  completionRate: number
   averagePerDay: number
   lifetimeTotal: number
   currentStreak: number
@@ -144,7 +143,6 @@ export function computeStats(habits: Habit[], completions: Completion[], windowD
     }))
 
     const totalInWindow = dailyData.reduce((sum, d) => sum + d.count, 0)
-    const completionRate = windowDays > 0 ? (totalInWindow / windowDays) * 100 : 0
     const averagePerDay = windowDays > 0 ? totalInWindow / windowDays : 0
 
     return {
@@ -154,7 +152,6 @@ export function computeStats(habits: Habit[], completions: Completion[], windowD
       habitColor: habit.color,
       habitType: habit.type,
       totalInWindow,
-      completionRate: Math.round(completionRate * 10) / 10,
       averagePerDay: Math.round(averagePerDay * 100) / 100,
       lifetimeTotal,
       currentStreak: computeCurrentStreak(completions, habit.id, habit.type, habit.createdAt),

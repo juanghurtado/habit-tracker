@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react"
-import { CheckCheck, Flame, List, Calendar, CalendarRange, BarChart3 } from "lucide-react"
+import { CheckCheck, Flame, Calendar, CalendarRange, BarChart3 } from "lucide-react"
 import { useHabits } from "../hooks/use-habits"
 import { computeStats } from "../lib/compute-stats"
 import { HabitStatCard } from "./habit-stat-card"
@@ -51,12 +51,9 @@ export function StatsPage() {
       ...stats.badHabits.map((h) => h.currentStreak),
       0
     )
-    const activeHabits = [...stats.goodHabits, ...stats.badHabits].filter(
-      (h) => h.totalInWindow > 0
-    ).length
 
-    return { totalCompletions, bestStreak, activeHabits, totalHabits: habits.length }
-  }, [stats, habits])
+    return { totalCompletions, bestStreak }
+  }, [stats])
 
   return (
     <div className="flex flex-col gap-5 px-4 pt-5 pb-28">
@@ -102,7 +99,7 @@ export function StatsPage() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-2 gap-2.5">
             <SummaryStat
               icon={CheckCheck}
               value={summaryStats.totalCompletions}
@@ -114,11 +111,6 @@ export function StatsPage() {
               value={summaryStats.bestStreak > 0 ? `${summaryStats.bestStreak}d` : "—"}
               label="best streak"
               color="var(--color-accent)"
-            />
-            <SummaryStat
-              icon={List}
-              value={`${summaryStats.activeHabits}/${summaryStats.totalHabits}`}
-              label="active"
             />
           </div>
 

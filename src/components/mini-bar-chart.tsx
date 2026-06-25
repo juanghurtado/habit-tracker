@@ -24,7 +24,10 @@ export function MiniBarChart({ data, color, maxCount }: MiniBarChartProps) {
   }, [data])
 
   return (
-    <div className="flex items-end gap-[2px]">
+    <div
+      className="flex items-end gap-[2px]"
+      style={{ borderBottom: `1px solid color-mix(in oklch, ${color} 25%, transparent)` }}
+    >
       {data.map((day, index) => {
         const height = Math.max((day.count / max) * 100, day.count > 0 ? 8 : 0)
         return (
@@ -40,9 +43,9 @@ export function MiniBarChart({ data, color, maxCount }: MiniBarChartProps) {
               className="w-full rounded-t-[3px] transition-all duration-300"
               style={{
                 height: `${height}%`,
-                backgroundColor: day.count > 0 ? color : "var(--color-muted)",
-                opacity: day.count > 0 ? 0.85 : 0.3,
-                minHeight: day.count > 0 ? 4 : 2,
+                backgroundColor: day.count > 0 ? color : undefined,
+                opacity: day.count > 0 ? 0.85 : undefined,
+                minHeight: day.count > 0 ? 4 : undefined,
               }}
             />
           </div>

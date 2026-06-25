@@ -59,12 +59,6 @@ describe("computeStats", () => {
     expect(result.goodHabits[0].totalInWindow).toBe(2)
   })
 
-  it("calculates completion rate as percentage", () => {
-    const completions = Array.from({ length: 4 }, () => makeCompletion("h1", 0))
-    const result = computeStats(habits, completions, 7)
-    expect(result.goodHabits[0].completionRate).toBeCloseTo(57.1, 0)
-  })
-
   it("calculates average per day", () => {
     const completions = Array.from({ length: 14 }, (_, i) => makeCompletion("h1", i))
     const result = computeStats(habits, completions, 7)
