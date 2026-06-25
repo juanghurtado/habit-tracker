@@ -25,6 +25,7 @@
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.4.1",
     "gh-pages": "^6.3.0",
+    "husky": "^9.1.7",
     "jsdom": "^29.1.1",
     "tailwindcss": "^4.1.4",
     "typescript": "~5.7.2",
@@ -42,7 +43,8 @@
     "lint": "ultracite check",
     "format": "ultracite fix",
     "check": "ultracite check",
-    "fix": "ultracite fix"
+    "fix": "ultracite fix",
+    "prepare": "husky"
   },
   "type": "module",
   "version": "0.1.0",
