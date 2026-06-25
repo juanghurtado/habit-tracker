@@ -1,7 +1,23 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { act, renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { loadHabits } from "../lib/storage.ts";
+import { AuthProvider } from "./use-auth.tsx";
 import { useHabits } from "./use-habits.ts";
+
+const mockSupabase = {
+  auth: {
+    onAuthStateChange: () => ({
+      data: { subscription: { unsubscribe: vi.fn() } },
+    }),
+  },
+} as unknown as SupabaseClient;
+
+function createWrapper() {
+  return function Wrapper({ children }: { children: React.ReactNode }) {
+    return <AuthProvider supabase={mockSupabase}>{children}</AuthProvider>;
+  };
+}
 
 describe("useHabits", () => {
   beforeEach(() => {
@@ -9,13 +25,17 @@ describe("useHabits", () => {
   });
 
   it("returns empty habits and completions initially", () => {
-    const { result } = renderHook(() => useHabits());
+    const { result } = renderHook(() => useHabits(), {
+      wrapper: createWrapper(),
+    });
     expect(result.current.habits).toEqual([]);
     expect(result.current.completions).toEqual([]);
   });
 
   it("adds a habit and updates the habits list", () => {
-    const { result } = renderHook(() => useHabits());
+    const { result } = renderHook(() => useHabits(), {
+      wrapper: createWrapper(),
+    });
     act(() => {
       result.current.addHabit(
         "Drink water",
@@ -30,7 +50,9 @@ describe("useHabits", () => {
   });
 
   it("edits an existing habit", () => {
-    const { result } = renderHook(() => useHabits());
+    const { result } = renderHook(() => useHabits(), {
+      wrapper: createWrapper(),
+    });
     act(() => {
       result.current.addHabit(
         "Old name",
@@ -57,7 +79,9 @@ describe("useHabits", () => {
   });
 
   it("deletes a habit and its completions", () => {
-    const { result } = renderHook(() => useHabits());
+    const { result } = renderHook(() => useHabits(), {
+      wrapper: createWrapper(),
+    });
     act(() => {
       result.current.addHabit(
         "Delete me",
@@ -80,7 +104,9 @@ describe("useHabits", () => {
   });
 
   it("adds a completion for a habit", () => {
-    const { result } = renderHook(() => useHabits());
+    const { result } = renderHook(() => useHabits(), {
+      wrapper: createWrapper(),
+    });
     act(() => {
       result.current.addHabit(
         "Test",
@@ -99,7 +125,9 @@ describe("useHabits", () => {
   });
 
   it("adds a completion for a specific date", () => {
-    const { result } = renderHook(() => useHabits());
+    const { result } = renderHook(() => useHabits(), {
+      wrapper: createWrapper(),
+    });
     act(() => {
       result.current.addHabit(
         "Test",
@@ -119,7 +147,9 @@ describe("useHabits", () => {
   });
 
   it("undoes the last completion for a habit", () => {
-    const { result } = renderHook(() => useHabits());
+    const { result } = renderHook(() => useHabits(), {
+      wrapper: createWrapper(),
+    });
     act(() => {
       result.current.addHabit(
         "Test",
@@ -142,7 +172,9 @@ describe("useHabits", () => {
   });
 
   it("persists data to localStorage", () => {
-    const { result } = renderHook(() => useHabits());
+    const { result } = renderHook(() => useHabits(), {
+      wrapper: createWrapper(),
+    });
     act(() => {
       result.current.addHabit(
         "Persist test",
