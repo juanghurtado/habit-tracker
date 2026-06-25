@@ -1,15 +1,4 @@
 {
-  "name": "habit-tracker",
-  "private": true,
-  "version": "0.1.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview",
-    "test": "vitest run",
-    "deploy": "npm run build && npx gh-pages -d dist"
-  },
   "dependencies": {
     "@fontsource-variable/figtree": "^5.2.10",
     "@radix-ui/react-dialog": "^1.1.6",
@@ -26,6 +15,7 @@
     "tailwind-merge": "^3.2.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.16",
     "@tailwindcss/vite": "^4.1.4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -37,7 +27,23 @@
     "jsdom": "^29.1.1",
     "tailwindcss": "^4.1.4",
     "typescript": "~5.7.2",
+    "ultracite": "^7.8.3",
     "vite": "^6.3.2",
     "vitest": "^4.1.9"
-  }
+  },
+  "name": "habit-tracker",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "deploy": "npm run build && npx gh-pages -d dist",
+    "lint": "ultracite check",
+    "format": "ultracite fix",
+    "check": "ultracite check",
+    "fix": "ultracite fix"
+  },
+  "type": "module",
+  "version": "0.1.0",
+  "private": true
 }

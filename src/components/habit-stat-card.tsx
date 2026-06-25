@@ -1,23 +1,27 @@
-import { Zap } from "lucide-react"
-import { getIcon } from "../lib/icons"
-import type { HabitStats } from "../lib/compute-stats"
-import { MiniBarChart } from "./mini-bar-chart"
+import { Zap } from "lucide-react";
+import type { HabitStats } from "../lib/compute-stats.ts";
+import { getIcon } from "../lib/icons.ts";
+import { MiniBarChart } from "./mini-bar-chart.tsx";
 
 interface HabitStatCardProps {
-  stats: HabitStats
+  stats: HabitStats;
 }
 
 export function HabitStatCard({ stats }: HabitStatCardProps) {
-  const Icon = getIcon(stats.habitIcon)
+  const Icon = getIcon(stats.habitIcon);
 
   return (
     <div
       className="relative overflow-hidden rounded-2xl border bg-card p-4"
-      style={{ borderColor: `color-mix(in oklch, ${stats.habitColor} 30%, transparent)` }}
+      style={{
+        borderColor: `color-mix(in oklch, ${stats.habitColor} 30%, transparent)`,
+      }}
     >
       <div
         className="pointer-events-none absolute inset-0"
-        style={{ backgroundColor: `color-mix(in oklch, ${stats.habitColor} 8%, transparent)` }}
+        style={{
+          backgroundColor: `color-mix(in oklch, ${stats.habitColor} 8%, transparent)`,
+        }}
       />
       <div className="relative z-0 space-y-4">
         <div className="flex items-center gap-3">
@@ -36,34 +40,59 @@ export function HabitStatCard({ stats }: HabitStatCardProps) {
         </div>
 
         <div className="grid grid-cols-3 gap-2">
-          <div className="rounded-xl p-2.5 text-center" style={{ backgroundColor: `color-mix(in oklch, ${stats.habitColor} 12%, transparent)` }}>
-            <div className="text-lg font-bold leading-none">{stats.totalInWindow}</div>
-            <div className="mt-0.5 text-xs text-muted-foreground">Done</div>
+          <div
+            className="rounded-xl p-2.5 text-center"
+            style={{
+              backgroundColor: `color-mix(in oklch, ${stats.habitColor} 12%, transparent)`,
+            }}
+          >
+            <div className="font-bold text-lg leading-none">
+              {stats.totalInWindow}
+            </div>
+            <div className="mt-0.5 text-muted-foreground text-xs">Done</div>
           </div>
-          <div className="rounded-xl p-2.5 text-center" style={{ backgroundColor: `color-mix(in oklch, ${stats.habitColor} 12%, transparent)` }}>
-            <div className="text-lg font-bold leading-none">{stats.averagePerDay}</div>
-            <div className="mt-0.5 text-xs text-muted-foreground">Avg/day</div>
+          <div
+            className="rounded-xl p-2.5 text-center"
+            style={{
+              backgroundColor: `color-mix(in oklch, ${stats.habitColor} 12%, transparent)`,
+            }}
+          >
+            <div className="font-bold text-lg leading-none">
+              {stats.averagePerDay}
+            </div>
+            <div className="mt-0.5 text-muted-foreground text-xs">Avg/day</div>
           </div>
-          <div className="rounded-xl p-2.5 text-center" style={{ backgroundColor: `color-mix(in oklch, ${stats.habitColor} 12%, transparent)` }}>
-            <div className="inline-flex items-center justify-center gap-0.5 text-lg font-bold leading-none">
+          <div
+            className="rounded-xl p-2.5 text-center"
+            style={{
+              backgroundColor: `color-mix(in oklch, ${stats.habitColor} 12%, transparent)`,
+            }}
+          >
+            <div className="inline-flex items-center justify-center gap-0.5 font-bold text-lg leading-none">
               <Zap className="size-3.5" style={{ color: stats.habitColor }} />
               {stats.currentStreak}
             </div>
-            <div className="mt-0.5 text-xs text-muted-foreground">Streak</div>
+            <div className="mt-0.5 text-muted-foreground text-xs">Streak</div>
           </div>
         </div>
 
-        <MiniBarChart data={stats.dailyData} color={stats.habitColor} />
+        <MiniBarChart color={stats.habitColor} data={stats.dailyData} />
 
         <div className="flex items-center justify-between text-xs">
           <span className="text-muted-foreground">
-            Lifetime: <span className="font-semibold text-foreground">{stats.lifetimeTotal}</span>
+            Lifetime:{" "}
+            <span className="font-semibold text-foreground">
+              {stats.lifetimeTotal}
+            </span>
           </span>
           <span className="text-muted-foreground">
-            Best streak: <span className="font-semibold text-foreground">{stats.longestStreak} days</span>
+            Best streak:{" "}
+            <span className="font-semibold text-foreground">
+              {stats.longestStreak} days
+            </span>
           </span>
         </div>
       </div>
     </div>
-  )
+  );
 }

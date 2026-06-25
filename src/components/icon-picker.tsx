@@ -1,8 +1,8 @@
-import { curatedIcons } from "../lib/icons"
+import { curatedIcons } from "../lib/icons.ts";
 
 interface IconPickerProps {
-  selected: string
-  onSelect: (name: string) => void
+  onSelect: (name: string) => void;
+  selected: string;
 }
 
 export function IconPicker({ selected, onSelect }: IconPickerProps) {
@@ -10,17 +10,17 @@ export function IconPicker({ selected, onSelect }: IconPickerProps) {
     <div className="grid grid-cols-5 gap-3">
       {curatedIcons.map(({ name, Icon }) => (
         <button
-          key={name}
-          onClick={() => onSelect(name)}
-          className={`flex items-center justify-center rounded-xl p-3 transition-all duration-150 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+          className={`flex items-center justify-center rounded-xl p-3 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-90 ${
             selected === name
               ? "bg-primary text-primary-foreground shadow-md"
               : "bg-muted text-muted-foreground hoverable:hover:bg-muted/80"
           }`}
+          key={name}
+          onClick={() => onSelect(name)}
         >
           <Icon className="size-6" />
         </button>
       ))}
     </div>
-  )
+  );
 }

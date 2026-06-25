@@ -11,7 +11,7 @@ export const goodLabels = [
   "Let's go!",
   "Solid!",
   "Easy!",
-]
+];
 
 export const badLabels = [
   "Oops...",
@@ -24,14 +24,14 @@ export const badLabels = [
   "Avoided",
   "Passed",
   "Nah",
-]
+];
 
 export const allLabels: Record<"good" | "bad", string[]> = {
   good: goodLabels,
   bad: badLabels,
-}
+};
 
 export function getRandomLabel(type: "good" | "bad"): string {
-  const list = allLabels[type]
-  return list[Math.floor(Math.random() * list.length)]
+  const list = allLabels[type];
+  return list[Math.floor(Math.random() * list.length)];
 }

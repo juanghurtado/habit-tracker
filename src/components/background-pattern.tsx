@@ -1,31 +1,36 @@
-import { useMemo } from "react"
-import { curatedIcons } from "../lib/icons"
+import { useMemo } from "react";
+import { curatedIcons } from "../lib/icons.ts";
 
-const COLS = 12
-const ROWS = 24
-const TOTAL = COLS * ROWS
+const COLS = 12;
+const ROWS = 24;
+const TOTAL = COLS * ROWS;
 
 function seededRandom(seed: number) {
-  let s = seed
+  let s = seed;
   return () => {
-    s = (s * 16807) % 2147483647
-    return (s - 1) / 2147483646
-  }
+    s = (s * 16_807) % 2_147_483_647;
+    return (s - 1) / 2_147_483_646;
+  };
 }
 
 export function BackgroundPattern() {
   const cells = useMemo(() => {
-    const rng = seededRandom(42)
-    const result: { iconIndex: number; rotate: number; x: number; y: number }[] = []
+    const rng = seededRandom(42);
+    const result: {
+      iconIndex: number;
+      rotate: number;
+      x: number;
+      y: number;
+    }[] = [];
     for (let i = 0; i < TOTAL; i++) {
-      const iconIndex = Math.floor(rng() * curatedIcons.length)
-      const rotate = (rng() - 0.5) * 40
-      const x = rng() * 4 - 2
-      const y = rng() * 4 - 2
-      result.push({ iconIndex, rotate, x, y })
+      const iconIndex = Math.floor(rng() * curatedIcons.length);
+      const rotate = (rng() - 0.5) * 40;
+      const x = rng() * 4 - 2;
+      const y = rng() * 4 - 2;
+      result.push({ iconIndex, rotate, x, y });
     }
-    return result
-  }, [])
+    return result;
+  }, []);
 
   return (
     <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
@@ -38,11 +43,11 @@ export function BackgroundPattern() {
         }}
       >
         {cells.map(({ iconIndex, rotate, x, y }, i) => {
-          const { Icon } = curatedIcons[iconIndex]
+          const { Icon } = curatedIcons[iconIndex];
           return (
             <div
-              key={i}
               className="flex items-center justify-center"
+              key={i}
               style={{ opacity: 0.06 }}
             >
               <Icon
@@ -52,9 +57,9 @@ export function BackgroundPattern() {
                 }}
               />
             </div>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }

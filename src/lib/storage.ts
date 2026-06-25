@@ -1,55 +1,58 @@
-import type { Habit, Completion } from "../types"
-import { getRandomColor } from "./colors"
-import { getRandomLabel } from "./button-labels"
+import type { Completion, Habit } from "../types.ts";
+import { getRandomLabel } from "./button-labels.ts";
+import { getRandomColor } from "./colors.ts";
 
-const HABITS_KEY = "habit-tracker-habits"
-const COMPLETIONS_KEY = "habit-tracker-completions"
+const HABITS_KEY = "habit-tracker-habits";
+const COMPLETIONS_KEY = "habit-tracker-completions";
 
 function generateId(): string {
-  return crypto.randomUUID?.() ?? `xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx`.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0
-    return (c === "x" ? r : (r & 0x3) | 0x8).toString(16)
-  })
+  return (
+    crypto.randomUUID?.() ??
+    "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+    })
+  );
 }
 
 export function loadHabits(): Habit[] {
   try {
-    const raw = localStorage.getItem(HABITS_KEY)
-    const habits: Habit[] = raw ? JSON.parse(raw) : []
-    if (habits.some((h) => !h.color || !h.buttonLabel)) {
+    const raw = localStorage.getItem(HABITS_KEY);
+    const habits: Habit[] = raw ? JSON.parse(raw) : [];
+    if (habits.some((h) => !(h.color && h.buttonLabel))) {
       const migrated = habits.map((h) => ({
         ...h,
         color: h.color ?? getRandomColor(h.type),
         buttonLabel: h.buttonLabel ?? getRandomLabel(h.type),
-      }))
+      }));
       try {
-        saveHabits(migrated)
+        saveHabits(migrated);
       } catch {
-        console.warn("Failed to persist migrated habit data")
+        console.warn("Failed to persist migrated habit data");
       }
-      return migrated
+      return migrated;
     }
-    return habits
+    return habits;
   } catch {
-    return []
+    return [];
   }
 }
 
 export function saveHabits(habits: Habit[]): void {
-  localStorage.setItem(HABITS_KEY, JSON.stringify(habits))
+  localStorage.setItem(HABITS_KEY, JSON.stringify(habits));
 }
 
 export function loadCompletions(): Completion[] {
   try {
-    const raw = localStorage.getItem(COMPLETIONS_KEY)
-    return raw ? JSON.parse(raw) : []
+    const raw = localStorage.getItem(COMPLETIONS_KEY);
+    return raw ? JSON.parse(raw) : [];
   } catch {
-    return []
+    return [];
   }
 }
 
 export function saveCompletions(completions: Completion[]): void {
-  localStorage.setItem(COMPLETIONS_KEY, JSON.stringify(completions))
+  localStorage.setItem(COMPLETIONS_KEY, JSON.stringify(completions));
 }
 
 export function createHabit(
@@ -67,38 +70,43 @@ export function createHabit(
     color,
     buttonLabel,
     createdAt: new Date().toISOString(),
-  }
+  };
 }
 
 export function createCompletion(habitId: string, date?: Date): Completion {
   const timestamp = date
-    ? new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12).toISOString()
-    : new Date().toISOString()
+    ? new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+        12
+      ).toISOString()
+    : new Date().toISOString();
   return {
     id: generateId(),
     habitId,
     timestamp,
-  }
+  };
 }
 
 export function formatDateKey(date: Date): string {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, "0")
-  const d = String(date.getDate()).padStart(2, "0")
-  return `${y}-${m}-${d}`
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
 
 export function getCompletionsForDate(
   completions: Completion[],
   date: Date
 ): Completion[] {
-  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate())
-  const end = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
-  const startStr = start.toISOString()
-  const endStr = end.toISOString()
+  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const end = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+  const startStr = start.toISOString();
+  const endStr = end.toISOString();
   return completions.filter(
     (c) => c.timestamp >= startStr && c.timestamp < endStr
-  )
+  );
 }
 
 export function getCompletionsForHabitOnDate(
@@ -106,11 +114,12 @@ export function getCompletionsForHabitOnDate(
   habitId: string,
   date: Date
 ): Completion[] {
-  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate())
-  const end = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
-  const startStr = start.toISOString()
-  const endStr = end.toISOString()
+  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const end = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+  const startStr = start.toISOString();
+  const endStr = end.toISOString();
   return completions.filter(
-    (c) => c.habitId === habitId && c.timestamp >= startStr && c.timestamp < endStr
-  )
+    (c) =>
+      c.habitId === habitId && c.timestamp >= startStr && c.timestamp < endStr
+  );
 }

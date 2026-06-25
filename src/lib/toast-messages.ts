@@ -9,7 +9,7 @@ export const goodMessages = [
   '"{name}" — another one in the bag.',
   'Locked in. "{name}" done.',
   'Easy. "{name}" — checked off.',
-]
+];
 
 export const badMessages = [
   '"{name}" — slipped today.',
@@ -22,15 +22,18 @@ export const badMessages = [
   '"{name}" got away today. Tomorrow.',
   'Noted. "{name}" — move forward.',
   '"{name}" — write it off, start again.',
-]
+];
 
 export const allToastMessages: Record<"good" | "bad", string[]> = {
   good: goodMessages,
   bad: badMessages,
-}
+};
 
-export function getRandomToastMessage(type: "good" | "bad", name: string): string {
-  const list = allToastMessages[type]
-  const template = list[Math.floor(Math.random() * list.length)]
-  return template.replace("{name}", name)
+export function getRandomToastMessage(
+  type: "good" | "bad",
+  name: string
+): string {
+  const list = allToastMessages[type];
+  const template = list[Math.floor(Math.random() * list.length)];
+  return template.replace("{name}", name);
 }

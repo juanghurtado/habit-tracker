@@ -11,6 +11,7 @@ import {
   Dumbbell,
   Footprints,
   Heart,
+  type LucideIcon,
   Monitor,
   Moon,
   Music,
@@ -22,8 +23,7 @@ import {
   Trophy,
   Weight,
   Wine,
-  type LucideIcon,
-} from "lucide-react"
+} from "lucide-react";
 
 export const curatedIcons: { name: string; Icon: LucideIcon }[] = [
   { name: "Sun", Icon: Sun },
@@ -49,12 +49,12 @@ export const curatedIcons: { name: string; Icon: LucideIcon }[] = [
   { name: "Timer", Icon: Timer },
   { name: "Weight", Icon: Weight },
   { name: "Pencil", Icon: Pencil },
-]
+];
 
 export const iconMap = Object.fromEntries(
   curatedIcons.map(({ name, Icon }) => [name, Icon])
-)
+);
 
 export function getIcon(name: string): LucideIcon {
-  return iconMap[name] ?? Trophy
+  return iconMap[name] ?? Trophy;
 }
