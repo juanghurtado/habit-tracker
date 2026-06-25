@@ -25,7 +25,7 @@ export function DateNavigation({ date, onDateChange }: DateNavigationProps) {
       </Button>
       <button
         onClick={() => onDateChange(today)}
-        className="text-center"
+        className="rounded-xl px-3 py-1 text-center transition-all duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 hoverable:hover:bg-muted cursor-pointer select-none"
       >
         <p className="text-sm font-medium text-muted-foreground">
           {format(date, "EEEE")}

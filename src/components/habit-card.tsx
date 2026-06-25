@@ -63,7 +63,7 @@ export function HabitCard({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                className="flex size-8 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted transition-all active:scale-90"
+                className="flex size-8 items-center justify-center rounded-xl text-muted-foreground hoverable:hover:bg-muted transition-all duration-150 active:scale-90 active:bg-muted-foreground/10 data-[state=open]:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 style={{
                   color: `color-mix(in oklch, ${habit.color} 50%, var(--color-muted-foreground) 50%)`,
                 }}
@@ -93,7 +93,7 @@ export function HabitCard({
           </DropdownMenu>
         </div>
         <button
-          className="mt-3 flex w-full items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:brightness-110 active:scale-[0.97]"
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all duration-150 hoverable:hover:brightness-110 active:scale-[0.97] active:brightness-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           style={{ backgroundColor: habit.color }}
           onClick={() => onComplete(habit.id)}
         >

@@ -4,18 +4,18 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-5 [&_svg]:shrink-0 cursor-pointer active:scale-95 select-none",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-5 [&_svg]:shrink-0 cursor-pointer active:scale-95 select-none",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow-sm hover:brightness-110",
-        secondary: "bg-secondary text-secondary-foreground shadow-sm hover:brightness-110",
-        accent: "bg-accent text-accent-foreground shadow-sm hover:brightness-110",
-        destructive: "bg-destructive text-destructive-foreground shadow-sm hover:brightness-110",
-        outline: "border border-border bg-card hover:bg-muted",
-        ghost: "hover:bg-muted",
-        link: "text-primary underline-offset-4 hover:underline",
-        complete: "bg-gradient-to-br from-primary to-secondary text-primary-foreground shadow-md hover:shadow-lg",
+        default: "bg-primary text-primary-foreground shadow-sm hoverable:hover:brightness-110 active:brightness-90",
+        secondary: "bg-secondary text-secondary-foreground shadow-sm hoverable:hover:brightness-110 active:brightness-90",
+        accent: "bg-accent text-accent-foreground shadow-sm hoverable:hover:brightness-110 active:brightness-90",
+        destructive: "bg-destructive text-destructive-foreground shadow-sm hoverable:hover:brightness-110 active:brightness-90",
+        outline: "border border-border bg-card hoverable:hover:bg-muted active:bg-border",
+        ghost: "hoverable:hover:bg-muted active:bg-muted-foreground/10",
+        link: "text-primary underline-offset-4 hoverable:hover:underline",
+        complete: "bg-gradient-to-br from-primary to-secondary text-primary-foreground shadow-md hoverable:hover:shadow-lg",
       },
       size: {
         default: "h-10 px-5 py-2",

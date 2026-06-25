@@ -15,10 +15,10 @@ export function ColorPicker({ type, selected, onSelect }: ColorPickerProps) {
         <button
           key={c.value}
           onClick={() => onSelect(c.value)}
-          className={`flex size-9 items-center justify-center rounded-xl transition-all active:scale-90 ${
+          className={`flex size-9 items-center justify-center rounded-xl transition-all duration-150 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
             selected === c.value
               ? "ring-2 ring-ring ring-offset-2 ring-offset-bg"
-              : "hover:scale-110"
+              : "hoverable:hover:scale-110"
           }`}
           style={{ backgroundColor: c.value }}
           title={c.name}

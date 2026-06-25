@@ -68,7 +68,7 @@ function FormContent({ habit, onSave, onOpenChange }: {
               setColor(getRandomColor("good"))
               setButtonLabel(getRandomLabel("good"))
             }}
-            className={`flex-1 rounded-xl px-4 py-3 text-center text-sm font-medium transition-all active:scale-95 ${
+            className={`flex-1 rounded-xl px-4 py-3 text-center text-sm font-medium transition-all duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
               type === "good"
                 ? "bg-primary text-primary-foreground shadow-sm"
                 : "bg-muted text-muted-foreground"
@@ -82,7 +82,7 @@ function FormContent({ habit, onSave, onOpenChange }: {
               setColor(getRandomColor("bad"))
               setButtonLabel(getRandomLabel("bad"))
             }}
-            className={`flex-1 rounded-xl px-4 py-3 text-center text-sm font-medium transition-all active:scale-95 ${
+            className={`flex-1 rounded-xl px-4 py-3 text-center text-sm font-medium transition-all duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
               type === "bad"
                 ? "bg-destructive text-destructive-foreground shadow-sm"
                 : "bg-muted text-muted-foreground"

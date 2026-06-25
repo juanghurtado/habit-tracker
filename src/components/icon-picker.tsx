@@ -12,10 +12,10 @@ export function IconPicker({ selected, onSelect }: IconPickerProps) {
         <button
           key={name}
           onClick={() => onSelect(name)}
-          className={`flex items-center justify-center rounded-xl p-3 transition-all active:scale-90 ${
+          className={`flex items-center justify-center rounded-xl p-3 transition-all duration-150 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
             selected === name
               ? "bg-primary text-primary-foreground shadow-md"
-              : "bg-muted text-muted-foreground hover:bg-muted/80"
+              : "bg-muted text-muted-foreground hoverable:hover:bg-muted/80"
           }`}
         >
           <Icon className="size-6" />

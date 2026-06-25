@@ -63,10 +63,10 @@ export function StatsPage() {
           <button
             onClick={() => setWindowDays(7)}
             className={cn(
-              "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer select-none",
+              "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-150 cursor-pointer select-none active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               windowDays === 7
                 ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hoverable:hover:text-foreground"
             )}
           >
             <Calendar className="size-3.5" />
@@ -75,10 +75,10 @@ export function StatsPage() {
           <button
             onClick={() => setWindowDays(30)}
             className={cn(
-              "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer select-none",
+              "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-150 cursor-pointer select-none active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               windowDays === 30
                 ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hoverable:hover:text-foreground"
             )}
           >
             <CalendarRange className="size-3.5" />

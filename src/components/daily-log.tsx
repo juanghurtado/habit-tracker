@@ -86,7 +86,7 @@ return (
                 <div key={habit.id} className="relative h-full">
                   <button
                     onClick={() => handleComplete(habit.id)}
-                    className="flex h-full w-full flex-col items-center justify-center rounded-2xl p-5 text-center transition-all active:scale-[0.96]"
+                    className="flex h-full w-full flex-col items-center justify-center rounded-2xl p-5 text-center transition-all duration-150 active:scale-[0.97] active:brightness-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     style={{ backgroundColor: `color-mix(in oklch, ${habit.color} 22%, white)` }}
                   >
                     {count > 0 && (
@@ -98,7 +98,7 @@ return (
                       </div>
                     )}
                     <div
-                      className="mb-2 flex size-12 items-center justify-center rounded-2xl text-white transition-transform hover:scale-110"
+                      className="mb-2 flex size-12 items-center justify-center rounded-2xl text-white transition-transform duration-150 hoverable:hover:scale-110"
                       style={{ backgroundColor: habit.color }}
                     >
                       <Icon className="size-6" />
@@ -112,7 +112,7 @@ return (
                     <DropdownMenuTrigger asChild>
                       <div
                         onClick={(e) => e.stopPropagation()}
-                        className="absolute right-1.5 top-1.5 z-10 flex size-8 cursor-pointer items-center justify-center rounded-xl transition-colors hover:bg-black/5"
+                        className="absolute right-1.5 top-1.5 z-10 flex size-8 cursor-pointer items-center justify-center rounded-xl transition-all duration-150 hoverable:hover:bg-black/5 active:scale-90 active:bg-black/10 data-[state=open]:bg-black/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       >
                         <MoreVertical className="size-5" style={{ color: habit.color }} />
                       </div>

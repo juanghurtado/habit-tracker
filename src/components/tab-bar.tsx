@@ -25,10 +25,10 @@ export function TabBar({ activeTab, onTabChange }: TabBarProps) {
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
               className={cn(
-                "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors cursor-pointer select-none",
+                "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-150 cursor-pointer select-none active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 isActive
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hoverable:hover:text-foreground"
               )}
             >
               <Icon className="size-4" />
