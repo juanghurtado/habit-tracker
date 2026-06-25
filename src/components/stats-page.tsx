@@ -41,7 +41,10 @@ export function StatsPage() {
   const { habits, completions } = useHabits()
   const [windowDays, setWindowDays] = useState(7)
 
-  const stats = computeStats(habits, completions, windowDays)
+  const stats = useMemo(
+    () => computeStats(habits, completions, windowDays),
+    [habits, completions, windowDays]
+  )
 
   const summaryStats = useMemo(() => {
     const totalCompletions = stats.goodHabits.reduce((s, h) => s + h.totalInWindow, 0) +
