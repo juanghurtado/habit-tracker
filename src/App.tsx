@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Toaster } from "sonner";
-import { AuthEntry } from "./components/auth-entry.tsx";
 import { BackgroundPattern } from "./components/background-pattern.tsx";
 import { DailyLog } from "./components/daily-log.tsx";
 import { Gate } from "./components/gate.tsx";
 import { StatsPage } from "./components/stats-page.tsx";
 import type { Tab } from "./components/tab-bar.tsx";
 import { TabBar } from "./components/tab-bar.tsx";
+import { Topbar } from "./components/topbar.tsx";
 import { useAuth } from "./hooks/use-auth.tsx";
 import { useHabits } from "./hooks/use-habits.ts";
 import { saveCompletions, saveHabits } from "./lib/storage.ts";
@@ -15,7 +15,7 @@ import { syncAll } from "./lib/sync.ts";
 
 export default function App() {
   const { loading, signIn, signOut, isAuthenticated, user } = useAuth();
-  const { habits, completions } = useHabits();
+  const { habits, completions, syncStatus } = useHabits();
   const [date, setDate] = useState(new Date());
   const [tab, setTab] = useState<Tab>("log");
   const [dismissed, setDismissed] = useState(false);
@@ -75,7 +75,15 @@ export default function App() {
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-md flex-col">
+    <div className="mx-auto flex min-h-dvh max-w-md flex-col pt-[52px]">
+      <Topbar
+        hasLocalData={habits.length > 0 || completions.length > 0}
+        isAuthenticated={isAuthenticated}
+        signIn={signIn}
+        signOut={signOut}
+        syncStatus={syncStatus}
+        user={user}
+      />
       <BackgroundPattern />
       {tab === "log" ? (
         <DailyLog date={date} onDateChange={setDate} />
@@ -84,14 +92,6 @@ export default function App() {
       )}
 
       <TabBar activeTab={tab} onTabChange={setTab} />
-
-      <AuthEntry
-        hasLocalData={habits.length > 0 || completions.length > 0}
-        isAuthenticated={isAuthenticated}
-        signIn={signIn}
-        signOut={signOut}
-        user={user}
-      />
 
       <Toaster
         position="bottom-center"

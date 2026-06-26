@@ -38,9 +38,34 @@ function getSnapshotCompletions(): Completion[] {
   return cachedCompletions;
 }
 
+export type SyncStatus = "idle" | "pending" | "syncing";
+
+let syncStatus: SyncStatus = "idle";
+
+const syncStatusListeners = new Set<() => void>();
+
+function subscribeSyncStatus(callback: () => void): () => void {
+  syncStatusListeners.add(callback);
+  return () => syncStatusListeners.delete(callback);
+}
+
+function getSnapshotSyncStatus(): SyncStatus {
+  return syncStatus;
+}
+
+function notifySyncStatus() {
+  for (const listener of syncStatusListeners) {
+    listener();
+  }
+}
+
 export function useHabits() {
   const habits = useSyncExternalStore(subscribe, getSnapshotHabits);
   const completions = useSyncExternalStore(subscribe, getSnapshotCompletions);
+  const status = useSyncExternalStore(
+    subscribeSyncStatus,
+    getSnapshotSyncStatus
+  );
   const { user } = useAuth();
   const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userRef = useRef(user);
@@ -51,17 +76,24 @@ export function useHabits() {
     if (!currentUser) {
       return;
     }
+    syncStatus = "syncing";
+    notifySyncStatus();
     const currentHabits = loadHabits();
     const currentCompletions = loadCompletions();
-    const result = await syncAll({
-      habits: currentHabits,
-      completions: currentCompletions,
-      supabase,
-      userId: currentUser.id,
-    });
-    saveHabits(result.habits);
-    saveCompletions(result.completions);
-    notifyListeners();
+    try {
+      const result = await syncAll({
+        habits: currentHabits,
+        completions: currentCompletions,
+        supabase,
+        userId: currentUser.id,
+      });
+      saveHabits(result.habits);
+      saveCompletions(result.completions);
+      notifyListeners();
+    } finally {
+      syncStatus = "idle";
+      notifySyncStatus();
+    }
   }, []);
 
   const scheduleSync = useCallback(() => {
@@ -70,8 +102,14 @@ export function useHabits() {
     }
     if (syncTimeoutRef.current) {
       clearTimeout(syncTimeoutRef.current);
+    } else {
+      syncStatus = "pending";
+      notifySyncStatus();
     }
-    syncTimeoutRef.current = setTimeout(doSync, 2000);
+    syncTimeoutRef.current = setTimeout(() => {
+      syncTimeoutRef.current = null;
+      doSync();
+    }, 2000);
   }, [doSync]);
 
   const flushSync = useCallback(() => {
@@ -183,5 +221,6 @@ export function useHabits() {
     deleteHabit,
     addCompletion,
     undoLastCompletion,
+    syncStatus: status,
   };
 }
