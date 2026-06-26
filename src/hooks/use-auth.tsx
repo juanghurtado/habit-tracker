@@ -41,6 +41,16 @@ export function AuthProvider({
     }
     initialized.current = true;
 
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email ?? "",
+        });
+      }
+      setLoading(false);
+    });
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -52,7 +62,6 @@ export function AuthProvider({
       } else {
         setUser(null);
       }
-      setLoading(false);
     });
 
     return () => {
@@ -69,6 +78,7 @@ export function AuthProvider({
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
+    setUser(null);
   }, [supabase]);
 
   return (

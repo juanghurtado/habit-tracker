@@ -7,6 +7,7 @@ import { useHabits } from "./use-habits.ts";
 
 const mockSupabase = {
   auth: {
+    getSession: vi.fn(async () => ({ data: { session: null } })),
     onAuthStateChange: () => ({
       data: { subscription: { unsubscribe: vi.fn() } },
     }),

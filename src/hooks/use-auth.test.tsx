@@ -10,13 +10,12 @@ function createMockSupabase() {
 
   const mock = {
     auth: {
+      getSession: vi.fn(async () => ({ data: { session: null } })),
       signInWithOtp: vi.fn(async () => ({ error: null })),
       signOut: vi.fn(async () => ({ error: null })),
       onAuthStateChange: vi.fn(
         (callback: (event: string, session: unknown) => void) => {
           listeners.push({ callback });
-          // Simulate initial session check
-          setTimeout(() => callback("INITIAL_SESSION", null), 0);
           return {
             data: {
               subscription: {
