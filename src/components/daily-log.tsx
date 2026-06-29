@@ -20,6 +20,12 @@ import { DateNavigation } from "./date-navigation.tsx";
 import { EditHabitSheet } from "./edit-habit-sheet.tsx";
 import { Button } from "./ui/button.tsx";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog.tsx";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -34,6 +40,7 @@ interface DailyLogProps {
 export function DailyLog({ date, onDateChange }: DailyLogProps) {
   const [addOpen, setAddOpen] = useState(false);
   const [editHabit, setEditHabit] = useState<Habit | null>(null);
+  const [habitToDelete, setHabitToDelete] = useState<Habit | null>(null);
 
   const {
     habits,
@@ -187,7 +194,7 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
                         className="text-destructive focus:text-destructive"
                         onClick={(e) => {
                           e.stopPropagation();
-                          deleteHabit(habit.id);
+                          setHabitToDelete(habit);
                         }}
                       >
                         <Trash2 className="size-4" />
@@ -231,6 +238,42 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
         }}
         open={editHabit !== null}
       />
+
+      <Dialog
+        onOpenChange={(open) => {
+          if (!open) {
+            setHabitToDelete(null);
+          }
+        }}
+        open={habitToDelete !== null}
+      >
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>
+              Delete &ldquo;{habitToDelete?.name}&rdquo;?
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-muted-foreground text-sm">
+            This will permanently delete this habit and all of its completions.
+          </p>
+          <div className="flex justify-end gap-2">
+            <Button onClick={() => setHabitToDelete(null)} variant="outline">
+              Cancel
+            </Button>
+            <Button
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (habitToDelete) {
+                  deleteHabit(habitToDelete.id);
+                  setHabitToDelete(null);
+                }
+              }}
+            >
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
