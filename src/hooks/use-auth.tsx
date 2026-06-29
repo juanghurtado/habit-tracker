@@ -69,6 +69,26 @@ export function AuthProvider({
     };
   }, [supabase]);
 
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (session?.user) {
+            setUser({
+              id: session.user.id,
+              email: session.user.email ?? "",
+            });
+          }
+        });
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [supabase]);
+
   const signIn = useCallback(
     async (email: string) => {
       const { error } = await supabase.auth.signInWithOtp({

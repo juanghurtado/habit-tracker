@@ -20,6 +20,26 @@ export default function App() {
   const [date, setDate] = useState(new Date());
   const [tab, setTab] = useState<Tab>("log");
   const [initialSyncDone, setInitialSyncDone] = useState(false);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash.includes("access_token")) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
+  useEffect(() => {
+    const isFromEmail = window.location.hash.includes("access_token");
+    const isStandalone = window.matchMedia(
+      "(display-mode: standalone)"
+    ).matches;
+    const dismissed = localStorage.getItem("pwa-install-banner-dismissed");
+
+    if (isFromEmail && !isStandalone && !dismissed) {
+      setShowInstallBanner(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated && user && !initialSyncDone) {
@@ -51,6 +71,27 @@ export default function App() {
         syncStatus={syncStatus}
         user={user}
       />
+
+      {showInstallBanner && (
+        <div className="fixed top-[52px] right-0 left-0 z-50 mx-auto max-w-md bg-primary px-4 py-3 text-primary-foreground">
+          <div className="flex items-center justify-between gap-2">
+            <p className="font-medium text-sm">
+              Open in the app for the best experience
+            </p>
+            <button
+              className="shrink-0 text-xs opacity-80 hover:opacity-100"
+              onClick={() => {
+                localStorage.setItem("pwa-install-banner-dismissed", "true");
+                setShowInstallBanner(false);
+              }}
+              type="button"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
       <BackgroundPattern />
       <Suspense
         fallback={
