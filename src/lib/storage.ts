@@ -59,10 +59,15 @@ export function loadCompletions(): Completion[] {
   try {
     const raw = localStorage.getItem(COMPLETIONS_KEY);
     const completions: Completion[] = raw ? JSON.parse(raw) : [];
-    if (completions.some((c) => c.syncedAt === undefined)) {
+    if (
+      completions.some(
+        (c) => c.syncedAt === undefined || c.deletedAt === undefined
+      )
+    ) {
       const migrated = completions.map((c) => ({
         ...c,
         syncedAt: c.syncedAt ?? null,
+        deletedAt: c.deletedAt ?? null,
       }));
       try {
         saveCompletions(migrated);
@@ -117,6 +122,7 @@ export function createCompletion(habitId: string, date?: Date): Completion {
     habitId,
     timestamp,
     syncedAt: null,
+    deletedAt: null,
   };
 }
 

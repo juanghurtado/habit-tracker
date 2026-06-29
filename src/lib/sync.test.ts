@@ -25,6 +25,7 @@ function completion(
     habitId: "h1",
     timestamp: "2026-01-01T12:00:00.000Z",
     syncedAt: null,
+    deletedAt: null,
     ...overrides,
   };
 }
@@ -140,6 +141,29 @@ describe("mergeCompletions", () => {
     expect(mergeCompletions([completion({ id: "c1" })], [])).toHaveLength(1);
     expect(mergeCompletions([], [completion({ id: "c1" })])).toHaveLength(1);
   });
+
+  it("skips remote completions with deletedAt set", () => {
+    const local: Completion[] = [];
+    const remote = [
+      completion({ id: "c1", deletedAt: "2026-01-03T12:00:00.000Z" }),
+    ];
+    const result = mergeCompletions(local, remote);
+    expect(result).toHaveLength(0);
+  });
+
+  it("keeps local completion marked as deleted (local wins by id)", () => {
+    const local = [
+      completion({
+        id: "c1",
+        deletedAt: "2026-01-03T12:00:00.000Z",
+        syncedAt: null,
+      }),
+    ];
+    const remote = [completion({ id: "c1", deletedAt: null })];
+    const result = mergeCompletions(local, remote);
+    expect(result).toHaveLength(1);
+    expect(result[0].deletedAt).toBe("2026-01-03T12:00:00.000Z");
+  });
 });
 
 describe("syncAll", () => {
@@ -239,6 +263,7 @@ describe("syncAll", () => {
         habit_id: "h2",
         timestamp: "2026-01-02T12:00:00.000Z",
         synced_at: null,
+        deleted_at: null,
         user_id: "uid",
       },
     ];

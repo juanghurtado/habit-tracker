@@ -40,6 +40,7 @@ function makeCompletion(habitId: string, daysAgo: number): Completion {
     habitId,
     timestamp: `${y}-${m}-${day}T12:00:00.000Z`,
     syncedAt: null,
+    deletedAt: null,
   };
 }
 

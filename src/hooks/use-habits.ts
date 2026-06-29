@@ -17,6 +17,9 @@ let cachedVisibleHabits: Habit[] = cachedHabits.filter(
   (h) => h.deletedAt === null
 );
 let cachedCompletions: Completion[] = loadCompletions();
+let cachedVisibleCompletions: Completion[] = cachedCompletions.filter(
+  (c) => c.deletedAt === null
+);
 
 const listeners = new Set<() => void>();
 
@@ -24,6 +27,9 @@ function notifyListeners() {
   cachedHabits = loadHabits();
   cachedVisibleHabits = cachedHabits.filter((h) => h.deletedAt === null);
   cachedCompletions = loadCompletions();
+  cachedVisibleCompletions = cachedCompletions.filter(
+    (c) => c.deletedAt === null
+  );
   for (const listener of listeners) {
     listener();
   }
@@ -39,7 +45,7 @@ function getSnapshotHabits(): Habit[] {
 }
 
 function getSnapshotCompletions(): Completion[] {
-  return cachedCompletions;
+  return cachedVisibleCompletions;
 }
 
 export type SyncStatus = "idle" | "pending" | "syncing";
@@ -207,14 +213,19 @@ export function useHabits() {
   const undoLastCompletion = useCallback(
     (habitId: string) => {
       const comps = loadCompletions();
-      const habitComps = comps.filter((c) => c.habitId === habitId);
+      const habitComps = comps.filter(
+        (c) => c.habitId === habitId && c.deletedAt === null
+      );
       if (habitComps.length === 0) {
         return;
       }
-      const mostRecent = habitComps.reduce((a, b) =>
+      const now = new Date().toISOString();
+      const targetId = habitComps.reduce((a, b) =>
         a.timestamp > b.timestamp ? a : b
+      ).id;
+      const updated = comps.map((c) =>
+        c.id === targetId ? { ...c, deletedAt: now, syncedAt: null } : c
       );
-      const updated = comps.filter((c) => c.id !== mostRecent.id);
       saveCompletions(updated);
       notifyListeners();
       scheduleSync();

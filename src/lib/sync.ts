@@ -38,7 +38,10 @@ export function mergeCompletions(
   const localIds = new Set(local.map((c) => c.id));
   const merged = [...local];
   for (const remoteCompletion of remote) {
-    if (!localIds.has(remoteCompletion.id)) {
+    if (
+      !localIds.has(remoteCompletion.id) &&
+      remoteCompletion.deletedAt === null
+    ) {
       merged.push(remoteCompletion);
     }
   }
@@ -79,6 +82,7 @@ export async function syncAll(options: {
       habit_id: completion.habitId,
       timestamp: completion.timestamp,
       synced_at: now,
+      deleted_at: completion.deletedAt,
     });
   }
 
@@ -120,6 +124,7 @@ export async function syncAll(options: {
       habitId: r.habit_id as string,
       timestamp: r.timestamp as string,
       syncedAt: (r.synced_at as string | null) ?? null,
+      deletedAt: (r.deleted_at as string | null) ?? null,
     })
   );
 

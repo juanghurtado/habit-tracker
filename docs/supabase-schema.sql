@@ -17,7 +17,8 @@ CREATE TABLE completions (
   user_id UUID REFERENCES auth.users NOT NULL,
   habit_id UUID NOT NULL,
   timestamp TIMESTAMPTZ NOT NULL,
-  synced_at TIMESTAMPTZ
+  synced_at TIMESTAMPTZ,
+  deleted_at TIMESTAMPTZ
 );
 
 ALTER TABLE habits ENABLE ROW LEVEL SECURITY;

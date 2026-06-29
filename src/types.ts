@@ -14,6 +14,7 @@ export interface Habit {
 }
 
 export interface Completion {
+  deletedAt: string | null;
   habitId: string;
   id: string;
   syncedAt: string | null;

@@ -35,18 +35,21 @@ describe("getCompletionsForDate", () => {
       habitId: "a",
       timestamp: "2026-06-25T10:00:00.000Z",
       syncedAt: null,
+      deletedAt: null,
     },
     {
       id: "2",
       habitId: "b",
       timestamp: "2026-06-25T14:30:00.000Z",
       syncedAt: null,
+      deletedAt: null,
     },
     {
       id: "3",
       habitId: "a",
       timestamp: "2026-06-24T23:00:00.000Z",
       syncedAt: null,
+      deletedAt: null,
     },
   ];
 
@@ -76,6 +79,7 @@ describe("getCompletionsForDate", () => {
         habitId: "a",
         timestamp: "2026-06-26T02:00:00.000Z",
         syncedAt: null,
+        deletedAt: null,
       },
     ];
     const localDate = new Date(2026, 5, 25);
@@ -91,18 +95,21 @@ describe("getCompletionsForHabitOnDate", () => {
       habitId: "a",
       timestamp: "2026-06-25T10:00:00.000Z",
       syncedAt: null,
+      deletedAt: null,
     },
     {
       id: "2",
       habitId: "b",
       timestamp: "2026-06-25T14:30:00.000Z",
       syncedAt: null,
+      deletedAt: null,
     },
     {
       id: "3",
       habitId: "a",
       timestamp: "2026-06-24T23:00:00.000Z",
       syncedAt: null,
+      deletedAt: null,
     },
   ];
 
@@ -130,6 +137,7 @@ describe("getCompletionsForHabitOnDate", () => {
         habitId: "a",
         timestamp: "2026-06-26T02:00:00.000Z",
         syncedAt: null,
+        deletedAt: null,
       },
     ];
     const localJune25 = new Date(2026, 5, 25);
@@ -174,6 +182,7 @@ describe("createCompletion", () => {
     expect(completion.timestamp).toBeDefined();
     expect(() => new Date(completion.timestamp)).not.toThrow();
     expect(completion.syncedAt).toBeNull();
+    expect(completion.deletedAt).toBeNull();
   });
 
   it("creates a completion for a specific date so it is findable by getCompletionsForHabitOnDate", () => {
@@ -336,6 +345,7 @@ describe("loadCompletions", () => {
         habitId: "a",
         timestamp: "2026-06-25T10:00:00.000Z",
         syncedAt: null,
+        deletedAt: null,
       },
     ];
     saveCompletions(completions);
@@ -346,7 +356,7 @@ describe("loadCompletions", () => {
     expect(result[0].syncedAt).toBeNull();
   });
 
-  it("migrates old completions missing syncedAt", () => {
+  it("migrates old completions missing syncedAt and deletedAt", () => {
     const legacy = {
       id: "legacy-completion-1",
       habitId: "habit-a",
@@ -358,9 +368,11 @@ describe("loadCompletions", () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].syncedAt).toBeNull();
+    expect(result[0].deletedAt).toBeNull();
 
     const raw = localStorage.getItem("habit-tracker-completions");
     const parsed = raw ? JSON.parse(raw) : [];
     expect(parsed[0].syncedAt).toBeNull();
+    expect(parsed[0].deletedAt).toBeNull();
   });
 });
