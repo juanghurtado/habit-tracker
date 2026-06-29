@@ -61,7 +61,7 @@ export function Gate({ loading, onStart, signIn }: GateProps) {
         <div className="flex w-full flex-col gap-3">
           <input
             autoFocus
-            className="w-full rounded-xl border border-input bg-card px-4 py-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full rounded-xl border border-border bg-bg px-4 py-3 text-base outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring"
             onChange={(e) => setEmail(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {

@@ -2,47 +2,29 @@ import { useEffect, useState } from "react";
 import { Toaster } from "sonner";
 import { BackgroundPattern } from "./components/background-pattern.tsx";
 import { DailyLog } from "./components/daily-log.tsx";
-import { Gate } from "./components/gate.tsx";
 import { StatsPage } from "./components/stats-page.tsx";
 import type { Tab } from "./components/tab-bar.tsx";
 import { TabBar } from "./components/tab-bar.tsx";
 import { Topbar } from "./components/topbar.tsx";
 import { useAuth } from "./hooks/use-auth.tsx";
 import { useHabits } from "./hooks/use-habits.ts";
-import { saveCompletions, saveHabits } from "./lib/storage.ts";
-import { supabase } from "./lib/supabase.ts";
-import { syncAll } from "./lib/sync.ts";
 
 export default function App() {
   const { loading, signIn, signOut, isAuthenticated, user } = useAuth();
-  const { habits, completions, syncStatus } = useHabits();
+  const { syncStatus, syncNow } = useHabits();
   const [date, setDate] = useState(new Date());
   const [tab, setTab] = useState<Tab>("log");
-  const [dismissed, setDismissed] = useState(false);
   const [initialSyncDone, setInitialSyncDone] = useState(false);
 
   useEffect(() => {
-    if (
-      isAuthenticated &&
-      user &&
-      !initialSyncDone &&
-      (habits.length > 0 || completions.length > 0)
-    ) {
-      syncAll({
-        habits,
-        completions,
-        supabase,
-        userId: user.id,
-      }).then((result) => {
-        saveHabits(result.habits);
-        saveCompletions(result.completions);
-      });
+    if (isAuthenticated && user && !initialSyncDone) {
+      syncNow();
       setInitialSyncDone(true);
     }
     if (!isAuthenticated) {
       setInitialSyncDone(false);
     }
-  }, [isAuthenticated, user, habits, completions, initialSyncDone]);
+  }, [isAuthenticated, user, initialSyncDone, syncNow]);
 
   if (loading) {
     return (
@@ -55,29 +37,9 @@ export default function App() {
     );
   }
 
-  const gateDismissed =
-    localStorage.getItem("habit-tracker-gate-dismissed") === "true" ||
-    dismissed;
-
-  const showGate =
-    !(isAuthenticated || gateDismissed) &&
-    habits.length === 0 &&
-    completions.length === 0;
-
-  if (showGate) {
-    return (
-      <Gate
-        loading={false}
-        onStart={() => setDismissed(true)}
-        signIn={signIn}
-      />
-    );
-  }
-
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col pt-[52px]">
       <Topbar
-        hasLocalData={habits.length > 0 || completions.length > 0}
         isAuthenticated={isAuthenticated}
         signIn={signIn}
         signOut={signOut}

@@ -10,7 +10,6 @@ describe("Topbar", () => {
   it("shows email and sign out button when authenticated", () => {
     const { getByText } = render(
       <Topbar
-        hasLocalData={true}
         isAuthenticated={true}
         signIn={vi.fn()}
         signOut={() => Promise.resolve()}
@@ -19,14 +18,13 @@ describe("Topbar", () => {
       />
     );
 
-    expect(getByText("test@example.com")).toBeTruthy();
-    expect(getByText("Sign out")).toBeTruthy();
+    expect(getByText("Cloud backup enabled")).toBeTruthy();
+    expect(getByText("Disable")).toBeTruthy();
   });
 
-  it("shows enable cloud backup when anonymous with data", () => {
+  it("shows enable cloud backup when anonymous without data", () => {
     const { getByText } = render(
       <Topbar
-        hasLocalData={true}
         isAuthenticated={false}
         signIn={vi.fn()}
         signOut={() => Promise.resolve()}
@@ -35,28 +33,13 @@ describe("Topbar", () => {
       />
     );
 
-    expect(getByText("Enable cloud backup")).toBeTruthy();
-  });
-
-  it("renders nothing when anonymous without data", () => {
-    const { container } = render(
-      <Topbar
-        hasLocalData={false}
-        isAuthenticated={false}
-        signIn={vi.fn()}
-        signOut={() => Promise.resolve()}
-        syncStatus="idle"
-        user={null}
-      />
-    );
-
-    expect(container.firstChild).toBeNull();
+    expect(getByText("Cloud backup disabled")).toBeTruthy();
+    expect(getByText("Enable")).toBeTruthy();
   });
 
   it("opens dialog when clicking enable cloud backup", () => {
     const { getByText, getByPlaceholderText } = render(
       <Topbar
-        hasLocalData={true}
         isAuthenticated={false}
         signIn={vi.fn()}
         signOut={() => Promise.resolve()}
@@ -66,7 +49,7 @@ describe("Topbar", () => {
     );
 
     act(() => {
-      getByText("Enable cloud backup").dispatchEvent(
+      getByText("Enable").dispatchEvent(
         new MouseEvent("click", { bubbles: true })
       );
     });
@@ -77,7 +60,6 @@ describe("Topbar", () => {
   it("shows sync spinning icon when syncing", () => {
     const { container } = render(
       <Topbar
-        hasLocalData={true}
         isAuthenticated={true}
         signIn={vi.fn()}
         signOut={() => Promise.resolve()}

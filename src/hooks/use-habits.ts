@@ -13,12 +13,16 @@ import type { Completion, Habit } from "../types.ts";
 import { useAuth } from "./use-auth.tsx";
 
 let cachedHabits: Habit[] = loadHabits();
+let cachedVisibleHabits: Habit[] = cachedHabits.filter(
+  (h) => h.deletedAt === null
+);
 let cachedCompletions: Completion[] = loadCompletions();
 
 const listeners = new Set<() => void>();
 
 function notifyListeners() {
   cachedHabits = loadHabits();
+  cachedVisibleHabits = cachedHabits.filter((h) => h.deletedAt === null);
   cachedCompletions = loadCompletions();
   for (const listener of listeners) {
     listener();
@@ -31,7 +35,7 @@ function subscribe(callback: () => void): () => void {
 }
 
 function getSnapshotHabits(): Habit[] {
-  return cachedHabits;
+  return cachedVisibleHabits;
 }
 
 function getSnapshotCompletions(): Completion[] {
@@ -175,7 +179,12 @@ export function useHabits() {
 
   const deleteHabit = useCallback(
     (id: string) => {
-      const updated = loadHabits().filter((h) => h.id !== id);
+      const now = new Date().toISOString();
+      const updated = loadHabits().map((h) =>
+        h.id === id
+          ? { ...h, deletedAt: now, updatedAt: now, syncedAt: null }
+          : h
+      );
       saveHabits(updated);
       const comps = loadCompletions().filter((c) => c.habitId !== id);
       saveCompletions(comps);
@@ -213,6 +222,10 @@ export function useHabits() {
     [scheduleSync]
   );
 
+  const syncNow = useCallback(() => {
+    doSync();
+  }, [doSync]);
+
   return {
     habits,
     completions,
@@ -222,5 +235,6 @@ export function useHabits() {
     addCompletion,
     undoLastCompletion,
     syncStatus: status,
+    syncNow,
   };
 }

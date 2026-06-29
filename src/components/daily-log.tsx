@@ -83,7 +83,7 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
         <DateNavigation date={date} onDateChange={onDateChange} />
       </header>
 
-      <main className="flex-1 px-4 pb-28">
+      <main className="flex-1 px-4 pb-6">
         {habits.length === 0 ? (
           <div className="flex flex-col items-center justify-center pt-20 text-center">
             <div className="mb-6 flex size-24 items-center justify-center rounded-3xl bg-gradient-to-br from-primary/20 to-secondary/15">
@@ -202,7 +202,7 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
         )}
       </main>
 
-      <div className="fixed right-6 bottom-6 z-20">
+      <div className="flex justify-end px-4 pb-3.5">
         <Button
           className="h-16 w-16 rounded-full p-0 shadow-xl"
           onClick={() => setAddOpen(true)}

@@ -71,7 +71,10 @@ export function AuthProvider({
 
   const signIn = useCallback(
     async (email: string) => {
-      await supabase.auth.signInWithOtp({ email });
+      const { error } = await supabase.auth.signInWithOtp({ email });
+      if (error) {
+        throw error;
+      }
     },
     [supabase]
   );
