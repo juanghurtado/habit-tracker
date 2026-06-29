@@ -42,7 +42,9 @@ const DialogContent = ({
     React.isValidElement(firstChild) && firstChild.type === DialogHeader;
 
   const titleElement = isHeader
-    ? React.Children.toArray(firstChild.props.children).find(
+    ? React.Children.toArray(
+        (firstChild.props as { children?: React.ReactNode }).children
+      ).find(
         (c) =>
           React.isValidElement(c) &&
           (c.type === DialogPrimitive.Title || c.type === DialogTitle)

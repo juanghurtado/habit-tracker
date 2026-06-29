@@ -28,6 +28,8 @@ Biome (the underlying engine) provides robust linting and formatting. Most issue
 
 **Always run the linter after editing files.** After every `edit`, `write`, or `apply_patch` tool use, run `npm exec -- ultracite check` and fix any issues before continuing. If `ultracite check` reports fixable issues, run `npm exec -- ultracite fix` first, then re-run `check` to confirm everything passes.
 
+**Also run the build after editing files.** After running the linter successfully, run `npm run build` to confirm the project compiles without type errors.
+
 ---
 
 ## Core Principles
