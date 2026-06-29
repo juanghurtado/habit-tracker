@@ -67,6 +67,9 @@ describe("useAuth", () => {
     });
     expect(mockSupabase.auth.signInWithOtp).toHaveBeenCalledWith({
       email: "test@example.com",
+      options: {
+        emailRedirectTo: "http://localhost:5173",
+      },
     });
   });
 

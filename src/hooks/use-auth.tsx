@@ -71,7 +71,12 @@ export function AuthProvider({
 
   const signIn = useCallback(
     async (email: string) => {
-      const { error } = await supabase.auth.signInWithOtp({ email });
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: import.meta.env.VITE_APP_URL as string | undefined,
+        },
+      });
       if (error) {
         throw error;
       }
