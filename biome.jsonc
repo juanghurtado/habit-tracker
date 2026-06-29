@@ -39,7 +39,7 @@
   },
   "overrides": [
     {
-      "includes": ["src/main.tsx"],
+      "includes": ["src/main.tsx", "src/App.tsx"],
       "linter": {
         "rules": {
           "correctness": {

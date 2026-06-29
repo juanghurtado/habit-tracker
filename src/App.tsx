@@ -1,13 +1,18 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Toaster } from "sonner";
 import { BackgroundPattern } from "./components/background-pattern.tsx";
-import { DailyLog } from "./components/daily-log.tsx";
-import { StatsPage } from "./components/stats-page.tsx";
 import type { Tab } from "./components/tab-bar.tsx";
 import { TabBar } from "./components/tab-bar.tsx";
 import { Topbar } from "./components/topbar.tsx";
 import { useAuth } from "./hooks/use-auth.tsx";
 import { useHabits } from "./hooks/use-habits.ts";
+
+const DailyLog = lazy(() =>
+  import("./components/daily-log.tsx").then((m) => ({ default: m.DailyLog }))
+);
+const StatsPage = lazy(() =>
+  import("./components/stats-page.tsx").then((m) => ({ default: m.StatsPage }))
+);
 
 export default function App() {
   const { loading, signIn, signOut, isAuthenticated, user } = useAuth();
@@ -47,11 +52,22 @@ export default function App() {
         user={user}
       />
       <BackgroundPattern />
-      {tab === "log" ? (
-        <DailyLog date={date} onDateChange={setDate} />
-      ) : (
-        <StatsPage />
-      )}
+      <Suspense
+        fallback={
+          <div className="flex flex-1 items-center justify-center">
+            <div
+              className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"
+              role="status"
+            />
+          </div>
+        }
+      >
+        {tab === "log" ? (
+          <DailyLog date={date} onDateChange={setDate} />
+        ) : (
+          <StatsPage />
+        )}
+      </Suspense>
 
       <TabBar activeTab={tab} onTabChange={setTab} />
 

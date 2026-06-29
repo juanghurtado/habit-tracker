@@ -5,4 +5,25 @@ import { defineConfig } from "vite";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   base: "/habit-tracker/",
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (
+              id.includes("/react/") ||
+              id.includes("/react-dom/") ||
+              id.includes("/scheduler/")
+            ) {
+              return "vendor-react";
+            }
+            if (id.includes("@supabase/supabase-js")) {
+              return "vendor-supabase";
+            }
+            return "vendor";
+          }
+        },
+      },
+    },
+  },
 });
