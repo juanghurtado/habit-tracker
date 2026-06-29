@@ -5,7 +5,9 @@ import {
   formatDateKey,
   getCompletionsForDate,
   getCompletionsForHabitOnDate,
+  loadCompletions,
   loadHabits,
+  saveCompletions,
   saveHabits,
 } from "./storage.ts";
 
@@ -28,9 +30,24 @@ describe("formatDateKey", () => {
 
 describe("getCompletionsForDate", () => {
   const completions = [
-    { id: "1", habitId: "a", timestamp: "2026-06-25T10:00:00.000Z" },
-    { id: "2", habitId: "b", timestamp: "2026-06-25T14:30:00.000Z" },
-    { id: "3", habitId: "a", timestamp: "2026-06-24T23:00:00.000Z" },
+    {
+      id: "1",
+      habitId: "a",
+      timestamp: "2026-06-25T10:00:00.000Z",
+      syncedAt: null,
+    },
+    {
+      id: "2",
+      habitId: "b",
+      timestamp: "2026-06-25T14:30:00.000Z",
+      syncedAt: null,
+    },
+    {
+      id: "3",
+      habitId: "a",
+      timestamp: "2026-06-24T23:00:00.000Z",
+      syncedAt: null,
+    },
   ];
 
   it("returns completions matching the date key", () => {
@@ -54,7 +71,12 @@ describe("getCompletionsForDate", () => {
 
   it.skip("matches completions across UTC day boundary", () => {
     const completions = [
-      { id: "1", habitId: "a", timestamp: "2026-06-26T02:00:00.000Z" },
+      {
+        id: "1",
+        habitId: "a",
+        timestamp: "2026-06-26T02:00:00.000Z",
+        syncedAt: null,
+      },
     ];
     const localDate = new Date(2026, 5, 25);
     const result = getCompletionsForDate(completions, localDate);
@@ -64,9 +86,24 @@ describe("getCompletionsForDate", () => {
 
 describe("getCompletionsForHabitOnDate", () => {
   const completions = [
-    { id: "1", habitId: "a", timestamp: "2026-06-25T10:00:00.000Z" },
-    { id: "2", habitId: "b", timestamp: "2026-06-25T14:30:00.000Z" },
-    { id: "3", habitId: "a", timestamp: "2026-06-24T23:00:00.000Z" },
+    {
+      id: "1",
+      habitId: "a",
+      timestamp: "2026-06-25T10:00:00.000Z",
+      syncedAt: null,
+    },
+    {
+      id: "2",
+      habitId: "b",
+      timestamp: "2026-06-25T14:30:00.000Z",
+      syncedAt: null,
+    },
+    {
+      id: "3",
+      habitId: "a",
+      timestamp: "2026-06-24T23:00:00.000Z",
+      syncedAt: null,
+    },
   ];
 
   it("returns completions for specific habit and date", () => {
@@ -88,7 +125,12 @@ describe("getCompletionsForHabitOnDate", () => {
 
   it.skip("matches a completion logged near local midnight using UTC range", () => {
     const completions = [
-      { id: "1", habitId: "a", timestamp: "2026-06-26T02:00:00.000Z" },
+      {
+        id: "1",
+        habitId: "a",
+        timestamp: "2026-06-26T02:00:00.000Z",
+        syncedAt: null,
+      },
     ];
     const localJune25 = new Date(2026, 5, 25);
     const result = getCompletionsForHabitOnDate(completions, "a", localJune25);
@@ -115,6 +157,11 @@ describe("createHabit", () => {
     expect(typeof habit.id).toBe("string");
     expect(habit.createdAt).toBeDefined();
     expect(() => new Date(habit.createdAt)).not.toThrow();
+
+    expect(habit.syncedAt).toBeNull();
+    expect(habit.updatedAt).toBeDefined();
+    expect(() => new Date(habit.updatedAt)).not.toThrow();
+    expect(habit.deletedAt).toBeNull();
   });
 });
 
@@ -126,6 +173,7 @@ describe("createCompletion", () => {
     expect(typeof completion.id).toBe("string");
     expect(completion.timestamp).toBeDefined();
     expect(() => new Date(completion.timestamp)).not.toThrow();
+    expect(completion.syncedAt).toBeNull();
   });
 
   it("creates a completion for a specific date so it is findable by getCompletionsForHabitOnDate", () => {
@@ -215,5 +263,104 @@ describe("loadHabits", () => {
   it("returns empty array on corrupt localStorage", () => {
     localStorage.setItem("habit-tracker-habits", "not-json");
     expect(loadHabits()).toEqual([]);
+  });
+
+  it("migrates habits missing syncedAt, updatedAt, and deletedAt", () => {
+    const legacy = {
+      id: "legacy-sync-1",
+      name: "Old habit",
+      icon: "Star",
+      type: "good" as const,
+      color: "oklch(0.7 0.12 225)",
+      buttonLabel: "Done!",
+      createdAt: "2026-01-01T00:00:00.000Z",
+    };
+    localStorage.setItem("habit-tracker-habits", JSON.stringify([legacy]));
+
+    const result = loadHabits();
+
+    expect(result).toHaveLength(1);
+    expect(result[0].syncedAt).toBeNull();
+    expect(result[0].updatedAt).toBeDefined();
+    expect(() => new Date(result[0].updatedAt)).not.toThrow();
+    expect(result[0].deletedAt).toBeNull();
+
+    const raw = localStorage.getItem("habit-tracker-habits");
+    const parsed = raw ? JSON.parse(raw) : [];
+    expect(parsed[0].syncedAt).toBeNull();
+    expect(parsed[0].updatedAt).toBeDefined();
+    expect(parsed[0].deletedAt).toBeNull();
+  });
+
+  it("leaves modern habits with complete sync fields unchanged", () => {
+    const modern = createHabit(
+      "Modern habit",
+      "Zap",
+      "good",
+      "oklch(0.7 0.12 225)",
+      "Nice!"
+    );
+    saveHabits([modern]);
+
+    const result = loadHabits();
+
+    expect(result).toHaveLength(1);
+    expect(result[0].syncedAt).toBeNull();
+    expect(result[0].updatedAt).toBe(modern.updatedAt);
+    expect(result[0].deletedAt).toBeNull();
+
+    const raw = localStorage.getItem("habit-tracker-habits");
+    const storedAfter = raw ? JSON.parse(raw) : [];
+    expect(storedAfter[0].updatedAt).toBe(modern.updatedAt);
+  });
+});
+
+describe("loadCompletions", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it("returns empty array when no completions exist", () => {
+    expect(loadCompletions()).toEqual([]);
+  });
+
+  it("returns empty array on corrupt localStorage", () => {
+    localStorage.setItem("habit-tracker-completions", "not-json");
+    expect(loadCompletions()).toEqual([]);
+  });
+
+  it("returns completions unchanged when they have syncedAt", () => {
+    const completions = [
+      {
+        id: "1",
+        habitId: "a",
+        timestamp: "2026-06-25T10:00:00.000Z",
+        syncedAt: null,
+      },
+    ];
+    saveCompletions(completions);
+
+    const result = loadCompletions();
+
+    expect(result).toHaveLength(1);
+    expect(result[0].syncedAt).toBeNull();
+  });
+
+  it("migrates old completions missing syncedAt", () => {
+    const legacy = {
+      id: "legacy-completion-1",
+      habitId: "habit-a",
+      timestamp: "2026-06-25T10:00:00.000Z",
+    };
+    localStorage.setItem("habit-tracker-completions", JSON.stringify([legacy]));
+
+    const result = loadCompletions();
+
+    expect(result).toHaveLength(1);
+    expect(result[0].syncedAt).toBeNull();
+
+    const raw = localStorage.getItem("habit-tracker-completions");
+    const parsed = raw ? JSON.parse(raw) : [];
+    expect(parsed[0].syncedAt).toBeNull();
   });
 });

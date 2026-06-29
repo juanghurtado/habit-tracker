@@ -39,6 +39,9 @@ const mockHabit: Habit = {
   color: "oklch(0.7 0.12 225)",
   buttonLabel: "I did it!",
   createdAt: "2026-01-01T00:00:00.000Z",
+  syncedAt: null,
+  updatedAt: "2026-01-01T00:00:00.000Z",
+  deletedAt: null,
 };
 
 describe("EditHabitSheet", () => {

@@ -20,6 +20,12 @@ import { DateNavigation } from "./date-navigation.tsx";
 import { EditHabitSheet } from "./edit-habit-sheet.tsx";
 import { Button } from "./ui/button.tsx";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog.tsx";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -34,6 +40,7 @@ interface DailyLogProps {
 export function DailyLog({ date, onDateChange }: DailyLogProps) {
   const [addOpen, setAddOpen] = useState(false);
   const [editHabit, setEditHabit] = useState<Habit | null>(null);
+  const [habitToDelete, setHabitToDelete] = useState<Habit | null>(null);
 
   const {
     habits,
@@ -83,7 +90,7 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
         <DateNavigation date={date} onDateChange={onDateChange} />
       </header>
 
-      <main className="flex-1 px-4 pb-28">
+      <main className="flex-1 px-4 pb-6">
         {habits.length === 0 ? (
           <div className="flex flex-col items-center justify-center pt-20 text-center">
             <div className="mb-6 flex size-24 items-center justify-center rounded-3xl bg-gradient-to-br from-primary/20 to-secondary/15">
@@ -187,7 +194,7 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
                         className="text-destructive focus:text-destructive"
                         onClick={(e) => {
                           e.stopPropagation();
-                          deleteHabit(habit.id);
+                          setHabitToDelete(habit);
                         }}
                       >
                         <Trash2 className="size-4" />
@@ -202,7 +209,7 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
         )}
       </main>
 
-      <div className="fixed right-6 bottom-6 z-20">
+      <div className="flex justify-end px-4 pb-3.5">
         <Button
           className="h-16 w-16 rounded-full p-0 shadow-xl"
           onClick={() => setAddOpen(true)}
@@ -231,6 +238,42 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
         }}
         open={editHabit !== null}
       />
+
+      <Dialog
+        onOpenChange={(open) => {
+          if (!open) {
+            setHabitToDelete(null);
+          }
+        }}
+        open={habitToDelete !== null}
+      >
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>
+              Delete &ldquo;{habitToDelete?.name}&rdquo;?
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-muted-foreground text-sm">
+            This will permanently delete this habit and all of its completions.
+          </p>
+          <div className="flex justify-end gap-2">
+            <Button onClick={() => setHabitToDelete(null)} variant="outline">
+              Cancel
+            </Button>
+            <Button
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (habitToDelete) {
+                  deleteHabit(habitToDelete.id);
+                  setHabitToDelete(null);
+                }
+              }}
+            >
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,17 +1,51 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Toaster } from "sonner";
 import { BackgroundPattern } from "./components/background-pattern.tsx";
 import { DailyLog } from "./components/daily-log.tsx";
 import { StatsPage } from "./components/stats-page.tsx";
 import type { Tab } from "./components/tab-bar.tsx";
 import { TabBar } from "./components/tab-bar.tsx";
+import { Topbar } from "./components/topbar.tsx";
+import { useAuth } from "./hooks/use-auth.tsx";
+import { useHabits } from "./hooks/use-habits.ts";
 
 export default function App() {
+  const { loading, signIn, signOut, isAuthenticated, user } = useAuth();
+  const { syncStatus, syncNow } = useHabits();
   const [date, setDate] = useState(new Date());
   const [tab, setTab] = useState<Tab>("log");
+  const [initialSyncDone, setInitialSyncDone] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated && user && !initialSyncDone) {
+      syncNow();
+      setInitialSyncDone(true);
+    }
+    if (!isAuthenticated) {
+      setInitialSyncDone(false);
+    }
+  }, [isAuthenticated, user, initialSyncDone, syncNow]);
+
+  if (loading) {
+    return (
+      <div className="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center">
+        <div
+          className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"
+          role="status"
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-md flex-col">
+    <div className="mx-auto flex min-h-dvh max-w-md flex-col pt-[52px]">
+      <Topbar
+        isAuthenticated={isAuthenticated}
+        signIn={signIn}
+        signOut={signOut}
+        syncStatus={syncStatus}
+        user={user}
+      />
       <BackgroundPattern />
       {tab === "log" ? (
         <DailyLog date={date} onDateChange={setDate} />
