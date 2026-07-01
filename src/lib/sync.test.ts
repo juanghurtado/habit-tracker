@@ -308,4 +308,87 @@ describe("syncAll", () => {
     expect(result.habits[0].syncedAt).not.toBeNull();
     expect(typeof result.habits[0].syncedAt).toBe("string");
   });
+
+  it("marks habit as synced even when upsert fails (documents bug — plan 012 fixes)", async () => {
+    const habits = [habit({ id: "h1", syncedAt: null })];
+    const mockUpsert = vi
+      .fn()
+      .mockResolvedValue({ error: { message: "fail" } });
+    const mockHabitsEq = vi.fn().mockResolvedValue({ data: [], error: null });
+    const mockSelectHabits = vi.fn().mockReturnValue({ eq: mockHabitsEq });
+    const mockFrom = vi
+      .fn()
+      .mockReturnValue({ upsert: mockUpsert, select: mockSelectHabits });
+    const supabase = { from: mockFrom } as unknown as SupabaseClient;
+
+    const result = await syncAll({
+      habits,
+      completions: [],
+      supabase,
+      userId: "uid",
+    });
+
+    // Current bug: syncedAt is set despite upsert failure
+    expect(result.habits[0].syncedAt).not.toBeNull();
+  });
+
+  it("marks completion as synced even when upsert fails (documents bug — plan 012 fixes)", async () => {
+    const completions = [completion({ id: "c1", syncedAt: null })];
+    let callCount = 0;
+    const mockUpsert = vi.fn().mockImplementation(() => {
+      callCount++;
+      // First call is habits (empty), second is completions (fail)
+      if (callCount === 2) {
+        return { error: { message: "fail" } };
+      }
+      return { error: null };
+    });
+    const mockEq = vi.fn().mockResolvedValue({ data: [], error: null });
+    const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
+    const mockFrom = vi
+      .fn()
+      .mockReturnValue({ upsert: mockUpsert, select: mockSelect });
+    const supabase = { from: mockFrom } as unknown as SupabaseClient;
+
+    const result = await syncAll({
+      habits: [],
+      completions,
+      supabase,
+      userId: "uid",
+    });
+
+    // Current bug: syncedAt is set despite upsert failure
+    expect(result.completions[0].syncedAt).not.toBeNull();
+  });
+
+  it("marks all habits as synced even when some upserts fail", async () => {
+    const habits = [
+      habit({ id: "h1", syncedAt: null }),
+      habit({ id: "h2", syncedAt: null }),
+    ];
+    let callCount = 0;
+    const mockUpsert = vi.fn().mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) {
+        return { error: { message: "fail" } }; // first habit fails
+      }
+      return { error: null }; // second habit succeeds
+    });
+    const mockEq = vi.fn().mockResolvedValue({ data: [], error: null });
+    const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
+    const mockFrom = vi
+      .fn()
+      .mockReturnValue({ upsert: mockUpsert, select: mockSelect });
+    const supabase = { from: mockFrom } as unknown as SupabaseClient;
+
+    const result = await syncAll({
+      habits,
+      completions: [],
+      supabase,
+      userId: "uid",
+    });
+
+    // Current bug: both marked as synced despite first failing
+    expect(result.habits.every((h) => h.syncedAt !== null)).toBe(true);
+  });
 });
