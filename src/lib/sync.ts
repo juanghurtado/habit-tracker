@@ -2,15 +2,15 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Completion, Habit } from "../types.ts";
 
 export function mergeHabits(local: Habit[], remote: Habit[]): Habit[] {
-  const localMap = new Map(local.map((h) => [h.id, h]));
+  const remoteMap = new Map(remote.map((h) => [h.id, h]));
   const seenIds = new Set<string>();
   const merged: Habit[] = [];
 
-  for (const remoteHabit of remote) {
-    const localHabit = localMap.get(remoteHabit.id);
+  for (const localHabit of local) {
+    const remoteHabit = remoteMap.get(localHabit.id);
     let winner: Habit;
-    if (!localHabit) {
-      winner = remoteHabit;
+    if (!remoteHabit) {
+      winner = localHabit;
     } else if (localHabit.updatedAt >= remoteHabit.updatedAt) {
       winner = localHabit;
     } else {
@@ -22,9 +22,9 @@ export function mergeHabits(local: Habit[], remote: Habit[]): Habit[] {
     }
   }
 
-  for (const localHabit of local) {
-    if (!seenIds.has(localHabit.id) && localHabit.deletedAt === null) {
-      merged.push(localHabit);
+  for (const remoteHabit of remote) {
+    if (!seenIds.has(remoteHabit.id) && remoteHabit.deletedAt === null) {
+      merged.push(remoteHabit);
     }
   }
 
