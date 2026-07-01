@@ -209,7 +209,7 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
         )}
       </main>
 
-      <div className="flex justify-end px-4 pb-3.5">
+      <div className="fixed right-4 bottom-2.5 z-20">
         <Button
           className="h-16 w-16 rounded-full p-0 shadow-xl"
           onClick={() => setAddOpen(true)}
