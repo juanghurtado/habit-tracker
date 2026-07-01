@@ -46,7 +46,7 @@
     "build": "node scripts/generate-icons.mjs && tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "deploy": "npm run build && npx gh-pages -d dist",
+    "deploy": "npm run build && npx gh-pages -d dist && node scripts/watch-deploy.mjs",
     "lint": "ultracite check",
     "format": "ultracite fix",
     "check": "ultracite check",
