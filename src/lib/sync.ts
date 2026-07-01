@@ -58,8 +58,9 @@ export async function syncAll(options: {
   const now = new Date().toISOString();
 
   const habitsToPush = habits.filter((h) => h.syncedAt === null);
+  const failedHabitIds = new Set<string>();
   for (const habit of habitsToPush) {
-    await supabase.from("habits").upsert({
+    const { error } = await supabase.from("habits").upsert({
       id: habit.id,
       user_id: userId,
       name: habit.name,
@@ -72,11 +73,15 @@ export async function syncAll(options: {
       updated_at: habit.updatedAt,
       deleted_at: habit.deletedAt,
     });
+    if (error) {
+      failedHabitIds.add(habit.id);
+    }
   }
 
   const completionsToPush = completions.filter((c) => c.syncedAt === null);
+  const failedCompletionIds = new Set<string>();
   for (const completion of completionsToPush) {
-    await supabase.from("completions").upsert({
+    const { error } = await supabase.from("completions").upsert({
       id: completion.id,
       user_id: userId,
       habit_id: completion.habitId,
@@ -84,13 +89,20 @@ export async function syncAll(options: {
       synced_at: now,
       deleted_at: completion.deletedAt,
     });
+    if (error) {
+      failedCompletionIds.add(completion.id);
+    }
   }
 
   const syncedHabits = habits.map((h) =>
-    h.syncedAt === null ? { ...h, syncedAt: now } : h
+    h.syncedAt === null && !failedHabitIds.has(h.id)
+      ? { ...h, syncedAt: now }
+      : h
   );
   const syncedCompletions = completions.map((c) =>
-    c.syncedAt === null ? { ...c, syncedAt: now } : c
+    c.syncedAt === null && !failedCompletionIds.has(c.id)
+      ? { ...c, syncedAt: now }
+      : c
   );
 
   const { data: remoteHabits } = await supabase

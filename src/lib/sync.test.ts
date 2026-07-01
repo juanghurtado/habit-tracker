@@ -309,7 +309,7 @@ describe("syncAll", () => {
     expect(typeof result.habits[0].syncedAt).toBe("string");
   });
 
-  it("marks habit as synced even when upsert fails (documents bug — plan 012 fixes)", async () => {
+  it("leaves syncedAt null when habit upsert fails", async () => {
     const habits = [habit({ id: "h1", syncedAt: null })];
     const mockUpsert = vi
       .fn()
@@ -328,21 +328,14 @@ describe("syncAll", () => {
       userId: "uid",
     });
 
-    // Current bug: syncedAt is set despite upsert failure
-    expect(result.habits[0].syncedAt).not.toBeNull();
+    expect(result.habits[0].syncedAt).toBeNull();
   });
 
-  it("marks completion as synced even when upsert fails (documents bug — plan 012 fixes)", async () => {
+  it("leaves syncedAt null when completion upsert fails", async () => {
     const completions = [completion({ id: "c1", syncedAt: null })];
-    let callCount = 0;
-    const mockUpsert = vi.fn().mockImplementation(() => {
-      callCount++;
-      // First call is habits (empty), second is completions (fail)
-      if (callCount === 2) {
-        return { error: { message: "fail" } };
-      }
-      return { error: null };
-    });
+    const mockUpsert = vi
+      .fn()
+      .mockResolvedValue({ error: { message: "fail" } });
     const mockEq = vi.fn().mockResolvedValue({ data: [], error: null });
     const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
     const mockFrom = vi
@@ -357,11 +350,10 @@ describe("syncAll", () => {
       userId: "uid",
     });
 
-    // Current bug: syncedAt is set despite upsert failure
-    expect(result.completions[0].syncedAt).not.toBeNull();
+    expect(result.completions[0].syncedAt).toBeNull();
   });
 
-  it("marks all habits as synced even when some upserts fail", async () => {
+  it("leaves syncedAt null for failed habits but sets it for successful ones", async () => {
     const habits = [
       habit({ id: "h1", syncedAt: null }),
       habit({ id: "h2", syncedAt: null }),
@@ -388,7 +380,7 @@ describe("syncAll", () => {
       userId: "uid",
     });
 
-    // Current bug: both marked as synced despite first failing
-    expect(result.habits.every((h) => h.syncedAt !== null)).toBe(true);
+    expect(result.habits[0].syncedAt).toBeNull(); // failed
+    expect(result.habits[1].syncedAt).not.toBeNull(); // succeeded
   });
 });
