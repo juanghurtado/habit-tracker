@@ -129,30 +129,19 @@ export function createCompletion(habitId: string, date?: Date): Completion {
 // biome-ignore lint/performance/noBarrelFile: backward-compat re-export for storage.test.ts
 export { formatDateKey } from "./utils.ts";
 
-export function getCompletionsForDate(
+export function completionsOnDate(
   completions: Completion[],
-  date: Date
+  date: Date,
+  habitId?: string
 ): Completion[] {
   const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   const end = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
   const startStr = start.toISOString();
   const endStr = end.toISOString();
-  return completions.filter(
-    (c) => c.timestamp >= startStr && c.timestamp < endStr
-  );
-}
-
-export function getCompletionsForHabitOnDate(
-  completions: Completion[],
-  habitId: string,
-  date: Date
-): Completion[] {
-  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const end = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
-  const startStr = start.toISOString();
-  const endStr = end.toISOString();
-  return completions.filter(
-    (c) =>
-      c.habitId === habitId && c.timestamp >= startStr && c.timestamp < endStr
-  );
+  return completions.filter((c) => {
+    if (habitId !== undefined && c.habitId !== habitId) {
+      return false;
+    }
+    return c.timestamp >= startStr && c.timestamp < endStr;
+  });
 }

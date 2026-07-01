@@ -13,7 +13,7 @@ vi.mock("canvas-confetti", () => ({ default: vi.fn() }));
 vi.mock("sonner", () => ({ toast: vi.fn() }));
 
 vi.mock("../lib/storage.ts", () => ({
-  getCompletionsForHabitOnDate: () => [],
+  completionsOnDate: () => [],
 }));
 
 function mockEmpty() {

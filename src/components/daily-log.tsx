@@ -12,7 +12,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useHabits } from "../hooks/use-habits.ts";
 import { getIcon } from "../lib/icons.ts";
-import { getCompletionsForHabitOnDate } from "../lib/storage.ts";
+import { completionsOnDate } from "../lib/storage.ts";
 import { getRandomToastMessage } from "../lib/toast-messages.ts";
 import type { Habit } from "../types.ts";
 import { AddHabitSheet } from "./add-habit-sheet.tsx";
@@ -104,10 +104,10 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
         ) : (
           <div className="mt-3 grid grid-cols-2 gap-3">
             {habits.map((habit) => {
-              const habitCompletions = getCompletionsForHabitOnDate(
+              const habitCompletions = completionsOnDate(
                 completions,
-                habit.id,
-                date
+                date,
+                habit.id
               );
               const count = habitCompletions.length;
               const Icon = getIcon(habit.icon);

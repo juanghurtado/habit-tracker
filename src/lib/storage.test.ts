@@ -1,10 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
+  completionsOnDate,
   createCompletion,
   createHabit,
   formatDateKey,
-  getCompletionsForDate,
-  getCompletionsForHabitOnDate,
   loadCompletions,
   loadHabits,
   saveCompletions,
@@ -28,7 +27,7 @@ describe("formatDateKey", () => {
   });
 });
 
-describe("getCompletionsForDate", () => {
+describe("completionsOnDate (all habits)", () => {
   const completions = [
     {
       id: "1",
@@ -55,40 +54,25 @@ describe("getCompletionsForDate", () => {
 
   it("returns completions matching the date key", () => {
     const date = new Date(2026, 5, 25);
-    const result = getCompletionsForDate(completions, date);
+    const result = completionsOnDate(completions, date);
     expect(result).toHaveLength(2);
     expect(result.map((c) => c.id)).toEqual(["1", "2"]);
   });
 
   it("returns empty array when no completions match", () => {
     const date = new Date(2026, 6, 1);
-    expect(getCompletionsForDate(completions, date)).toEqual([]);
+    expect(completionsOnDate(completions, date)).toEqual([]);
   });
 
-  it("matches timestamp prefix exactly", () => {
+  it("matches timestamp using local-day range", () => {
     const date = new Date(2026, 5, 24);
-    const result = getCompletionsForDate(completions, date);
+    const result = completionsOnDate(completions, date);
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe("3");
   });
-
-  it.skip("matches completions across UTC day boundary", () => {
-    const completions = [
-      {
-        id: "1",
-        habitId: "a",
-        timestamp: "2026-06-26T02:00:00.000Z",
-        syncedAt: null,
-        deletedAt: null,
-      },
-    ];
-    const localDate = new Date(2026, 5, 25);
-    const result = getCompletionsForDate(completions, localDate);
-    expect(result).toHaveLength(1);
-  });
 });
 
-describe("getCompletionsForHabitOnDate", () => {
+describe("completionsOnDate (specific habit)", () => {
   const completions = [
     {
       id: "1",
@@ -115,35 +99,19 @@ describe("getCompletionsForHabitOnDate", () => {
 
   it("returns completions for specific habit and date", () => {
     const date = new Date(2026, 5, 25);
-    const result = getCompletionsForHabitOnDate(completions, "a", date);
+    const result = completionsOnDate(completions, date, "a");
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe("1");
   });
 
   it("returns empty array for habit with no completions on date", () => {
     const date = new Date(2026, 5, 25);
-    expect(getCompletionsForHabitOnDate(completions, "c", date)).toEqual([]);
+    expect(completionsOnDate(completions, date, "c")).toEqual([]);
   });
 
   it("handles empty completions array", () => {
     const date = new Date(2026, 5, 25);
-    expect(getCompletionsForHabitOnDate([], "a", date)).toEqual([]);
-  });
-
-  it.skip("matches a completion logged near local midnight using UTC range", () => {
-    const completions = [
-      {
-        id: "1",
-        habitId: "a",
-        timestamp: "2026-06-26T02:00:00.000Z",
-        syncedAt: null,
-        deletedAt: null,
-      },
-    ];
-    const localJune25 = new Date(2026, 5, 25);
-    const result = getCompletionsForHabitOnDate(completions, "a", localJune25);
-    expect(result).toHaveLength(1);
-    expect(result[0].id).toBe("1");
+    expect(completionsOnDate([], date, "a")).toEqual([]);
   });
 });
 
@@ -185,14 +153,10 @@ describe("createCompletion", () => {
     expect(completion.deletedAt).toBeNull();
   });
 
-  it("creates a completion for a specific date so it is findable by getCompletionsForHabitOnDate", () => {
+  it("creates a completion for a specific date so it is findable by completionsOnDate", () => {
     const pastDate = new Date(2026, 5, 24);
     const completion = createCompletion("habit-1", pastDate);
-    const result = getCompletionsForHabitOnDate(
-      [completion],
-      "habit-1",
-      pastDate
-    );
+    const result = completionsOnDate([completion], pastDate, "habit-1");
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe(completion.id);
   });

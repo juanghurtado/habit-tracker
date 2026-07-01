@@ -1,4 +1,5 @@
 import type { Completion, Habit } from "../types.ts";
+import { completionsOnDate } from "./storage.ts";
 import { formatDateKey } from "./utils.ts";
 
 export interface DailyCount {
@@ -38,17 +39,6 @@ function getDaysInRange(start: Date, end: Date): Date[] {
     current.setDate(current.getDate() + 1);
   }
   return days;
-}
-
-function countCompletionsOnDate(
-  completions: Completion[],
-  habitId: string,
-  date: Date
-): number {
-  const key = formatDateKey(date);
-  return completions.filter(
-    (c) => c.habitId === habitId && c.timestamp.startsWith(key)
-  ).length;
 }
 
 function getCompletionDateSet(
@@ -172,7 +162,7 @@ export function computeStats(
 
     const dailyData: DailyCount[] = daysInWindow.map((d) => ({
       date: formatDateKey(d),
-      count: countCompletionsOnDate(completions, habit.id, d),
+      count: completionsOnDate(completions, d, habit.id).length,
     }));
 
     const totalInWindow = dailyData.reduce((sum, d) => sum + d.count, 0);
