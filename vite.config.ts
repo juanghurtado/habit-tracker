@@ -11,6 +11,7 @@ export default defineConfig({
       strategies: "injectManifest",
       srcDir: "src",
       filename: "sw.ts",
+      injectRegister: "script",
       manifest: {
         name: "The Habbit",
         short_name: "The Habbit",
