@@ -173,8 +173,20 @@ export function useHabits() {
       color: string,
       buttonLabel: string
     ) => {
+      const now = new Date().toISOString();
       const updated = loadHabits().map((h) =>
-        h.id === id ? { ...h, name, icon, type, color, buttonLabel } : h
+        h.id === id
+          ? {
+              ...h,
+              name,
+              icon,
+              type,
+              color,
+              buttonLabel,
+              updatedAt: now,
+              syncedAt: null,
+            }
+          : h
       );
       saveHabits(updated);
       notifyListeners();

@@ -172,6 +172,41 @@ describe("useHabits", () => {
     expect(result.current.completions).toHaveLength(1);
   });
 
+  it("editHabit sets updatedAt and syncedAt to null for sync", () => {
+    vi.useFakeTimers();
+    const { result } = renderHook(() => useHabits(), {
+      wrapper: createWrapper(),
+    });
+    act(() => {
+      result.current.addHabit(
+        "Test",
+        "Sun",
+        "good",
+        "oklch(0.7 0.12 225)",
+        "Done!"
+      );
+    });
+    const id = result.current.habits[0].id;
+    const originalUpdatedAt = result.current.habits[0].updatedAt;
+
+    vi.advanceTimersByTime(1000);
+    act(() => {
+      result.current.editHabit(
+        id,
+        "Updated",
+        "Moon",
+        "bad",
+        "oklch(0.5 0.2 22)",
+        "Oops..."
+      );
+    });
+
+    expect(result.current.habits[0].name).toBe("Updated");
+    expect(result.current.habits[0].updatedAt).not.toBe(originalUpdatedAt);
+    expect(result.current.habits[0].syncedAt).toBeNull();
+    vi.useRealTimers();
+  });
+
   it("persists data to localStorage", () => {
     const { result } = renderHook(() => useHabits(), {
       wrapper: createWrapper(),
