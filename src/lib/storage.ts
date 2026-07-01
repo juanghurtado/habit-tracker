@@ -126,12 +126,8 @@ export function createCompletion(habitId: string, date?: Date): Completion {
   };
 }
 
-export function formatDateKey(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
+// biome-ignore lint/performance/noBarrelFile: backward-compat re-export for storage.test.ts
+export { formatDateKey } from "./utils.ts";
 
 export function getCompletionsForDate(
   completions: Completion[],
