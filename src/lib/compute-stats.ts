@@ -1,4 +1,5 @@
 import type { Completion, Habit } from "../types.ts";
+import { formatDateKey } from "./utils.ts";
 
 export interface DailyCount {
   count: number;
@@ -23,13 +24,6 @@ export interface StatsResult {
   badHabits: HabitStats[];
   goodHabits: HabitStats[];
   grandTotal: number;
-}
-
-function formatDateKey(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
 }
 
 function startOfDay(d: Date): Date {
