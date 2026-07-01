@@ -2,6 +2,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { loadHabits } from "../lib/storage.ts";
+import { reset as resetStore } from "../lib/store.ts";
+import { reset as resetScheduler } from "../lib/sync-scheduler.ts";
 import { AuthProvider } from "./use-auth.tsx";
 import { useHabits } from "./use-habits.ts";
 
@@ -23,6 +25,8 @@ function createWrapper() {
 describe("useHabits", () => {
   beforeEach(() => {
     localStorage.clear();
+    resetStore();
+    resetScheduler();
   });
 
   it("returns empty habits and completions initially", () => {

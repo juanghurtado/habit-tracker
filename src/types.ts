@@ -13,6 +13,8 @@ export interface Habit {
   updatedAt: string;
 }
 
+export type SyncStatus = "idle" | "pending" | "syncing";
+
 export interface Completion {
   deletedAt: string | null;
   habitId: string;
