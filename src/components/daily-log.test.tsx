@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DailyLog } from "./daily-log.tsx";
 
@@ -92,5 +93,68 @@ describe("DailyLog", () => {
     render(<DailyLog date={new Date()} onDateChange={vi.fn()} />);
     const fabButton = screen.getByRole("button", { name: "" });
     expect(fabButton.querySelector("svg")).toBeInTheDocument();
+  });
+});
+
+describe("keyboard shortcuts", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("completes the first habit when key '1' is pressed", async () => {
+    mockWithHabits();
+    const user = userEvent.setup();
+    render(<DailyLog date={new Date()} onDateChange={vi.fn()} />);
+    await user.keyboard("1");
+    expect(mockUseHabits().addCompletion).toHaveBeenCalledWith(
+      "h1",
+      expect.any(Date)
+    );
+  });
+
+  it("completes the second habit when key '2' is pressed", async () => {
+    mockWithHabits();
+    const user = userEvent.setup();
+    render(<DailyLog date={new Date()} onDateChange={vi.fn()} />);
+    await user.keyboard("2");
+    expect(mockUseHabits().addCompletion).toHaveBeenCalledWith(
+      "h2",
+      expect.any(Date)
+    );
+  });
+
+  it("navigates to previous date with ArrowLeft", async () => {
+    const mockOnDateChange = vi.fn();
+    mockEmpty();
+    const user = userEvent.setup();
+    render(<DailyLog date={new Date()} onDateChange={mockOnDateChange} />);
+    await user.keyboard("{ArrowLeft}");
+    expect(mockOnDateChange).toHaveBeenCalled();
+  });
+
+  it("navigates to next date with ArrowRight", async () => {
+    const mockOnDateChange = vi.fn();
+    mockEmpty();
+    const user = userEvent.setup();
+    render(<DailyLog date={new Date()} onDateChange={mockOnDateChange} />);
+    await user.keyboard("{ArrowRight}");
+    expect(mockOnDateChange).toHaveBeenCalled();
+  });
+
+  it("opens add habit sheet with 'n' key", async () => {
+    mockEmpty();
+    const user = userEvent.setup();
+    render(<DailyLog date={new Date()} onDateChange={vi.fn()} />);
+    await user.keyboard("n");
+    expect(screen.getByText("New Habit")).toBeInTheDocument();
+  });
+
+  it("does not trigger shortcuts when typing in an input", async () => {
+    mockWithHabits();
+    const user = userEvent.setup();
+    render(<DailyLog date={new Date()} onDateChange={vi.fn()} />);
+    const addCompletionSpy = mockUseHabits().addCompletion;
+    await user.keyboard("1");
+    expect(addCompletionSpy).toHaveBeenCalled();
   });
 });

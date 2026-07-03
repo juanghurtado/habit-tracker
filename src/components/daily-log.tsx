@@ -1,4 +1,6 @@
 import confetti from "canvas-confetti";
+import { addDays } from "date-fns/addDays";
+import { subDays } from "date-fns/subDays";
 import {
   Frown,
   MoreVertical,
@@ -8,7 +10,7 @@ import {
   Trash2,
   Undo2,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useHabits } from "../hooks/use-habits.ts";
 import { getIcon } from "../lib/icons.ts";
@@ -51,6 +53,47 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
     addCompletion,
     undoLastCompletion,
   } = useHabits();
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        (e.target as HTMLElement).isContentEditable
+      ) {
+        return;
+      }
+
+      const habitIds = habits
+        .filter((h) => h.deletedAt === null)
+        .map((h) => h.id);
+
+      const digit = Number.parseInt(e.key, 10);
+      if (digit >= 1 && digit <= 9 && habitIds[digit - 1]) {
+        e.preventDefault();
+        addCompletion(habitIds[digit - 1], date);
+        return;
+      }
+
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        onDateChange(subDays(date, 1));
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        onDateChange(addDays(date, 1));
+      }
+
+      if (e.key === "n" || e.key === "N") {
+        e.preventDefault();
+        setAddOpen(true);
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [habits, date, onDateChange, addCompletion]);
 
   function handleComplete(habitId: string) {
     addCompletion(habitId, date);
