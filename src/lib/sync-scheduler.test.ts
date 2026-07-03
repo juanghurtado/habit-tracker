@@ -116,6 +116,23 @@ describe("sync-scheduler", () => {
     expect(mockSyncAll).toHaveBeenCalledTimes(1);
   });
 
+  it("does not start a second sync while one is in progress", async () => {
+    mockSyncAll.mockImplementation(
+      () =>
+        new Promise(() => {
+          /* never resolves */
+        })
+    );
+
+    schedule();
+    await vi.advanceTimersByTimeAsync(2000);
+
+    syncNow();
+
+    expect(mockSyncAll).toHaveBeenCalledTimes(1);
+    reset();
+  });
+
   it("reset clears timeout and status", () => {
     mockSyncAll.mockResolvedValue({ habits: [], completions: [] });
 

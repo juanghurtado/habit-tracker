@@ -6,6 +6,7 @@ import type { SyncStatus } from "../types.ts";
 let syncStatus: SyncStatus = "idle";
 let syncTimeout: ReturnType<typeof setTimeout> | null = null;
 let currentUserId: string | null = null;
+let syncing = false;
 const statusListeners = new Set<() => void>();
 
 function notifyStatusListeners(): void {
@@ -31,7 +32,11 @@ async function doSync(): Promise<void> {
   if (!currentUserId) {
     return;
   }
+  if (syncing) {
+    return;
+  }
 
+  syncing = true;
   syncStatus = "syncing";
   notifyStatusListeners();
 
@@ -46,6 +51,7 @@ async function doSync(): Promise<void> {
     });
     commit(result);
   } finally {
+    syncing = false;
     syncStatus = "idle";
     notifyStatusListeners();
   }
@@ -103,6 +109,7 @@ export function reset(): void {
     syncTimeout = null;
   }
   syncStatus = "idle";
+  syncing = false;
   currentUserId = null;
   statusListeners.clear();
   initialized = false;
