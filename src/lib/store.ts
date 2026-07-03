@@ -54,8 +54,15 @@ export function commit(transforms: {
     state.completions = transforms.completions;
   }
   updateCaches();
-  saveHabits(state.habits);
-  saveCompletions(state.completions);
+  try {
+    saveHabits(state.habits);
+    saveCompletions(state.completions);
+  } catch (e) {
+    console.error(
+      "Failed to persist data to localStorage. Data in memory is intact but will be lost on reload.",
+      e instanceof Error ? e.message : e
+    );
+  }
   notify();
 }
 

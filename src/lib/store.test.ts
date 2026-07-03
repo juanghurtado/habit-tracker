@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import * as storage from "../lib/storage.ts";
 import { loadHabits } from "../lib/storage.ts";
 import { commit, getState, reset, subscribe } from "../lib/store.ts";
 import type { Completion, Habit } from "../types.ts";
@@ -112,5 +113,18 @@ describe("store", () => {
     commit({ completions: [active, deleted] });
     const raw = getState();
     expect(raw.completions).toHaveLength(2);
+  });
+
+  it("does not crash when localStorage write fails", () => {
+    const spy = vi.spyOn(storage, "saveHabits").mockImplementation(() => {
+      throw new Error("QuotaExceededError");
+    });
+    try {
+      const habit = createHabit();
+      expect(() => commit({ habits: [habit] })).not.toThrow();
+      expect(getState().habits).toHaveLength(1);
+    } finally {
+      spy.mockRestore();
+    }
   });
 });
