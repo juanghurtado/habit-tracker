@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Toaster } from "sonner";
 import { BackgroundPattern } from "./components/background-pattern.tsx";
 import type { Tab } from "./components/tab-bar.tsx";
@@ -22,22 +22,28 @@ export default function App() {
   const [initialSyncDone, setInitialSyncDone] = useState(false);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
 
+  const isFromEmailRef = useRef(false);
+
   useEffect(() => {
     const hash = window.location.hash;
-    if (hash.includes("access_token")) {
+    const isFromEmail = hash.includes("access_token");
+    isFromEmailRef.current = isFromEmail;
+
+    if (isFromEmail) {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
 
   useEffect(() => {
-    const isFromEmail = window.location.hash.includes("access_token");
-    const isStandalone = window.matchMedia(
-      "(display-mode: standalone)"
-    ).matches;
-    const dismissed = localStorage.getItem("pwa-install-banner-dismissed");
+    if (isFromEmailRef.current) {
+      const isStandalone = window.matchMedia(
+        "(display-mode: standalone)"
+      ).matches;
+      const dismissed = localStorage.getItem("pwa-install-banner-dismissed");
 
-    if (isFromEmail && !isStandalone && !dismissed) {
-      setShowInstallBanner(true);
+      if (!(isStandalone || dismissed)) {
+        setShowInstallBanner(true);
+      }
     }
   }, []);
 
