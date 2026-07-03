@@ -48,6 +48,86 @@ export function mergeCompletions(
   return merged;
 }
 
+export function validateHabitRecord(r: Record<string, unknown>): asserts r is {
+  id: string;
+  user_id: string;
+  name: string;
+  icon: string;
+  type: "good" | "bad";
+  color: string;
+  button_label: string;
+  created_at: string;
+  updated_at: string;
+  synced_at: string | null;
+  deleted_at: string | null;
+} {
+  const requiredStringFields: Array<keyof typeof r> = [
+    "id",
+    "user_id",
+    "name",
+    "icon",
+    "color",
+    "button_label",
+    "created_at",
+    "updated_at",
+  ];
+  for (const field of requiredStringFields) {
+    if (typeof r[field] !== "string") {
+      throw new Error(
+        `Invalid habit record: field "${String(field)}" is not a string (got ${typeof r[field]})`
+      );
+    }
+  }
+  if (r.type !== "good" && r.type !== "bad") {
+    throw new Error(
+      `Invalid habit record: field "type" must be "good" or "bad" (got ${String(r.type)})`
+    );
+  }
+  const nullableFields: Array<keyof typeof r> = ["synced_at", "deleted_at"];
+  for (const field of nullableFields) {
+    const val = r[field];
+    if (val !== null && val !== undefined && typeof val !== "string") {
+      throw new Error(
+        `Invalid habit record: field "${String(field)}" must be string or null (got ${typeof val})`
+      );
+    }
+  }
+}
+
+export function validateCompletionRecord(
+  r: Record<string, unknown>
+): asserts r is {
+  id: string;
+  user_id: string;
+  habit_id: string;
+  timestamp: string;
+  synced_at: string | null;
+  deleted_at: string | null;
+} {
+  const requiredStringFields: Array<keyof typeof r> = [
+    "id",
+    "user_id",
+    "habit_id",
+    "timestamp",
+  ];
+  for (const field of requiredStringFields) {
+    if (typeof r[field] !== "string") {
+      throw new Error(
+        `Invalid completion record: field "${String(field)}" is not a string (got ${typeof r[field]})`
+      );
+    }
+  }
+  const nullableFields: Array<keyof typeof r> = ["synced_at", "deleted_at"];
+  for (const field of nullableFields) {
+    const val = r[field];
+    if (val !== null && val !== undefined && typeof val !== "string") {
+      throw new Error(
+        `Invalid completion record: field "${String(field)}" must be string or null (got ${typeof val})`
+      );
+    }
+  }
+}
+
 export async function syncAll(options: {
   habits: Habit[];
   completions: Completion[];
@@ -115,29 +195,33 @@ export async function syncAll(options: {
     .select("*")
     .eq("user_id", userId);
 
-  const mappedRemoteHabits: Habit[] = (remoteHabits ?? []).map(
-    (r: Record<string, unknown>) => ({
-      id: r.id as string,
-      name: r.name as string,
-      icon: r.icon as string,
-      type: r.type as "good" | "bad",
-      color: r.color as string,
-      buttonLabel: r.button_label as string,
-      createdAt: r.created_at as string,
-      syncedAt: (r.synced_at as string | null) ?? null,
-      updatedAt: r.updated_at as string,
-      deletedAt: (r.deleted_at as string | null) ?? null,
-    })
-  );
+  const mappedRemoteHabits: Habit[] = (remoteHabits ?? []).map((r) => {
+    validateHabitRecord(r);
+    return {
+      id: r.id,
+      name: r.name,
+      icon: r.icon,
+      type: r.type,
+      color: r.color,
+      buttonLabel: r.button_label,
+      createdAt: r.created_at,
+      syncedAt: r.synced_at,
+      updatedAt: r.updated_at,
+      deletedAt: r.deleted_at,
+    };
+  });
 
   const mappedRemoteCompletions: Completion[] = (remoteCompletions ?? []).map(
-    (r: Record<string, unknown>) => ({
-      id: r.id as string,
-      habitId: r.habit_id as string,
-      timestamp: r.timestamp as string,
-      syncedAt: (r.synced_at as string | null) ?? null,
-      deletedAt: (r.deleted_at as string | null) ?? null,
-    })
+    (r) => {
+      validateCompletionRecord(r);
+      return {
+        id: r.id,
+        habitId: r.habit_id,
+        timestamp: r.timestamp,
+        syncedAt: r.synced_at,
+        deletedAt: r.deleted_at,
+      };
+    }
   );
 
   return {

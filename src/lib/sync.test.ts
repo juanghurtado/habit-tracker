@@ -1,7 +1,13 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { describe, expect, it, vi } from "vitest";
 import type { Completion, Habit } from "../types.ts";
-import { mergeCompletions, mergeHabits, syncAll } from "./sync.ts";
+import {
+  mergeCompletions,
+  mergeHabits,
+  syncAll,
+  validateCompletionRecord,
+  validateHabitRecord,
+} from "./sync.ts";
 
 function habit(overrides: Partial<Habit> & { id: string }): Habit {
   return {
@@ -163,6 +169,91 @@ describe("mergeCompletions", () => {
     const result = mergeCompletions(local, remote);
     expect(result).toHaveLength(1);
     expect(result[0].deletedAt).toBe("2026-01-03T12:00:00.000Z");
+  });
+});
+
+describe("validateHabitRecord", () => {
+  it("accepts a valid habit record", () => {
+    const record = {
+      id: "h1",
+      user_id: "u1",
+      name: "Test",
+      icon: "Sun",
+      type: "good" as const,
+      color: "oklch(0.7 0.12 225)",
+      button_label: "Done!",
+      created_at: "2026-01-01T00:00:00.000Z",
+      updated_at: "2026-01-01T00:00:00.000Z",
+      synced_at: null,
+      deleted_at: null,
+    };
+    expect(() => validateHabitRecord(record as never)).not.toThrow();
+  });
+
+  it("throws when id is not a string", () => {
+    const record = {
+      id: 123,
+      user_id: "u1",
+      name: "Test",
+      icon: "Sun",
+      type: "good" as const,
+      color: "oklch(0.7 0.12 225)",
+      button_label: "Done!",
+      created_at: "2026-01-01T00:00:00.000Z",
+      updated_at: "2026-01-01T00:00:00.000Z",
+      synced_at: null,
+      deleted_at: null,
+    };
+    expect(() => validateHabitRecord(record as never)).toThrow(
+      'Invalid habit record: field "id" is not a string'
+    );
+  });
+
+  it("throws when type is not good or bad", () => {
+    const record = {
+      id: "h1",
+      user_id: "u1",
+      name: "Test",
+      icon: "Sun",
+      type: "invalid" as unknown as "good" | "bad",
+      color: "oklch(0.7 0.12 225)",
+      button_label: "Done!",
+      created_at: "2026-01-01T00:00:00.000Z",
+      updated_at: "2026-01-01T00:00:00.000Z",
+      synced_at: null,
+      deleted_at: null,
+    };
+    expect(() => validateHabitRecord(record as never)).toThrow(
+      'Invalid habit record: field "type" must be "good" or "bad"'
+    );
+  });
+});
+
+describe("validateCompletionRecord", () => {
+  it("accepts a valid completion record", () => {
+    const record = {
+      id: "c1",
+      user_id: "u1",
+      habit_id: "h1",
+      timestamp: "2026-01-01T12:00:00.000Z",
+      synced_at: null,
+      deleted_at: null,
+    };
+    expect(() => validateCompletionRecord(record as never)).not.toThrow();
+  });
+
+  it("throws when timestamp is not a string", () => {
+    const record = {
+      id: "c1",
+      user_id: "u1",
+      habit_id: "h1",
+      timestamp: 12_345,
+      synced_at: null,
+      deleted_at: null,
+    };
+    expect(() => validateCompletionRecord(record as never)).toThrow(
+      'Invalid completion record: field "timestamp" is not a string'
+    );
   });
 });
 
