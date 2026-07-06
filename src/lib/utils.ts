@@ -11,3 +11,11 @@ export function formatDateKey(date: Date): string {
   const d = String(date.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
 }
+
+export function isSameDay(a: Date, b: Date): boolean {
+  return formatDateKey(a) === formatDateKey(b);
+}
+
+export function isToday(date: Date): boolean {
+  return isSameDay(date, new Date());
+}

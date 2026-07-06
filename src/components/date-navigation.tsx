@@ -2,16 +2,17 @@ import { addDays } from "date-fns/addDays";
 import { format } from "date-fns/format";
 import { subDays } from "date-fns/subDays";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { isToday } from "../lib/utils.ts";
 import { Button } from "./ui/button.tsx";
 
-interface DateNavigationProps {
+export interface DateNavigationProps {
   date: Date;
   onDateChange: (date: Date) => void;
 }
 
 export function DateNavigation({ date, onDateChange }: DateNavigationProps) {
   const today = new Date();
-  const isToday = format(date, "yyyy-MM-dd") === format(today, "yyyy-MM-dd");
+  const todayFlag = isToday(date);
 
   return (
     <div className="flex items-center justify-between px-2">
@@ -32,12 +33,12 @@ export function DateNavigation({ date, onDateChange }: DateNavigationProps) {
           {format(date, "EEEE")}
         </p>
         <p className="font-bold text-2xl">
-          {isToday ? "Today" : format(date, "MMM d")}
+          {todayFlag ? "Today" : format(date, "MMM d")}
         </p>
       </button>
       <Button
         aria-label="Next day"
-        disabled={isToday}
+        disabled={todayFlag}
         onClick={() => onDateChange(addDays(date, 1))}
         size="icon"
         variant="ghost"

@@ -16,6 +16,7 @@ import { useHabits } from "../hooks/use-habits.ts";
 import { getIcon } from "../lib/icons.ts";
 import { completionsOnDate } from "../lib/storage.ts";
 import { getRandomToastMessage } from "../lib/toast-messages.ts";
+import { isToday } from "../lib/utils.ts";
 import type { Habit } from "../types.ts";
 import { AddHabitSheet } from "./add-habit-sheet.tsx";
 import { DateNavigation } from "./date-navigation.tsx";
@@ -80,7 +81,7 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
         e.preventDefault();
         onDateChange(subDays(date, 1));
       }
-      if (e.key === "ArrowRight") {
+      if (e.key === "ArrowRight" && !isToday(date)) {
         e.preventDefault();
         onDateChange(addDays(date, 1));
       }

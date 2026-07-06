@@ -127,7 +127,9 @@ describe("keyboard shortcuts", () => {
     const mockOnDateChange = vi.fn();
     mockEmpty();
     const user = userEvent.setup();
-    render(<DailyLog date={new Date()} onDateChange={mockOnDateChange} />);
+    const pastDate = new Date();
+    pastDate.setDate(pastDate.getDate() - 1);
+    render(<DailyLog date={pastDate} onDateChange={mockOnDateChange} />);
     await user.keyboard("{ArrowLeft}");
     expect(mockOnDateChange).toHaveBeenCalled();
   });
@@ -136,9 +138,20 @@ describe("keyboard shortcuts", () => {
     const mockOnDateChange = vi.fn();
     mockEmpty();
     const user = userEvent.setup();
-    render(<DailyLog date={new Date()} onDateChange={mockOnDateChange} />);
+    const pastDate = new Date();
+    pastDate.setDate(pastDate.getDate() - 1);
+    render(<DailyLog date={pastDate} onDateChange={mockOnDateChange} />);
     await user.keyboard("{ArrowRight}");
     expect(mockOnDateChange).toHaveBeenCalled();
+  });
+
+  it("does not navigate forward with ArrowRight when date is today", async () => {
+    const mockOnDateChange = vi.fn();
+    mockEmpty();
+    const user = userEvent.setup();
+    render(<DailyLog date={new Date()} onDateChange={mockOnDateChange} />);
+    await user.keyboard("{ArrowRight}");
+    expect(mockOnDateChange).not.toHaveBeenCalled();
   });
 
   it("opens add habit sheet with 'n' key", async () => {
