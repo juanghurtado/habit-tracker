@@ -7,9 +7,14 @@ import {
 } from "../lib/storage.ts";
 import type { Completion, Habit } from "../types.ts";
 
-interface StoreState {
+export interface StoreState {
   completions: Completion[];
   habits: Habit[];
+}
+
+export interface Transforms {
+  completions?: Completion[];
+  habits?: Habit[];
 }
 
 let state: StoreState = {
@@ -43,10 +48,7 @@ export function getState(): StoreState {
   return state;
 }
 
-export function commit(transforms: {
-  habits?: Habit[];
-  completions?: Completion[];
-}): void {
+export function commit(transforms: Transforms): void {
   if (transforms.habits !== undefined) {
     state.habits = transforms.habits;
   }
