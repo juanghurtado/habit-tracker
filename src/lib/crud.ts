@@ -52,7 +52,9 @@ export function deleteHabit(id: string): void {
   const updatedHabits = habits.map((h) =>
     h.id === id ? { ...h, deletedAt: now, updatedAt: now, syncedAt: null } : h
   );
-  const updatedCompletions = completions.filter((c) => c.habitId !== id);
+  const updatedCompletions = completions.map((c) =>
+    c.habitId === id ? { ...c, deletedAt: now, syncedAt: null } : c
+  );
   commit({ habits: updatedHabits, completions: updatedCompletions });
   schedule();
 }

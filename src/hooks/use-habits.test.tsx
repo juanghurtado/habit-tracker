@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { loadHabits } from "../lib/storage.ts";
-import { reset as resetStore } from "../lib/store.ts";
+import { getState, reset as resetStore } from "../lib/store.ts";
 import { reset as resetScheduler } from "../lib/sync-scheduler.ts";
 import { AuthProvider } from "./use-auth.tsx";
 import { useHabits } from "./use-habits.ts";
@@ -105,7 +105,9 @@ describe("useHabits", () => {
       result.current.deleteHabit(id);
     });
     expect(result.current.habits).toHaveLength(0);
-    expect(result.current.completions).toHaveLength(0);
+    expect(result.current.completions).toHaveLength(0); // UI doesn't show deleted
+    expect(getState().completions).toHaveLength(1); // but in-memory still has them
+    expect(getState().completions[0].deletedAt).not.toBeNull();
   });
 
   it("adds a completion for a habit", () => {
