@@ -41,15 +41,23 @@ export function AuthProvider({
     }
     initialized.current = true;
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email ?? "",
-        });
+    (async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (session?.user) {
+          setUser({
+            id: session.user.id,
+            email: session.user.email ?? "",
+          });
+        }
+      } catch {
+        // getSession failed — user stays logged out, loading ends
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    });
+    })();
 
     const {
       data: { subscription },
@@ -72,14 +80,19 @@ export function AuthProvider({
   useEffect(() => {
     const onVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-          if (session?.user) {
-            setUser({
-              id: session.user.id,
-              email: session.user.email ?? "",
-            });
-          }
-        });
+        supabase.auth
+          .getSession()
+          .then(({ data: { session } }) => {
+            if (session?.user) {
+              setUser({
+                id: session.user.id,
+                email: session.user.email ?? "",
+              });
+            }
+          })
+          .catch(() => {
+            // getSession failed on visibility change — silent fallback
+          });
       }
     };
 

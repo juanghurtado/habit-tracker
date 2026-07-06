@@ -111,4 +111,22 @@ describe("useAuth", () => {
     expect(result.current.user).toBeNull();
     expect(result.current.isAuthenticated).toBe(false);
   });
+
+  it("finishes loading even when getSession rejects", async () => {
+    const failingMock = createMockSupabase();
+    failingMock.auth.getSession = vi.fn(() =>
+      Promise.reject(new Error("Network error"))
+    );
+
+    function failingWrapper({ children }: { children: ReactNode }) {
+      return (
+        <AuthProvider supabase={failingMock as never}>{children}</AuthProvider>
+      );
+    }
+
+    const { result } = renderHook(() => useAuth(), { wrapper: failingWrapper });
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.user).toBeNull();
+    expect(result.current.isAuthenticated).toBe(false);
+  });
 });
