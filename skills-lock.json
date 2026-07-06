@@ -5,7 +5,7 @@
       "source": "mattpocock/skills",
       "sourceType": "github",
       "skillPath": "skills/engineering/ask-matt/SKILL.md",
-      "computedHash": "f3ac3351e2a242ce2591e4f8475424d58f62db3f5786332b78f330b15312d1e0"
+      "computedHash": "2d3f523c8bf1ebbd4d5ecaa1e2678ec629f157248669f1edba807de1d0feb031"
     },
     "codebase-design": {
       "source": "mattpocock/skills",
@@ -41,7 +41,7 @@
       "source": "mattpocock/skills",
       "sourceType": "github",
       "skillPath": "skills/productivity/grilling/SKILL.md",
-      "computedHash": "ef685a6fa0bbe73b05bbd8dc1ec97258191587f07c6aa7dbc9006675ceb8f90f"
+      "computedHash": "bf1e75d96966edd298902d63348c828921b8b095d7306d0cdd56b4a591a7a82b"
     },
     "handoff": {
       "source": "mattpocock/skills",
@@ -53,7 +53,7 @@
       "source": "pbakaus/impeccable",
       "sourceType": "github",
       "skillPath": ".agents/skills/impeccable/SKILL.md",
-      "computedHash": "c5c260ee8333b2710285ba484ab92d5abd23cc03d03cbf984bc2f108a8a47d8a"
+      "computedHash": "14b94c217b5a313cd69eccbed288cce844611f491df2d9e133fa10b19ff28a5a"
     },
     "improve": {
       "source": "shadcn/improve",
@@ -71,19 +71,19 @@
       "source": "mattpocock/skills",
       "sourceType": "github",
       "skillPath": "skills/engineering/prototype/SKILL.md",
-      "computedHash": "40ff56e36bb13b5a9a16903efd6c78a02690ba430e10a8d1a65559100b77f475"
+      "computedHash": "e70c8933d30153a4da47865829d356824b2a830367275e3b00c7b431a1544a79"
     },
     "setup-matt-pocock-skills": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "skillPath": "skills/engineering/setup-matt-pocock-skills/SKILL.md",
-      "computedHash": "400da4521ed701c99e8824ae7b71c7859632ee91481b3715890036cf8aec6857"
+      "computedHash": "a7d798f49081ea5b2606e8bcafa3bc2b34177cfaa24d71c2ddf2d433f4006a4a"
     },
     "tdd": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "skillPath": "skills/engineering/tdd/SKILL.md",
-      "computedHash": "d5ca5c8ae0615f343f1cfd71591f4a586046d77b1f36e8d67b8f643bad51043e"
+      "computedHash": "c9326b88419cfba1d54dd713b7ddb23020e6a93f4b0d13aea58cebba58cda2ee"
     },
     "teach": {
       "source": "mattpocock/skills",
