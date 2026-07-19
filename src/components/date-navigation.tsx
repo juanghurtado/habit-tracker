@@ -25,7 +25,7 @@ export function DateNavigation({ date, onDateChange }: DateNavigationProps) {
         <ChevronLeft className="size-6" />
       </Button>
       <button
-        className="cursor-pointer select-none rounded-xl px-3 py-1 text-center transition-all duration-150 hoverable:hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-95"
+        className="cursor-pointer select-none rounded-xl px-3 py-1 text-center hoverable:hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-95"
         onClick={() => onDateChange(today)}
         type="button"
       >

@@ -10,7 +10,7 @@ import {
   Trash2,
   Undo2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useHabits } from "../hooks/use-habits.ts";
 import { getIcon } from "../lib/icons.ts";
@@ -21,6 +21,7 @@ import type { Habit } from "../types.ts";
 import { AddHabitSheet } from "./add-habit-sheet.tsx";
 import { DateNavigation } from "./date-navigation.tsx";
 import { EditHabitSheet } from "./edit-habit-sheet.tsx";
+import { SwipeLayer } from "./swipe-layer.tsx";
 import { Button } from "./ui/button.tsx";
 import {
   Dialog,
@@ -54,6 +55,172 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
     addCompletion,
     undoLastCompletion,
   } = useHabits();
+
+  const prevDirectionRef = useRef<"left" | "right" | null>(null);
+  const prevDateRef = useRef(date);
+  const [prevContent, setPrevContent] = useState<React.ReactNode | null>(null);
+  const swipeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Render content for a given date (used for both render and swipe)
+  function renderContent(dateToRender: Date): React.ReactNode {
+    if (habits.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center pt-20 text-center">
+          <div className="mb-6 flex size-24 items-center justify-center rounded-3xl bg-gradient-to-br from-primary/20 to-secondary/15">
+            <Plus className="size-10 text-primary" />
+          </div>
+          <h2 className="font-bold text-2xl">Your habits start here</h2>
+          <p className="mt-2 max-w-xs text-muted-foreground text-sm leading-relaxed">
+            Tap the shiny + button below to add your first habit.
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        {habits.map((habit) => {
+          const habitCompletions = completionsOnDate(
+            completions,
+            dateToRender,
+            habit.id
+          );
+          const count = habitCompletions.length;
+          const Icon = getIcon(habit.icon);
+          return (
+            <div className="grid" key={`${habit.id}-${dateToRender.getTime()}`}>
+              <div className="relative h-full">
+                <button
+                  className="group habit-card flex h-full w-full flex-col items-center justify-center rounded-2xl border-2 p-5 text-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] active:brightness-90"
+                  onClick={() => handleComplete(habit.id)}
+                  style={
+                    {
+                      backgroundColor: `color-mix(in oklch, ${habit.color} 22%, white)`,
+                      "--card-border-color": `color-mix(in oklch, ${habit.color} 22%, white)`,
+                      "--card-hover-border-color": `color-mix(in oklch, ${habit.color} 40%, white)`,
+                    } as React.CSSProperties
+                  }
+                  type="button"
+                >
+                  {count > 0 && (
+                    <div
+                      className="absolute top-2.5 left-2.5 flex size-6 items-center justify-center rounded-full font-bold text-white text-xs shadow-sm"
+                      style={{ backgroundColor: habit.color }}
+                    >
+                      {habit.type === "good" ? (
+                        <Smile className="size-4" />
+                      ) : (
+                        <Frown className="size-4" />
+                      )}
+                    </div>
+                  )}
+                  <div
+                    className="mb-2 flex size-12 items-center justify-center rounded-2xl text-white transition-transform duration-150 group-hover:scale-110"
+                    style={{ backgroundColor: habit.color }}
+                  >
+                    <Icon className="size-6" />
+                  </div>
+                  <h3 className="font-bold text-sm leading-tight">
+                    {habit.name}
+                  </h3>
+                  <p className="mt-0.5 font-medium text-muted-foreground text-xs">
+                    {count === 0 ? (
+                      <span className="italic">Not yet today</span>
+                    ) : (
+                      <>
+                        {count} {count === 1 ? "time" : "times"}
+                      </>
+                    )}
+                  </p>
+                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      aria-label="More options"
+                      className="absolute top-1.5 right-1.5 z-10 flex size-8 cursor-pointer items-center justify-center rounded-xl transition-all duration-150 hoverable:hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-90 active:bg-black/10 data-[state=open]:bg-black/10"
+                      onClick={(e) => e.stopPropagation()}
+                      onKeyDown={(e) =>
+                        e.key === "Enter" && e.stopPropagation()
+                      }
+                      type="button"
+                    >
+                      <MoreVertical
+                        className="size-5"
+                        style={{ color: habit.color }}
+                      />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {count > 0 && (
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          undoLastCompletion(habit.id);
+                        }}
+                      >
+                        <Undo2 className="size-4" />
+                        Undo last
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditHabit(habit);
+                      }}
+                    >
+                      <Pencil className="size-4" />
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="text-destructive focus:text-destructive"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setHabitToDelete(habit);
+                      }}
+                    >
+                      <Trash2 className="size-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // Detect date change and trigger swipe animation
+  // biome-ignore lint/correctness/useExhaustiveDependencies: renderContent is a closure over component state; habits/completions keep it fresh
+  useEffect(() => {
+    if (date !== prevDateRef.current) {
+      if (prevDateRef.current > date) {
+        prevDirectionRef.current = "left";
+      } else {
+        prevDirectionRef.current = "right";
+      }
+      // Capture previous content for the exit animation
+      setPrevContent(renderContent(prevDateRef.current));
+      // Clean up old content after animation completes
+      if (swipeTimerRef.current) {
+        clearTimeout(swipeTimerRef.current);
+      }
+      swipeTimerRef.current = setTimeout(() => {
+        setPrevContent(null);
+      }, 250);
+      prevDateRef.current = date;
+    }
+  }, [date, habits, completions]);
+
+  useEffect(
+    () => () => {
+      if (swipeTimerRef.current) {
+        clearTimeout(swipeTimerRef.current);
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -132,141 +299,21 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
   }
 
   return (
-    <div className="flex flex-1 flex-col">
-      <header className="sticky top-0 z-10 px-4 pt-6 pb-4">
+    <article className="flex flex-1 flex-col overflow-hidden">
+      <div className="px-4 pt-6 pb-4">
         <DateNavigation date={date} onDateChange={onDateChange} />
-      </header>
+      </div>
 
-      <main className="flex-1 px-4 pb-6">
-        {habits.length === 0 ? (
-          <div className="flex flex-col items-center justify-center pt-20 text-center">
-            <div className="mb-6 flex size-24 items-center justify-center rounded-3xl bg-gradient-to-br from-primary/20 to-secondary/15">
-              <Plus className="size-10 text-primary" />
-            </div>
-            <h2 className="font-bold text-2xl">Your habits start here</h2>
-            <p className="mt-2 max-w-xs text-muted-foreground text-sm leading-relaxed">
-              Tap the shiny + button below to add your first habit.
-            </p>
-          </div>
-        ) : (
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            {habits.map((habit, index) => {
-              const habitCompletions = completionsOnDate(
-                completions,
-                date,
-                habit.id
-              );
-              const count = habitCompletions.length;
-              const Icon = getIcon(habit.icon);
-              return (
-                <div
-                  className="habit-card-stagger relative h-full"
-                  key={habit.id}
-                  style={
-                    {
-                      "--stagger-index": index,
-                    } as React.CSSProperties
-                  }
-                >
-                  <button
-                    className="group habit-card flex h-full w-full flex-col items-center justify-center rounded-2xl border-2 p-5 text-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] active:brightness-90"
-                    onClick={() => handleComplete(habit.id)}
-                    style={
-                      {
-                        backgroundColor: `color-mix(in oklch, ${habit.color} 22%, white)`,
-                        "--card-border-color": `color-mix(in oklch, ${habit.color} 22%, white)`,
-                        "--card-hover-border-color": `color-mix(in oklch, ${habit.color} 40%, white)`,
-                      } as React.CSSProperties
-                    }
-                    type="button"
-                  >
-                    {count > 0 && (
-                      <div
-                        className="absolute top-2.5 left-2.5 flex size-6 items-center justify-center rounded-full font-bold text-white text-xs shadow-sm"
-                        style={{ backgroundColor: habit.color }}
-                      >
-                        {habit.type === "good" ? (
-                          <Smile className="size-4" />
-                        ) : (
-                          <Frown className="size-4" />
-                        )}
-                      </div>
-                    )}
-                    <div
-                      className="mb-2 flex size-12 items-center justify-center rounded-2xl text-white transition-transform duration-150 group-hover:scale-110"
-                      style={{ backgroundColor: habit.color }}
-                    >
-                      <Icon className="size-6" />
-                    </div>
-                    <h3 className="font-bold text-sm leading-tight">
-                      {habit.name}
-                    </h3>
-                    <p className="mt-0.5 font-medium text-muted-foreground text-xs">
-                      {count === 0 ? (
-                        <span className="italic">Not yet today</span>
-                      ) : (
-                        <>
-                          {count} {count === 1 ? "time" : "times"}
-                        </>
-                      )}
-                    </p>
-                  </button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        aria-label="More options"
-                        className="absolute top-1.5 right-1.5 z-10 flex size-8 cursor-pointer items-center justify-center rounded-xl transition-all duration-150 hoverable:hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-90 active:bg-black/10 data-[state=open]:bg-black/10"
-                        onClick={(e) => e.stopPropagation()}
-                        onKeyDown={(e) =>
-                          e.key === "Enter" && e.stopPropagation()
-                        }
-                        type="button"
-                      >
-                        <MoreVertical
-                          className="size-5"
-                          style={{ color: habit.color }}
-                        />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {count > 0 && (
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            undoLastCompletion(habit.id);
-                          }}
-                        >
-                          <Undo2 className="size-4" />
-                          Undo last
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditHabit(habit);
-                        }}
-                      >
-                        <Pencil className="size-4" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-destructive focus:text-destructive"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setHabitToDelete(habit);
-                        }}
-                      >
-                        <Trash2 className="size-4" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </main>
+      <div className="relative flex-1 overflow-hidden px-4 pb-6">
+        <SwipeLayer
+          content={renderContent(date)}
+          direction={prevDirectionRef.current ?? undefined}
+          onRemoveOld={() => {
+            setPrevContent(null);
+          }}
+          prevContent={prevContent}
+        />
+      </div>
 
       <div className="fixed right-4 bottom-2.5 z-20">
         <Button
@@ -333,6 +380,6 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </article>
   );
 }

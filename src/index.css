@@ -194,18 +194,55 @@ p {
   border-color: var(--card-hover-border-color);
 }
 
-@keyframes staggerCardEnter {
+/* ---- Date swipe animations ---- */
+
+@keyframes swipeSlideRightOut {
   from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.97);
+    transform: translateX(0);
+    opacity: 1;
   }
   to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateX(100%);
+    opacity: 0;
   }
 }
 
-.habit-card-stagger {
-  animation: staggerCardEnter 250ms cubic-bezier(0.23, 1, 0.32, 1) both;
-  animation-delay: calc(var(--stagger-index, 0) * 30ms);
+@keyframes swipeSlideLeftOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
 }
+
+@keyframes swipeEnter {
+  from {
+    transform: translateX(var(--slide-in-from));
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.swipe-layer-enter {
+  animation: swipeEnter 300ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  animation-name: swipeEnter;
+}
+
+@keyframes staggerCardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Stagger card entrance animation — used by staggered card entrance plan */
