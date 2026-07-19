@@ -150,7 +150,7 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
           </div>
         ) : (
           <div className="mt-3 grid grid-cols-2 gap-3">
-            {habits.map((habit) => {
+            {habits.map((habit, index) => {
               const habitCompletions = completionsOnDate(
                 completions,
                 date,
@@ -159,7 +159,15 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
               const count = habitCompletions.length;
               const Icon = getIcon(habit.icon);
               return (
-                <div className="relative h-full" key={habit.id}>
+                <div
+                  className="habit-card-stagger relative h-full"
+                  key={habit.id}
+                  style={
+                    {
+                      "--stagger-index": index,
+                    } as React.CSSProperties
+                  }
+                >
                   <button
                     className="group habit-card flex h-full w-full flex-col items-center justify-center rounded-2xl border-2 p-5 text-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] active:brightness-90"
                     onClick={() => handleComplete(habit.id)}
