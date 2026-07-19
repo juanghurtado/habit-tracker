@@ -118,6 +118,9 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
       icon: <Icon className="size-4" style={{ color: habit.color }} />,
       style: {
         background: `color-mix(in oklch, ${habit.color} 22%, white)`,
+        borderColor: `color-mix(in oklch, ${habit.color} 40%, white)`,
+        borderWidth: "2px",
+        boxShadow: "none",
       },
       className: habit.type === "bad" ? "ToastWobble" : undefined,
       action: {
@@ -158,11 +161,15 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
               return (
                 <div className="relative h-full" key={habit.id}>
                   <button
-                    className="flex h-full w-full flex-col items-center justify-center rounded-2xl p-5 text-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] active:brightness-90"
+                    className="group habit-card flex h-full w-full flex-col items-center justify-center rounded-2xl border-2 p-5 text-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] active:brightness-90"
                     onClick={() => handleComplete(habit.id)}
-                    style={{
-                      backgroundColor: `color-mix(in oklch, ${habit.color} 22%, white)`,
-                    }}
+                    style={
+                      {
+                        backgroundColor: `color-mix(in oklch, ${habit.color} 22%, white)`,
+                        "--card-border-color": `color-mix(in oklch, ${habit.color} 22%, white)`,
+                        "--card-hover-border-color": `color-mix(in oklch, ${habit.color} 40%, white)`,
+                      } as React.CSSProperties
+                    }
                     type="button"
                   >
                     {count > 0 && (
@@ -178,7 +185,7 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
                       </div>
                     )}
                     <div
-                      className="mb-2 flex size-12 items-center justify-center rounded-2xl text-white transition-transform duration-150 hoverable:hover:scale-110"
+                      className="mb-2 flex size-12 items-center justify-center rounded-2xl text-white transition-transform duration-150 group-hover:scale-110"
                       style={{ backgroundColor: habit.color }}
                     >
                       <Icon className="size-6" />

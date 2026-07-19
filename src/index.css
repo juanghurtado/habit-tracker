@@ -122,19 +122,7 @@
   }
 }
 
-@keyframes press {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.ToastWobble {
+.ToastWobble [data-icon] {
   animation: wobble 0.5s ease-in-out;
 }
 
@@ -195,4 +183,13 @@ p {
 
 .DropdownMenuContent[data-state="closed"] {
   animation: zoomOut 0.1s ease-in;
+}
+
+.habit-card {
+  border-color: var(--card-border-color);
+  transition: border-color 0.2s ease;
+}
+
+.habit-card:hover {
+  border-color: var(--card-hover-border-color);
 }
