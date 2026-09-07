@@ -92,12 +92,14 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
               <div className="relative h-full">
                 <button
                   className="group habit-card flex h-full w-full flex-col items-center justify-center rounded-2xl border-2 p-5 text-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] active:brightness-90"
+                  data-done={count > 0 ? "" : undefined}
                   onClick={() => handleComplete(habit.id)}
                   style={
                     {
                       backgroundColor: `color-mix(in oklch, ${habit.color} 22%, white)`,
                       "--card-border-color": `color-mix(in oklch, ${habit.color} 22%, white)`,
                       "--card-hover-border-color": `color-mix(in oklch, ${habit.color} 40%, white)`,
+                      "--card-done-border-color": habit.color,
                     } as React.CSSProperties
                   }
                   type="button"
