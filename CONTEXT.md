@@ -25,7 +25,7 @@ The optional feature, enabled by signing in, that syncs data between the local b
 _Avoid_: Sync, cloud save, remote storage
 
 **Sync**:
-The process of reconciling local data with Supabase. Triggered on every write (debounced) and on visibility change. Habits use last-writer-wins by `updated_at` with soft deletes; Completions are append-only and both copies land.
+The process of reconciling local data with Supabase. Triggered on every write (debounced) and on visibility change. Habits use last-writer-wins by `updated_at` with soft deletes; Completions are append-only and both copies land. Edits made while a Sync is in flight win over that Sync's snapshot, stay marked as unsynced, and are pushed by a follow-up Sync.
 _Avoid_: Replication, merge, backup
 
 **Sync Queue**:

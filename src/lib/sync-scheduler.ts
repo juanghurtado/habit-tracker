@@ -7,6 +7,7 @@ let syncStatus: SyncStatus = "idle";
 let syncTimeout: ReturnType<typeof setTimeout> | null = null;
 let currentUserId: string | null = null;
 let syncing = false;
+let requestedDuringFlight = false;
 const statusListeners = new Set<() => void>();
 
 function notifyStatusListeners(): void {
@@ -33,6 +34,9 @@ async function doSync(): Promise<void> {
     return;
   }
   if (syncing) {
+    // A write landed while a sync is running. Its push was skipped, so run
+    // another sync as soon as this one finishes.
+    requestedDuringFlight = true;
     return;
   }
 
@@ -48,12 +52,19 @@ async function doSync(): Promise<void> {
       completions,
       supabase,
       userId: currentUserId,
+      // The store may have moved on since the snapshot above; syncAll merges
+      // against this so edits made mid-flight win instead of being reverted.
+      getLatestState: getState,
     });
     commit(result);
   } finally {
     syncing = false;
     syncStatus = "idle";
     notifyStatusListeners();
+    if (requestedDuringFlight) {
+      requestedDuringFlight = false;
+      schedule();
+    }
   }
 }
 
@@ -110,6 +121,7 @@ export function reset(): void {
   }
   syncStatus = "idle";
   syncing = false;
+  requestedDuringFlight = false;
   currentUserId = null;
   statusListeners.clear();
   initialized = false;

@@ -128,13 +128,47 @@ export function validateCompletionRecord(
   }
 }
 
+/**
+ * Marks records that were part of this sync's push batch as synced.
+ *
+ * Only records that are still the exact object we pushed are marked: an
+ * identity check, because a local edit while the sync was in flight replaces
+ * the object. Edited or newly added records stay dirty (`syncedAt === null`)
+ * and are pushed by the next sync.
+ */
+function markSynced<T extends { id: string; syncedAt: string | null }>(
+  latest: T[],
+  snapshot: T[],
+  failedIds: Set<string>,
+  now: string
+): T[] {
+  const snapshotById = new Map(snapshot.map((record) => [record.id, record]));
+  return latest.map((record) => {
+    const pushed = snapshotById.get(record.id);
+    if (
+      record !== pushed ||
+      pushed?.syncedAt !== null ||
+      failedIds.has(record.id)
+    ) {
+      return record;
+    }
+    return { ...record, syncedAt: now };
+  });
+}
+
 export async function syncAll(options: {
   habits: Habit[];
   completions: Completion[];
   supabase: SupabaseClient;
   userId: string;
+  /**
+   * Reads the store after the network I/O, so local edits made while this
+   * sync was in flight win over the snapshot we pushed from. Without it the
+   * snapshot is used, which drops concurrent edits.
+   */
+  getLatestState?: () => { habits: Habit[]; completions: Completion[] };
 }): Promise<{ habits: Habit[]; completions: Completion[] }> {
-  const { habits, completions, supabase, userId } = options;
+  const { habits, completions, supabase, userId, getLatestState } = options;
   const now = new Date().toISOString();
 
   const habitsToPush = habits.filter((h) => h.syncedAt === null);
@@ -173,17 +207,6 @@ export async function syncAll(options: {
       failedCompletionIds.add(completion.id);
     }
   }
-
-  const syncedHabits = habits.map((h) =>
-    h.syncedAt === null && !failedHabitIds.has(h.id)
-      ? { ...h, syncedAt: now }
-      : h
-  );
-  const syncedCompletions = completions.map((c) =>
-    c.syncedAt === null && !failedCompletionIds.has(c.id)
-      ? { ...c, syncedAt: now }
-      : c
-  );
 
   const { data: remoteHabits } = await supabase
     .from("habits")
@@ -224,8 +247,19 @@ export async function syncAll(options: {
     }
   );
 
+  // Read the store only now, after every await: edits made while this sync
+  // was in flight are local truth and must win over the snapshot we pushed
+  // from, while the remote copy wins for records untouched locally.
+  const latest = getLatestState ? getLatestState() : { habits, completions };
+
   return {
-    habits: mergeHabits(syncedHabits, mappedRemoteHabits),
-    completions: mergeCompletions(syncedCompletions, mappedRemoteCompletions),
+    habits: mergeHabits(
+      markSynced(latest.habits, habits, failedHabitIds, now),
+      mappedRemoteHabits
+    ),
+    completions: mergeCompletions(
+      markSynced(latest.completions, completions, failedCompletionIds, now),
+      mappedRemoteCompletions
+    ),
   };
 }
