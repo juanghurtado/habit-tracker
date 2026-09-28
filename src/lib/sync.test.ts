@@ -4,7 +4,7 @@ import type { Completion, Habit } from "../types.ts";
 import {
   mergeCompletions,
   mergeHabits,
-  syncAll,
+  runSync,
   validateCompletionRecord,
   validateHabitRecord,
 } from "./sync.ts";
@@ -257,32 +257,40 @@ describe("validateCompletionRecord", () => {
   });
 });
 
-describe("syncAll", () => {
+describe("runSync", () => {
   function createMockSupabase(options?: {
     remoteHabits?: Record<string, unknown>[];
     remoteCompletions?: Record<string, unknown>[];
+    selectError?: { message: string } | null;
+    beforeFetch?: () => void;
   }) {
-    const { remoteHabits = [], remoteCompletions = [] } = options ?? {};
+    const {
+      remoteHabits = [],
+      remoteCompletions = [],
+      selectError = null,
+      beforeFetch,
+    } = options ?? {};
     const mockUpsert = vi.fn().mockResolvedValue({ error: null });
-    const mockHabitsEq = vi.fn().mockResolvedValue({
-      data: remoteHabits,
-      error: null,
+    const mockHabitsEq = vi.fn().mockImplementation(() => {
+      beforeFetch?.();
+      return Promise.resolve({
+        data: selectError ? null : remoteHabits,
+        error: selectError,
+      });
     });
-    const mockCompletionsEq = vi.fn().mockResolvedValue({
-      data: remoteCompletions,
-      error: null,
+    const mockCompletionsEq = vi.fn().mockImplementation(() => {
+      beforeFetch?.();
+      return Promise.resolve({
+        data: selectError ? null : remoteCompletions,
+        error: selectError,
+      });
     });
     const mockSelectHabits = vi.fn().mockReturnValue({ eq: mockHabitsEq });
     const mockSelectCompletions = vi.fn().mockReturnValue({
       eq: mockCompletionsEq,
     });
-    let habitsSelectCalled = false;
     const mockFrom = vi.fn().mockImplementation((table: string) => {
       if (table === "habits") {
-        if (!habitsSelectCalled) {
-          habitsSelectCalled = true;
-          return { upsert: mockUpsert, select: mockSelectHabits };
-        }
         return { upsert: mockUpsert, select: mockSelectHabits };
       }
       if (table === "completions") {
@@ -298,41 +306,55 @@ describe("syncAll", () => {
     };
   }
 
-  it("pushes unsynced habits and completions", async () => {
-    const habits = [habit({ id: "h1", syncedAt: null })];
-    const completions = [completion({ id: "c1", syncedAt: null })];
+  function fakeStore(initial: { habits: Habit[]; completions: Completion[] }) {
+    let state = initial;
+    const commit = vi.fn(
+      (transforms: { habits?: Habit[]; completions?: Completion[] }) => {
+        state = {
+          habits: transforms.habits ?? state.habits,
+          completions: transforms.completions ?? state.completions,
+        };
+      }
+    );
+    return {
+      store: { getState: () => state, commit },
+      commit,
+      latestState: () => state,
+    };
+  }
+
+  it("pushes unsynced records and commits them as synced", async () => {
     const { supabase, mockUpsert, mockFrom } = createMockSupabase();
-    const result = await syncAll({
-      habits,
-      completions,
-      supabase,
-      userId: "uid",
+    const { store, latestState } = fakeStore({
+      habits: [habit({ id: "h1", syncedAt: null })],
+      completions: [completion({ id: "c1", syncedAt: null })],
     });
+
+    const outcome = await runSync({ store, supabase, userId: "uid" });
+
     expect(mockFrom).toHaveBeenCalledWith("habits");
     expect(mockFrom).toHaveBeenCalledWith("completions");
     expect(mockUpsert).toHaveBeenCalledTimes(2);
-    expect(result.habits[0].syncedAt).not.toBeNull();
-    expect(result.completions[0].syncedAt).not.toBeNull();
+    expect(outcome).toEqual({ status: "ok" });
+    expect(latestState().habits[0]?.syncedAt).not.toBeNull();
+    expect(latestState().completions[0]?.syncedAt).not.toBeNull();
   });
 
   it("does not push already synced records", async () => {
-    const habits = [habit({ id: "h1", syncedAt: "2026-01-01T00:00:00.000Z" })];
-    const completions = [
-      completion({ id: "c1", syncedAt: "2026-01-01T00:00:00.000Z" }),
-    ];
     const { supabase, mockUpsert } = createMockSupabase();
-    await syncAll({
-      habits,
-      completions,
-      supabase,
-      userId: "uid",
+    const { store, commit } = fakeStore({
+      habits: [habit({ id: "h1", syncedAt: "2026-01-01T00:00:00.000Z" })],
+      completions: [],
     });
+
+    const outcome = await runSync({ store, supabase, userId: "uid" });
+
     expect(mockUpsert).not.toHaveBeenCalled();
+    expect(outcome).toEqual({ status: "ok" });
+    expect(commit).toHaveBeenCalledTimes(1);
   });
 
-  it("pulls remote records and merges them", async () => {
-    const localHabits = [habit({ id: "h1", name: "Local" })];
-    const localCompletions: Completion[] = [];
+  it("pulls remote records and merges them into the commit", async () => {
     const remoteHabits = [
       {
         id: "h2",
@@ -362,68 +384,31 @@ describe("syncAll", () => {
       remoteHabits,
       remoteCompletions,
     });
-    const result = await syncAll({
-      habits: localHabits,
-      completions: localCompletions,
-      supabase,
-      userId: "uid",
+    const { store, latestState } = fakeStore({
+      habits: [habit({ id: "h1", name: "Local" })],
+      completions: [],
     });
-    expect(result.habits).toHaveLength(2);
-    expect(result.completions).toHaveLength(1);
-    expect(result.completions[0].id).toBe("c2");
+
+    const outcome = await runSync({ store, supabase, userId: "uid" });
+
+    expect(outcome).toEqual({ status: "ok" });
+    expect(latestState().habits).toHaveLength(2);
+    expect(latestState().completions).toHaveLength(1);
+    expect(latestState().completions[0]?.id).toBe("c2");
   });
 
-  it("is a no-op when no user provided (handled by caller)", async () => {
-    // syncAll itself doesn't check the user; the caller does
-    // This test ensures the function handles empty inputs gracefully
+  it("commits an empty reconciliation when there is nothing to sync", async () => {
     const { supabase } = createMockSupabase();
-    const result = await syncAll({
-      habits: [],
-      completions: [],
-      supabase,
-      userId: "uid",
-    });
-    expect(result.habits).toEqual([]);
-    expect(result.completions).toEqual([]);
+    const { store, latestState } = fakeStore({ habits: [], completions: [] });
+
+    const outcome = await runSync({ store, supabase, userId: "uid" });
+
+    expect(outcome).toEqual({ status: "ok" });
+    expect(latestState().habits).toEqual([]);
+    expect(latestState().completions).toEqual([]);
   });
 
-  it("sets syncedAt on pushed records in returned state", async () => {
-    const habits = [habit({ id: "h1" })];
-    const { supabase } = createMockSupabase();
-    const result = await syncAll({
-      habits,
-      completions: [],
-      supabase,
-      userId: "uid",
-    });
-    expect(result.habits[0].syncedAt).not.toBeNull();
-    expect(typeof result.habits[0].syncedAt).toBe("string");
-  });
-
-  it("leaves syncedAt null when habit upsert fails", async () => {
-    const habits = [habit({ id: "h1", syncedAt: null })];
-    const mockUpsert = vi
-      .fn()
-      .mockResolvedValue({ error: { message: "fail" } });
-    const mockHabitsEq = vi.fn().mockResolvedValue({ data: [], error: null });
-    const mockSelectHabits = vi.fn().mockReturnValue({ eq: mockHabitsEq });
-    const mockFrom = vi
-      .fn()
-      .mockReturnValue({ upsert: mockUpsert, select: mockSelectHabits });
-    const supabase = { from: mockFrom } as unknown as SupabaseClient;
-
-    const result = await syncAll({
-      habits,
-      completions: [],
-      supabase,
-      userId: "uid",
-    });
-
-    expect(result.habits[0].syncedAt).toBeNull();
-  });
-
-  it("leaves syncedAt null when completion upsert fails", async () => {
-    const completions = [completion({ id: "c1", syncedAt: null })];
+  it("reports push-rejected but still commits the reconciliation", async () => {
     const mockUpsert = vi
       .fn()
       .mockResolvedValue({ error: { message: "fail" } });
@@ -433,29 +418,25 @@ describe("syncAll", () => {
       .fn()
       .mockReturnValue({ upsert: mockUpsert, select: mockSelect });
     const supabase = { from: mockFrom } as unknown as SupabaseClient;
-
-    const result = await syncAll({
-      habits: [],
-      completions,
-      supabase,
-      userId: "uid",
+    const { store, latestState } = fakeStore({
+      habits: [habit({ id: "h1", syncedAt: null })],
+      completions: [],
     });
 
-    expect(result.completions[0].syncedAt).toBeNull();
+    const outcome = await runSync({ store, supabase, userId: "uid" });
+
+    expect(outcome).toEqual({ status: "failed", reason: "push-rejected" });
+    // Rejected records stay dirty so the next run pushes them again.
+    expect(latestState().habits[0]?.syncedAt).toBeNull();
   });
 
-  it("leaves syncedAt null for failed habits but sets it for successful ones", async () => {
-    const habits = [
-      habit({ id: "h1", syncedAt: null }),
-      habit({ id: "h2", syncedAt: null }),
-    ];
-    let callCount = 0;
+  it("marks the successful pushes but not the rejected ones", async () => {
+    let call = 0;
     const mockUpsert = vi.fn().mockImplementation(() => {
-      callCount++;
-      if (callCount === 1) {
-        return { error: { message: "fail" } }; // first habit fails
-      }
-      return { error: null }; // second habit succeeds
+      call += 1;
+      return Promise.resolve(
+        call === 1 ? { error: { message: "fail" } } : { error: null }
+      );
     });
     const mockEq = vi.fn().mockResolvedValue({ data: [], error: null });
     const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
@@ -463,15 +444,116 @@ describe("syncAll", () => {
       .fn()
       .mockReturnValue({ upsert: mockUpsert, select: mockSelect });
     const supabase = { from: mockFrom } as unknown as SupabaseClient;
-
-    const result = await syncAll({
-      habits,
+    const { store, latestState } = fakeStore({
+      habits: [
+        habit({ id: "h1", syncedAt: null }),
+        habit({ id: "h2", syncedAt: null }),
+      ],
       completions: [],
+    });
+
+    const outcome = await runSync({ store, supabase, userId: "uid" });
+
+    expect(outcome).toEqual({ status: "failed", reason: "push-rejected" });
+    expect(latestState().habits[0]?.syncedAt).toBeNull();
+    expect(latestState().habits[1]?.syncedAt).not.toBeNull();
+  });
+
+  it("reports network and does not commit when the remote copy is unreadable", async () => {
+    const { supabase } = createMockSupabase({
+      selectError: { message: "boom" },
+    });
+    const { store, commit } = fakeStore({ habits: [], completions: [] });
+
+    const outcome = await runSync({ store, supabase, userId: "uid" });
+
+    expect(outcome).toEqual({ status: "failed", reason: "network" });
+    expect(commit).not.toHaveBeenCalled();
+  });
+
+  it("reports invalid-remote and does not commit on a malformed row", async () => {
+    const { supabase } = createMockSupabase({ remoteHabits: [{ id: 123 }] });
+    const { store, commit } = fakeStore({ habits: [], completions: [] });
+
+    const outcome = await runSync({ store, supabase, userId: "uid" });
+
+    expect(outcome).toEqual({ status: "failed", reason: "invalid-remote" });
+    expect(commit).not.toHaveBeenCalled();
+  });
+
+  it("commits edits made while the run is in flight, keeping them dirty", async () => {
+    const original = habit({ id: "h1", name: "Beber agua", syncedAt: null });
+    let local: { habits: Habit[]; completions: Completion[] } = {
+      habits: [original],
+      completions: [],
+    };
+    const commit = vi.fn(
+      (transforms: { habits?: Habit[]; completions?: Completion[] }) => {
+        local = {
+          habits: transforms.habits ?? local.habits,
+          completions: transforms.completions ?? local.completions,
+        };
+      }
+    );
+    // A local edit lands between the snapshot and the remote fetch.
+    const { supabase } = createMockSupabase({
+      beforeFetch: () => {
+        local = {
+          habits: [{ ...original, name: "Renombrado", syncedAt: null }],
+          completions: [],
+        };
+      },
+    });
+
+    const outcome = await runSync({
+      store: { getState: () => local, commit },
       supabase,
       userId: "uid",
     });
 
-    expect(result.habits[0].syncedAt).toBeNull(); // failed
-    expect(result.habits[1].syncedAt).not.toBeNull(); // succeeded
+    expect(outcome).toEqual({ status: "ok" });
+    expect(local.habits[0]?.name).toBe("Renombrado");
+    // The edit was not the record we pushed, so it stays queued.
+    expect(local.habits[0]?.syncedAt).toBeNull();
+  });
+
+  it("snapshots the arrays, not the live state object", async () => {
+    // The real store's getState() returns the same object every time and
+    // replaces its properties on commit — capturing the object instead of
+    // the arrays makes the "snapshot" silently track post-edit state.
+    const state: { habits: Habit[]; completions: Completion[] } = {
+      habits: [habit({ id: "h1", name: "Beber agua", syncedAt: null })],
+      completions: [],
+    };
+    const commit = vi.fn(
+      (transforms: { habits?: Habit[]; completions?: Completion[] }) => {
+        if (transforms.habits) {
+          state.habits = transforms.habits;
+        }
+        if (transforms.completions) {
+          state.completions = transforms.completions;
+        }
+      }
+    );
+    const { supabase } = createMockSupabase({
+      beforeFetch: () => {
+        state.habits = state.habits.map((h) => ({
+          ...h,
+          name: "Renombrado",
+          syncedAt: null,
+        }));
+      },
+    });
+
+    const outcome = await runSync({
+      store: { getState: () => state, commit },
+      supabase,
+      userId: "uid",
+    });
+
+    expect(outcome).toEqual({ status: "ok" });
+    expect(state.habits[0]?.name).toBe("Renombrado");
+    // Marking must key off the captured arrays: the edit stays queued.
+    expect(state.habits[0]?.syncedAt).toBeNull();
   });
 });

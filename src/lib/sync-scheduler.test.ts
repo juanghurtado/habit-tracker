@@ -9,10 +9,10 @@ import {
   syncNow,
 } from "../lib/sync-scheduler.ts";
 
-const mockSyncAll = vi.hoisted(() => vi.fn());
+const mockRunSync = vi.hoisted(() => vi.fn());
 
 vi.mock("../lib/sync.ts", () => ({
-  syncAll: mockSyncAll,
+  runSync: mockRunSync,
 }));
 
 vi.mock("../lib/supabase.ts", () => ({
@@ -27,7 +27,7 @@ vi.mock("../lib/store.ts", () => ({
 describe("sync-scheduler", () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    mockSyncAll.mockReset();
+    mockRunSync.mockReset();
     setUserId("user-1");
   });
 
@@ -41,19 +41,19 @@ describe("sync-scheduler", () => {
   });
 
   it("transitions to pending on schedule, then syncing then idle after sync", async () => {
-    mockSyncAll.mockResolvedValue({ habits: [], completions: [] });
+    mockRunSync.mockResolvedValue({ status: "ok" });
 
     schedule();
     expect(getSnapshotSyncStatus()).toBe("pending");
 
     await vi.advanceTimersByTimeAsync(2000);
 
-    expect(mockSyncAll).toHaveBeenCalledTimes(1);
+    expect(mockRunSync).toHaveBeenCalledTimes(1);
     expect(getSnapshotSyncStatus()).toBe("idle");
   });
 
   it("transitions to syncing after debounce resolves", async () => {
-    mockSyncAll.mockResolvedValue({ habits: [], completions: [] });
+    mockRunSync.mockResolvedValue({ status: "ok" });
 
     const statuses: string[] = [];
     subscribeSyncStatus(() => {
@@ -69,16 +69,16 @@ describe("sync-scheduler", () => {
 
   it("does not sync when userId is null", async () => {
     setUserId(null);
-    mockSyncAll.mockResolvedValue({ habits: [], completions: [] });
+    mockRunSync.mockResolvedValue({ status: "ok" });
 
     schedule();
     await vi.advanceTimersByTimeAsync(2000);
 
-    expect(mockSyncAll).not.toHaveBeenCalled();
+    expect(mockRunSync).not.toHaveBeenCalled();
   });
 
   it("debounces multiple schedule calls within 2s", async () => {
-    mockSyncAll.mockResolvedValue({ habits: [], completions: [] });
+    mockRunSync.mockResolvedValue({ status: "ok" });
 
     schedule();
     await vi.advanceTimersByTimeAsync(500);
@@ -87,37 +87,37 @@ describe("sync-scheduler", () => {
     schedule();
     await vi.advanceTimersByTimeAsync(2000);
 
-    expect(mockSyncAll).toHaveBeenCalledTimes(1);
+    expect(mockRunSync).toHaveBeenCalledTimes(1);
   });
 
   it("flush cancels debounce and syncs immediately", async () => {
-    mockSyncAll.mockResolvedValue({ habits: [], completions: [] });
+    mockRunSync.mockResolvedValue({ status: "ok" });
 
     schedule();
     await vi.advanceTimersByTimeAsync(500);
     flush();
 
-    expect(mockSyncAll).toHaveBeenCalledTimes(1);
+    expect(mockRunSync).toHaveBeenCalledTimes(1);
   });
 
   it("flush syncs immediately even when no pending sync", () => {
-    mockSyncAll.mockResolvedValue({ habits: [], completions: [] });
+    mockRunSync.mockResolvedValue({ status: "ok" });
 
     flush();
 
-    expect(mockSyncAll).toHaveBeenCalledTimes(1);
+    expect(mockRunSync).toHaveBeenCalledTimes(1);
   });
 
   it("syncNow syncs immediately regardless of pending state", () => {
-    mockSyncAll.mockResolvedValue({ habits: [], completions: [] });
+    mockRunSync.mockResolvedValue({ status: "ok" });
 
     syncNow();
 
-    expect(mockSyncAll).toHaveBeenCalledTimes(1);
+    expect(mockRunSync).toHaveBeenCalledTimes(1);
   });
 
   it("does not start a second sync while one is in progress", async () => {
-    mockSyncAll.mockImplementation(
+    mockRunSync.mockImplementation(
       () =>
         new Promise(() => {
           /* never resolves */
@@ -129,12 +129,34 @@ describe("sync-scheduler", () => {
 
     syncNow();
 
-    expect(mockSyncAll).toHaveBeenCalledTimes(1);
+    expect(mockRunSync).toHaveBeenCalledTimes(1);
     reset();
   });
 
+  it("logs a failed run and does not schedule a retry", async () => {
+    mockRunSync.mockResolvedValue({ status: "failed", reason: "network" });
+    const warn = vi
+      .spyOn(console, "warn")
+      // biome-ignore lint/suspicious/noEmptyBlockStatements: silence the expected warning
+      .mockImplementation(() => {});
+
+    try {
+      syncNow();
+      await vi.advanceTimersByTimeAsync(0);
+
+      expect(getSnapshotSyncStatus()).toBe("idle");
+      expect(warn).toHaveBeenCalledWith("[sync] run failed: network");
+
+      // No automatic retry: dirty records wait for the next natural trigger.
+      await vi.advanceTimersByTimeAsync(10_000);
+      expect(mockRunSync).toHaveBeenCalledTimes(1);
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
   it("reset clears timeout and status", () => {
-    mockSyncAll.mockResolvedValue({ habits: [], completions: [] });
+    mockRunSync.mockResolvedValue({ status: "ok" });
 
     schedule();
     reset();
@@ -142,7 +164,7 @@ describe("sync-scheduler", () => {
     expect(getSnapshotSyncStatus()).toBe("idle");
 
     vi.advanceTimersByTime(2000);
-    expect(mockSyncAll).not.toHaveBeenCalled();
+    expect(mockRunSync).not.toHaveBeenCalled();
   });
 
   it("subscribes and unsubscribes correctly", () => {

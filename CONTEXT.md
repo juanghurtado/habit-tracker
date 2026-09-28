@@ -28,6 +28,10 @@ _Avoid_: Sync, cloud save, remote storage
 The process of reconciling local data with Supabase. Triggered on every write (debounced) and on visibility change. Habits use last-writer-wins by `updated_at` with soft deletes; Completions are append-only and both copies land. Edits made while a Sync is in flight win over that Sync's snapshot, stay marked as unsynced, and are pushed by a follow-up Sync.
 _Avoid_: Replication, merge, backup
 
+**Sync Outcome**:
+What one Sync run reports back: `ok` when everything pushed, fetched and merged, or `failed` with a reason — `network` (remote copy unreadable, nothing reconciled), `invalid-remote` (a remote row failed validation, nothing committed), or `push-rejected` (some records refused on upload; the reconciliation itself still commits). A failed Sync is quiet in the UI: the dirty records stay in the Sync Queue for the next trigger.
+_Avoid_: result, response, error state
+
 **Sync Queue**:
 Records created or modified while offline that haven't been pushed to Supabase yet. Identified by a `synced_at` timestamp of `null`.
 _Avoid_: Pending changes, outbox, dirty records

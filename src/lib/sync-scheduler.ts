@@ -1,6 +1,6 @@
 import { commit, getState } from "../lib/store.ts";
 import { supabase } from "../lib/supabase.ts";
-import { syncAll } from "../lib/sync.ts";
+import { runSync } from "../lib/sync.ts";
 import type { SyncStatus } from "../types.ts";
 
 let syncStatus: SyncStatus = "idle";
@@ -44,19 +44,17 @@ async function doSync(): Promise<void> {
   syncStatus = "syncing";
   notifyStatusListeners();
 
-  const { habits, completions } = getState();
-
   try {
-    const result = await syncAll({
-      habits,
-      completions,
+    const outcome = await runSync({
+      store: { getState, commit },
       supabase,
       userId: currentUserId,
-      // The store may have moved on since the snapshot above; syncAll merges
-      // against this so edits made mid-flight win instead of being reverted.
-      getLatestState: getState,
     });
-    commit(result);
+    if (outcome.status === "failed") {
+      // Quiet by design (ADR-0004: the app works fine while Supabase is
+      // down) — the dirty records stay queued for the next natural trigger.
+      console.warn(`[sync] run failed: ${outcome.reason}`);
+    }
   } finally {
     syncing = false;
     syncStatus = "idle";
