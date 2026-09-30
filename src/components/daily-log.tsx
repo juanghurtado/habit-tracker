@@ -13,6 +13,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useHabits } from "../hooks/use-habits.ts";
+import { useSwipeNavigation } from "../hooks/use-swipe-navigation.ts";
 import { getIcon } from "../lib/icons.ts";
 import { completionsOnDate } from "../lib/storage.ts";
 import { getRandomToastMessage } from "../lib/toast-messages.ts";
@@ -60,6 +61,17 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
   const prevDateRef = useRef(date);
   const [prevContent, setPrevContent] = useState<React.ReactNode | null>(null);
   const swipeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const swipeHandlers = useSwipeNavigation({
+    onSwipeLeft: () => {
+      if (!isToday(date)) {
+        onDateChange(addDays(date, 1));
+      }
+    },
+    onSwipeRight: () => {
+      onDateChange(subDays(date, 1));
+    },
+  });
 
   // Render content for a given date (used for both render and swipe)
   function renderContent(dateToRender: Date): React.ReactNode {
@@ -306,7 +318,10 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
         <DateNavigation date={date} onDateChange={onDateChange} />
       </div>
 
-      <div className="relative flex-1 overflow-hidden px-4 pb-6">
+      <div
+        className="relative flex-1 touch-pan-y overflow-hidden px-4 pb-6"
+        {...swipeHandlers}
+      >
         <SwipeLayer
           content={renderContent(date)}
           direction={prevDirectionRef.current ?? undefined}
