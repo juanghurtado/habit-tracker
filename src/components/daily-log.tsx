@@ -16,6 +16,7 @@ import { useHabits } from "../hooks/use-habits.ts";
 import { getIcon } from "../lib/icons.ts";
 import { completionsOnDate } from "../lib/storage.ts";
 import { getRandomToastMessage } from "../lib/toast-messages.ts";
+import { getToastPosition } from "../lib/toast-position.ts";
 import { isToday } from "../lib/utils.ts";
 import type { Habit } from "../types.ts";
 import { AddHabitSheet } from "./add-habit-sheet.tsx";
@@ -93,7 +94,9 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
                 <button
                   className="group habit-card flex h-full w-full flex-col items-center justify-center rounded-2xl border-2 p-5 text-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] active:brightness-90"
                   data-done={count > 0 ? "" : undefined}
-                  onClick={() => handleComplete(habit.id)}
+                  onClick={(event) =>
+                    handleComplete(habit.id, event.currentTarget)
+                  }
                   style={
                     {
                       backgroundColor: `color-mix(in oklch, ${habit.color} 22%, white)`,
@@ -265,7 +268,7 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [habits, date, onDateChange, addCompletion]);
 
-  function handleComplete(habitId: string) {
+  function handleComplete(habitId: string, card: HTMLElement) {
     addCompletion(habitId, date);
     const habit = habits.find((h) => h.id === habitId);
     if (!habit) {
@@ -285,6 +288,7 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
 
     toast(message, {
       icon: <Icon className="size-4" style={{ color: habit.color }} />,
+      position: getToastPosition(card),
       style: {
         background: `color-mix(in oklch, ${habit.color} 22%, white)`,
         borderColor: `color-mix(in oklch, ${habit.color} 40%, white)`,

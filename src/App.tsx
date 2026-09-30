@@ -119,8 +119,9 @@ export default function App() {
       <TabBar activeTab={tab} onTabChange={setTab} />
 
       <Toaster
+        mobileOffset={{ top: 60, bottom: 80 }}
+        offset={{ top: 60, bottom: 80 }}
         position="bottom-center"
-        style={{ bottom: "80px" }}
         toastOptions={{
           style: {
             background: "var(--color-card)",
