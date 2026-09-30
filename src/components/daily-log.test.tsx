@@ -1,5 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { addDays } from "date-fns/addDays";
+import { subDays } from "date-fns/subDays";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DailyLog } from "./daily-log.tsx";
 
@@ -169,5 +171,69 @@ describe("keyboard shortcuts", () => {
     const addCompletionSpy = mockUseHabits().addCompletion;
     await user.keyboard("1");
     expect(addCompletionSpy).toHaveBeenCalled();
+  });
+});
+
+describe("swipe navigation", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  function swipeSurface(container: HTMLElement): HTMLElement {
+    const surface = container.querySelector<HTMLElement>(".touch-pan-y");
+    if (!surface) {
+      throw new Error("swipe surface not found");
+    }
+    return surface;
+  }
+
+  function swipe(element: HTMLElement, fromX: number, toX: number) {
+    fireEvent.touchStart(element, {
+      touches: [{ clientX: fromX, clientY: 100 }],
+    });
+    fireEvent.touchMove(element, {
+      touches: [{ clientX: toX, clientY: 100 }],
+    });
+    fireEvent.touchEnd(element, {
+      changedTouches: [{ clientX: toX, clientY: 100 }],
+    });
+  }
+
+  it("goes to the previous day when swiping right", () => {
+    mockEmpty();
+    const onDateChange = vi.fn();
+    const date = new Date();
+    const { container } = render(
+      <DailyLog date={date} onDateChange={onDateChange} />
+    );
+
+    swipe(swipeSurface(container), 100, 220);
+
+    expect(onDateChange).toHaveBeenCalledWith(subDays(date, 1));
+  });
+
+  it("goes to the next day when swiping left", () => {
+    mockEmpty();
+    const onDateChange = vi.fn();
+    const date = subDays(new Date(), 2);
+    const { container } = render(
+      <DailyLog date={date} onDateChange={onDateChange} />
+    );
+
+    swipe(swipeSurface(container), 220, 100);
+
+    expect(onDateChange).toHaveBeenCalledWith(addDays(date, 1));
+  });
+
+  it("does not go past today when swiping left", () => {
+    mockEmpty();
+    const onDateChange = vi.fn();
+    const { container } = render(
+      <DailyLog date={new Date()} onDateChange={onDateChange} />
+    );
+
+    swipe(swipeSurface(container), 220, 100);
+
+    expect(onDateChange).not.toHaveBeenCalled();
   });
 });
