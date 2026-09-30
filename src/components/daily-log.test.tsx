@@ -2,7 +2,8 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { addDays } from "date-fns/addDays";
 import { subDays } from "date-fns/subDays";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { toast } from "sonner";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DailyLog } from "./daily-log.tsx";
 
 const mockUseHabits = vi.fn();
@@ -171,6 +172,65 @@ describe("keyboard shortcuts", () => {
     const addCompletionSpy = mockUseHabits().addCompletion;
     await user.keyboard("1");
     expect(addCompletionSpy).toHaveBeenCalled();
+  });
+});
+
+function withRect(top: number, height: number): () => DOMRect {
+  return () =>
+    ({
+      top,
+      height,
+      bottom: top + height,
+      left: 0,
+      right: 0,
+      width: 0,
+      x: 0,
+      y: top,
+      toJSON: () => ({}),
+    }) as DOMRect;
+}
+
+describe("toast position", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("shows the toast at the bottom when the habit is in the upper zone", async () => {
+    mockWithHabits();
+    vi.stubGlobal("innerWidth", 400);
+    vi.stubGlobal("innerHeight", 800);
+    const user = userEvent.setup();
+    render(<DailyLog date={new Date()} onDateChange={vi.fn()} />);
+    const card = screen
+      .getByText("Drink water")
+      .closest("button") as HTMLButtonElement;
+    card.getBoundingClientRect = withRect(50, 100);
+    await user.click(card);
+    expect(toast).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ position: "bottom-center" })
+    );
+  });
+
+  it("shows the toast at the top when the habit is in the lower zone", async () => {
+    mockWithHabits();
+    vi.stubGlobal("innerWidth", 400);
+    vi.stubGlobal("innerHeight", 800);
+    const user = userEvent.setup();
+    render(<DailyLog date={new Date()} onDateChange={vi.fn()} />);
+    const card = screen
+      .getByText("Drink water")
+      .closest("button") as HTMLButtonElement;
+    card.getBoundingClientRect = withRect(600, 100);
+    await user.click(card);
+    expect(toast).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ position: "top-center" })
+    );
   });
 });
 
