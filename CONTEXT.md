@@ -60,6 +60,10 @@ _Avoid_: CTA, verb, action text
 A randomly selected message shown in a Sonner toast when the user completes a Habit. The message pool is separate per Habit type — good habits get celebratory phrases ("Crushed \"{name}\" today!"); bad habits get resilient acknowledgements ("\"{name}\" — slipped today."). The toast also shows a type-appropriate icon (Smile for good, Frown for bad) and a left border in the Habit's color. Good-habit toasts trigger a confetti burst; bad-habit toasts play a gentle wobble animation.
 _Avoid_: Notification, alert, popup
 
+**Activity Grid**:
+A calendar-style overview within Stats showing one cell per day of the selected time window. Each cell holds one dot per Habit performed that day, drawn in the Habit's Color; a dot grows with the number of Completions logged for that Habit that day. Bad habits appear identically to good ones — their palette makes them visually distinct. The grid is informational only; cells are not interactive.
+_Avoid_: Heatmap, contributions graph, calendar view
+
 **Stats**:
 The aggregate view of Habit data over rolling time windows, presented separately from the daily log. Shows totals, rates, and streaks. Always computed relative to today, not the selected date.
 _Avoid_: Dashboard, analytics, reports
