@@ -9,6 +9,7 @@ import { useMemo, useState } from "react";
 import { useHabits } from "../hooks/use-habits.ts";
 import { computeStats } from "../lib/compute-stats.ts";
 import { cn } from "../lib/utils.ts";
+import { ActivityGrid } from "./activity-grid.tsx";
 import { HabitStatCard } from "./habit-stat-card.tsx";
 
 function SummaryStat({
@@ -130,6 +131,12 @@ export function StatsPage() {
               }
             />
           </div>
+
+          <ActivityGrid
+            completions={completions}
+            habits={habits}
+            windowDays={windowDays}
+          />
 
           {stats.goodHabits.length > 0 && (
             <section className="space-y-3">
