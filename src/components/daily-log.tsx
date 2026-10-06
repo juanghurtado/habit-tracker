@@ -111,9 +111,9 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
                   }
                   style={
                     {
-                      backgroundColor: `color-mix(in oklch, ${habit.color} 22%, white)`,
-                      "--card-border-color": `color-mix(in oklch, ${habit.color} 22%, white)`,
-                      "--card-hover-border-color": `color-mix(in oklch, ${habit.color} 40%, white)`,
+                      backgroundColor: `color-mix(in oklch, ${habit.color} 22%, var(--color-card))`,
+                      "--card-border-color": `color-mix(in oklch, ${habit.color} 22%, var(--color-card))`,
+                      "--card-hover-border-color": `color-mix(in oklch, ${habit.color} 40%, var(--color-card))`,
                       "--card-done-border-color": habit.color,
                     } as React.CSSProperties
                   }
@@ -154,7 +154,7 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
                   <DropdownMenuTrigger asChild>
                     <button
                       aria-label="More options"
-                      className="absolute top-1.5 right-1.5 z-10 flex size-8 cursor-pointer items-center justify-center rounded-xl transition-all duration-150 hoverable:hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-90 active:bg-black/10 data-[state=open]:bg-black/10"
+                      className="absolute top-1.5 right-1.5 z-10 flex size-8 cursor-pointer items-center justify-center rounded-xl transition-all duration-150 hoverable:hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-90 active:bg-foreground/10 data-[state=open]:bg-foreground/10"
                       onClick={(e) => e.stopPropagation()}
                       onKeyDown={(e) =>
                         e.key === "Enter" && e.stopPropagation()
@@ -302,8 +302,8 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
       icon: <Icon className="size-4" style={{ color: habit.color }} />,
       position: getToastPosition(card),
       style: {
-        background: `color-mix(in oklch, ${habit.color} 22%, white)`,
-        borderColor: `color-mix(in oklch, ${habit.color} 40%, white)`,
+        background: `color-mix(in oklch, ${habit.color} 22%, var(--color-card))`,
+        borderColor: `color-mix(in oklch, ${habit.color} 40%, var(--color-card))`,
         borderWidth: "2px",
         boxShadow: "none",
       },

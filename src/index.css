@@ -35,6 +35,10 @@
   }
 }
 
+:root {
+  color-scheme: light dark;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --color-bg: oklch(0.11 0.008 75);
