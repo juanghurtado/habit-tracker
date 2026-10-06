@@ -111,9 +111,9 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
                   }
                   style={
                     {
-                      backgroundColor: `color-mix(in oklch, ${habit.color} 22%, var(--color-card))`,
-                      "--card-border-color": `color-mix(in oklch, ${habit.color} 22%, var(--color-card))`,
-                      "--card-hover-border-color": `color-mix(in oklch, ${habit.color} 40%, var(--color-card))`,
+                      backgroundColor: `color-mix(in oklab, ${habit.color} 22%, var(--color-card))`,
+                      "--card-border-color": `color-mix(in oklab, ${habit.color} 22%, var(--color-card))`,
+                      "--card-hover-border-color": `color-mix(in oklab, ${habit.color} 40%, var(--color-card))`,
                       "--card-done-border-color": habit.color,
                     } as React.CSSProperties
                   }
@@ -302,8 +302,8 @@ export function DailyLog({ date, onDateChange }: DailyLogProps) {
       icon: <Icon className="size-4" style={{ color: habit.color }} />,
       position: getToastPosition(card),
       style: {
-        background: `color-mix(in oklch, ${habit.color} 22%, var(--color-card))`,
-        borderColor: `color-mix(in oklch, ${habit.color} 40%, var(--color-card))`,
+        background: `color-mix(in oklab, ${habit.color} 22%, var(--color-card))`,
+        borderColor: `color-mix(in oklab, ${habit.color} 40%, var(--color-card))`,
         borderWidth: "2px",
         boxShadow: "none",
       },
